@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileHub UI v2</title>
+    <style>
+      :root {
+        --bg: #f2f5fb;
+        --surface: #ffffff;
+        --surface-2: #f8fbff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --primary: #2563eb;
+        --secondary: #0ea5e9;
+        --accent: #f59e0b;
+        --border: #d8e0ee;
+        --success: #16a34a;
+        --warning: #f59e0b;
+        --danger: #dc2626;
+        --shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
+        --radius: 16px;
+        --title: "Avenir Next", "PingFang SC", sans-serif;
+        --body: "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: radial-gradient(circle at 10% 0%, #e9f2ff, var(--bg) 45%, #fef9ee 100%);
+        color: var(--text);
+        font-family: var(--body);
+      }
+
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--border);
+        background: color-mix(in srgb, var(--surface) 88%, white);
+        backdrop-filter: blur(8px);
+      }
+
+      .brand { font-family: var(--title); font-size: 22px; font-weight: 700; }
+      .theme-tag {
+        border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+        color: var(--primary);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        background: color-mix(in srgb, var(--primary) 10%, white);
+      }
+
+      .board {
+        width: min(1880px, calc(100vw - 32px));
+        margin: 18px auto 28px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .screen {
+        min-height: 400px;
+        border: 1px solid var(--border);
+        border-radius: calc(var(--radius) + 2px);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .screen-head {
+        height: 48px;
+        padding: 0 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(120deg, var(--surface-2), var(--surface));
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .screen-title {
+        font-family: var(--title);
+        font-size: 15px;
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .screen-body { padding: 14px; }
+
+      .login-wrap {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 14px;
+      }
+
+      .hero {
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        padding: 18px;
+        background:
+          radial-gradient(circle at 5% 10%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 35%),
+          radial-gradient(circle at 95% 100%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 35%),
+          var(--surface-2);
+      }
+
+      .hero h2 { margin: 0 0 8px; font-family: var(--title); }
+      .hero p { margin: 0; color: var(--muted); font-size: 13px; }
+      .hero .chips { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+      .chip {
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+
+      .form {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+      }
+
+      .field { margin-bottom: 10px; }
+      .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+      .input {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 9px 10px;
+        background: var(--surface);
+      }
+
+      .btn-row { display: flex; gap: 8px; }
+      .btn {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      .btn.primary {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+      }
+
+      .app-layout {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 12px;
+      }
+      .side {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px;
+        background: color-mix(in srgb, var(--surface-2) 65%, var(--surface));
+      }
+      .nav { display: grid; gap: 7px; }
+      .nav-item {
+        padding: 8px 9px;
+        border-radius: 9px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .nav-item.active {
+        color: var(--primary);
+        font-weight: 600;
+        background: color-mix(in srgb, var(--primary) 10%, white);
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .stat {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface-2);
+        padding: 9px;
+      }
+      .stat .k { color: var(--muted); font-size: 11px; }
+      .stat .v { margin-top: 5px; font-family: var(--title); font-size: 19px; font-weight: 700; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      th, td {
+        padding: 9px 8px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+      }
+      th { color: var(--muted); font-weight: 600; }
+
+      .tag {
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 999px;
+      }
+      .ok { color: var(--success); background: color-mix(in srgb, var(--success) 14%, white); }
+      .wait { color: #b45309; background: #fff7ed; }
+      .del { color: var(--danger); background: #fee2e2; }
+
+      .upload-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 10px;
+      }
+
+      .dropzone {
+        border: 2px dashed color-mix(in srgb, var(--primary) 45%, var(--border));
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+        min-height: 180px;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+      }
+
+      .queue .item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 8px;
+        margin-bottom: 7px;
+      }
+
+      .bar {
+        height: 8px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--border) 75%, white);
+        margin-top: 6px;
+        overflow: hidden;
+      }
+      .bar > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+      }
+
+      .preview-layout {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 10px;
+      }
+
+      .preview-box {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        min-height: 230px;
+        display: grid;
+        place-items: center;
+        background: color-mix(in srgb, var(--surface-2) 60%, var(--surface));
+        color: var(--muted);
+      }
+
+      .meta {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px;
+      }
+      .meta .row { display: flex; justify-content: space-between; font-size: 12px; padding: 7px 0; border-bottom: 1px dashed var(--border); }
+      .meta .row:last-child { border-bottom: none; }
+
+      .admin-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .chart {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        min-height: 150px;
+        padding: 10px;
+        background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      }
+
+      .bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        height: 95px;
+        margin-top: 10px;
+      }
+      .bars span {
+        width: 12%;
+        border-radius: 8px 8px 4px 4px;
+        background: linear-gradient(180deg, var(--secondary), var(--primary));
+      }
+
+      .bars span:nth-child(1){height: 44%;}
+      .bars span:nth-child(2){height: 68%;}
+      .bars span:nth-child(3){height: 57%;}
+      .bars span:nth-child(4){height: 86%;}
+      .bars span:nth-child(5){height: 63%;}
+      .bars span:nth-child(6){height: 75%;}
+
+      .log-filters { display: flex; gap: 8px; margin-bottom: 8px; }
+
+      body.theme-minimal {
+        --bg: #f5f7fb;
+        --surface: #ffffff;
+        --surface-2: #f3f6fd;
+        --text: #0f172a;
+        --muted: #667085;
+        --primary: #2563eb;
+        --secondary: #0284c7;
+        --accent: #f59e0b;
+        --border: #dbe4f0;
+        --radius: 14px;
+        --title: "Avenir Next", "PingFang SC", sans-serif;
+        --body: "PingFang SC", "Hiragino Sans GB", sans-serif;
+      }
+
+      body.theme-console {
+        --bg: #0b1324;
+        --surface: #111c31;
+        --surface-2: #0d172b;
+        --text: #dce7ff;
+        --muted: #8ca1c8;
+        --primary: #22d3ee;
+        --secondary: #38bdf8;
+        --accent: #fb7185;
+        --border: #1e3358;
+        --success: #4ade80;
+        --danger: #fb7185;
+        --shadow: 0 22px 54px rgba(0, 0, 0, 0.42);
+        --radius: 10px;
+        --title: "DIN Alternate", "PingFang SC", sans-serif;
+        --body: "IBM Plex Sans", "PingFang SC", sans-serif;
+      }
+
+      body.theme-console .header,
+      body.theme-console .screen-head,
+      body.theme-console .screen,
+      body.theme-console .panel,
+      body.theme-console .side,
+      body.theme-console .form,
+      body.theme-console .hero,
+      body.theme-console .meta,
+      body.theme-console .chart,
+      body.theme-console .dropzone,
+      body.theme-console .stat {
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 14%, transparent);
+      }
+
+      body.theme-cloud {
+        --bg: #edf7ff;
+        --surface: #ffffff;
+        --surface-2: #eaf5ff;
+        --text: #0f2940;
+        --muted: #56718c;
+        --primary: #0ea5e9;
+        --secondary: #38bdf8;
+        --accent: #fb923c;
+        --border: #c9e2f5;
+        --radius: 18px;
+        --title: "Nunito", "PingFang SC", sans-serif;
+        --body: "Nunito", "PingFang SC", sans-serif;
+      }
+
+      body.theme-cloud {
+        background:
+          radial-gradient(circle at 12% 0%, #d9efff 0%, transparent 32%),
+          radial-gradient(circle at 90% 100%, #fff3e0 0%, transparent 26%),
+          #edf7ff;
+      }
+
+      body.theme-blank {
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --surface-2: #ffffff;
+        --text: #111111;
+        --muted: #686868;
+        --primary: #111111;
+        --secondary: #4b4b4b;
+        --accent: #b45309;
+        --border: #ececec;
+        --radius: 3px;
+        --shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
+        --title: "Iowan Old Style", "Songti SC", serif;
+        --body: "Helvetica Neue", "PingFang SC", sans-serif;
+      }
+
+      body.theme-blank .header,
+      body.theme-blank .screen-head {
+        background: #fff;
+      }
+
+      body.theme-blank .screen,
+      body.theme-blank .panel,
+      body.theme-blank .side,
+      body.theme-blank .hero,
+      body.theme-blank .form,
+      body.theme-blank .meta,
+      body.theme-blank .chart,
+      body.theme-blank .stat,
+      body.theme-blank .dropzone {
+        border-radius: 3px;
+      }
+
+      body.theme-data {
+        --bg: #f4f6ff;
+        --surface: #ffffff;
+        --surface-2: #eef2ff;
+        --text: #111827;
+        --muted: #5b6270;
+        --primary: #4f46e5;
+        --secondary: #7c3aed;
+        --accent: #0d9488;
+        --border: #d6daf8;
+        --radius: 12px;
+        --shadow: 0 20px 48px rgba(79, 70, 229, 0.16);
+        --title: "SF Pro Display", "PingFang SC", sans-serif;
+        --body: "Inter", "PingFang SC", sans-serif;
+      }
+
+      body.theme-data {
+        background:
+          radial-gradient(circle at 0% 0%, #e5e7ff 0%, transparent 30%),
+          radial-gradient(circle at 100% 100%, #ecfeff 0%, transparent 30%),
+          #f4f6ff;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="brand">FileHub 文件仓库</div>
+      <div class="theme-tag" id="themeName">主题</div>
+    </header>
+
+    <section class="board">
+      <article class="screen">
+        <div class="screen-head"><span class="screen-title">1. 登录页</span><span>登录 / 注册</span></div>
+        <div class="screen-body">
+          <div class="login-wrap">
+            <div class="hero">
+              <h2>集中管理你的文件</h2>
+              <p>上传、预览、下载、回收和审计全部统一在一个仓库系统。</p>
+              <div class="chips">
+                <span class="chip">分片上传</span>
+                <span class="chip">断点续传</span>
+                <span class="chip">操作留痕</span>
+                <span class="chip">快速检索</span>
+              </div>
+            </div>
+            <div class="form">
+              <div class="field"><label>账号</label><input class="input" value="demo_user" /></div>
+              <div class="field"><label>密码</label><input class="input" type="password" value="12345678" /></div>
+              <div class="field"><label>验证码（可选）</label><input class="input" value="A9KD" /></div>
+              <div class="btn-row">
+                <button class="btn primary">登录</button>
+                <button class="btn">注册</button>
+                <button class="btn">忘记密码</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="screen">
+        <div class="screen-head"><span class="screen-title">2. 文件仓库首页 / 列表页</span><span>文件中心</span></div>
+        <div class="screen-body">
+          <div class="app-layout">
+            <div class="side">
+              <div class="nav">
+                <div class="nav-item active">文件仓库</div>
+                <div class="nav-item">最近文件</div>
+                <div class="nav-item">上传任务</div>
+                <div class="nav-item">回收站</div>
+                <div class="nav-item">后台管理</div>
+                <div class="nav-item">操作日志</div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="stats">
+                <div class="stat"><div class="k">文件总数</div><div class="v">12,420</div></div>
+                <div class="stat"><div class="k">总存储</div><div class="v">4.7 TB</div></div>
+                <div class="stat"><div class="k">今日上传</div><div class="v">286</div></div>
+                <div class="stat"><div class="k">待处理</div><div class="v">18</div></div>
+              </div>
+              <div class="toolbar">
+                <button class="btn primary">上传文件</button>
+                <button class="btn">新建目录</button>
+                <button class="btn">批量下载</button>
+                <button class="btn">筛选：本周</button>
+              </div>
+              <table>
+                <thead>
+                  <tr><th>文件名</th><th>类型</th><th>大小</th><th>更新时间</th><th>状态</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>产品路线图.pdf</td><td>PDF</td><td>24MB</td><td>03-10 14:18</td><td><span class="tag ok">可预览</span></td></tr>
+                  <tr><td>素材打包.zip</td><td>ZIP</td><td>2.1GB</td><td>03-10 13:45</td><td><span class="tag wait">分片中</span></td></tr>
+                  <tr><td>版本记录.txt</td><td>TXT</td><td>64KB</td><td>03-10 12:06</td><td><span class="tag ok">可预览</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="screen">
+        <div class="screen-head"><span class="screen-title">3. 文件上传页 / 上传弹窗</span><span>分片上传</span></div>
+        <div class="screen-body">
+          <div class="upload-grid">
+            <div class="dropzone">拖拽文件到此处或点击上传（支持大文件分片）</div>
+            <div class="queue">
+              <div class="item">video-demo.mp4 · 73%<div class="bar"><span style="width:73%"></span></div></div>
+              <div class="item">archive-20260310.tar · 41%<div class="bar"><span style="width:41%"></span></div></div>
+              <div class="item">report-final.pdf · 100%<div class="bar"><span style="width:100%"></span></div></div>
+              <div class="btn-row" style="margin-top:8px">
+                <button class="btn primary">开始上传</button>
+                <button class="btn">暂停全部</button>
+                <button class="btn">继续未完成</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="screen">
+        <div class="screen-head"><span class="screen-title">4. 文件详情 / 预览页</span><span>预览与元信息</span></div>
+        <div class="screen-body">
+          <div class="preview-layout">
+            <div class="preview-box">文件预览区域（图片 / PDF / 文本）</div>
+            <div class="meta">
+              <div class="row"><span>文件名</span><strong>产品路线图.pdf</strong></div>
+              <div class="row"><span>大小</span><strong>24 MB</strong></div>
+              <div class="row"><span>上传者</span><strong>李文</strong></div>
+              <div class="row"><span>上传时间</span><strong>2026-03-10 14:18</strong></div>
+              <div class="row"><span>哈希</span><strong>8db7...21ac</strong></div>
+              <div class="btn-row" style="margin-top:10px">
+                <button class="btn primary">下载</button>
+                <button class="btn">复制链接</button>
+                <button class="btn">移入回收站</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="screen">
+        <div class="screen-head"><span class="screen-title">5. 回收站页</span><span>软删除管理</span></div>
+        <div class="screen-body">
+          <div class="toolbar">
+            <button class="btn">仅看我删除</button>
+            <button class="btn">最近 30 天</button>
+            <button class="btn primary">恢复所选</button>
+            <button class="btn">彻底删除</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>文件名</th><th>原目录</th><th>删除时间</th><th>剩余保留</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>旧版方案.pptx</td><td>/项目文档/归档</td><td>03-09 10:22</td><td>27 天</td><td><span class="tag wait">可恢复</span></td></tr>
+              <tr><td>压测数据.csv</td><td>/测试报告</td><td>03-08 16:54</td><td>26 天</td><td><span class="tag wait">可恢复</span></td></tr>
+              <tr><td>临时素材.ai</td><td>/设计稿</td><td>03-01 09:10</td><td>19 天</td><td><span class="tag del">即将清理</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="screen">
+        <div class="screen-head"><span class="screen-title">6. 后台管理页</span><span>系统概览</span></div>
+        <div class="screen-body">
+          <div class="admin-grid">
+            <div class="chart">
+              <div style="font-weight:600">存储趋势（7 天）</div>
+              <div class="bars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class="chart">
+              <div style="font-weight:600">用户活跃分布</div>
+              <div class="bars"><span style="height:55%"></span><span style="height:74%"></span><span style="height:81%"></span><span style="height:49%"></span><span style="height:67%"></span><span style="height:62%"></span></div>
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top:10px">
+            <button class="btn">用户管理</button>
+            <button class="btn">存储策略</button>
+            <button class="btn">限流策略</button>
+            <button class="btn primary">导出报表</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="screen" style="grid-column: span 2">
+        <div class="screen-head"><span class="screen-title">7. 操作日志页</span><span>行为审计</span></div>
+        <div class="screen-body">
+          <div class="log-filters">
+            <button class="btn">用户：全部</button>
+            <button class="btn">操作：上传/下载/删除</button>
+            <button class="btn">时间：今天</button>
+            <button class="btn primary">查询</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>时间</th><th>用户</th><th>操作</th><th>对象</th><th>结果</th><th>IP</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>15:21:10</td><td>zhangsan</td><td>上传分片</td><td>素材打包.zip</td><td><span class="tag ok">成功</span></td><td>10.2.1.24</td></tr>
+              <tr><td>15:20:03</td><td>lisi</td><td>下载</td><td>产品路线图.pdf</td><td><span class="tag ok">成功</span></td><td>10.2.1.31</td></tr>
+              <tr><td>15:18:47</td><td>admin</td><td>恢复文件</td><td>旧版方案.pptx</td><td><span class="tag ok">成功</span></td><td>10.2.1.10</td></tr>
+              <tr><td>15:16:22</td><td>wangwu</td><td>彻底删除</td><td>临时素材.ai</td><td><span class="tag del">失败</span></td><td>10.2.1.48</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const theme = params.get("theme") || "minimal";
+      const map = {
+        minimal: ["theme-minimal", "方案 A · 简洁企业风"],
+        console: ["theme-console", "方案 B · 深色专业控制台风"],
+        cloud: ["theme-cloud", "方案 C · 轻量云盘风"],
+        blank: ["theme-blank", "方案 D · 极简留白风"],
+        data: ["theme-data", "方案 E · 高级数据后台风"]
+      };
+      const [klass, label] = map[theme] || map.minimal;
+      document.body.classList.add(klass);
+      document.getElementById("themeName").innerText = label;
+    </script>
+  </body>
+</html>

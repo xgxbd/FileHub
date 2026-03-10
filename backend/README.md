@@ -41,6 +41,7 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
   - 支持参数：`keyword`、`min_size`、`max_size`、`page`、`page_size`
   - 普通用户仅返回自己的文件，管理员返回全部文件
 - `GET /files/{file_id}/download`：下载文件（支持 `Range` 断点续传）
+- `GET /files/{file_id}/preview`：在线预览（支持 `image/*`、`application/pdf`、`text/*`）
 
 ## 分片上传 MVP 接口
 

@@ -5,13 +5,14 @@ import Button from "primevue/button";
 import Card from "primevue/card";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
+import Dialog from "primevue/dialog";
 import InputNumber from "primevue/inputnumber";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import ProgressBar from "primevue/progressbar";
 import Tag from "primevue/tag";
 
-import { downloadFile, fetchFileList } from "../api/files";
+import { downloadFile, fetchFileList, previewFile } from "../api/files";
 import { completeUploadSession, createUploadSession, uploadChunk } from "../api/upload";
 import { useAuthStore } from "../stores/auth";
 
@@ -35,6 +36,13 @@ const uploadMessage = ref("");
 const uploadError = ref("");
 const downloadError = ref("");
 const downloadingFileId = ref(null);
+const previewVisible = ref(false);
+const previewLoading = ref(false);
+const previewError = ref("");
+const previewType = ref("");
+const previewText = ref("");
+const previewUrl = ref("");
+const previewName = ref("");
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -181,6 +189,55 @@ async function triggerDownload(fileItem) {
   }
 }
 
+function resetPreviewState() {
+  previewLoading.value = false;
+  previewError.value = "";
+  previewType.value = "";
+  previewText.value = "";
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value);
+  }
+  previewUrl.value = "";
+}
+
+async function triggerPreview(fileItem) {
+  if (!authStore.accessToken) return;
+
+  resetPreviewState();
+  previewVisible.value = true;
+  previewLoading.value = true;
+  previewName.value = fileItem.file_name;
+
+  try {
+    const { blob, contentType } = await previewFile({
+      accessToken: authStore.accessToken,
+      fileId: fileItem.id
+    });
+
+    if (contentType.startsWith("text/")) {
+      previewType.value = "text";
+      previewText.value = await blob.text();
+    } else if (contentType.startsWith("image/")) {
+      previewType.value = "image";
+      previewUrl.value = URL.createObjectURL(blob);
+    } else if (contentType.includes("pdf")) {
+      previewType.value = "pdf";
+      previewUrl.value = URL.createObjectURL(blob);
+    } else {
+      previewError.value = "当前类型不支持预览";
+    }
+  } catch (err) {
+    previewError.value = err instanceof Error ? err.message : "预览失败";
+  } finally {
+    previewLoading.value = false;
+  }
+}
+
+function closePreview() {
+  previewVisible.value = false;
+  resetPreviewState();
+}
+
 onMounted(() => {
   loadFiles();
 });
@@ -250,16 +307,35 @@ onMounted(() => {
         </Column>
         <Column header="操作">
           <template #body="{ data }">
-            <Button
-              label="下载"
-              size="small"
-              icon="pi pi-download"
-              :loading="downloadingFileId === data.id"
-              @click="triggerDownload(data)"
-            />
+            <div class="file-row-actions">
+              <Button label="预览" size="small" severity="secondary" text icon="pi pi-eye" @click="triggerPreview(data)" />
+              <Button
+                label="下载"
+                size="small"
+                icon="pi pi-download"
+                :loading="downloadingFileId === data.id"
+                @click="triggerDownload(data)"
+              />
+            </div>
           </template>
         </Column>
       </DataTable>
+
+      <Dialog
+        :visible="previewVisible"
+        modal
+        :header="`预览：${previewName}`"
+        :style="{ width: '70vw' }"
+        @update:visible="(val) => { if (!val) closePreview(); }"
+      >
+        <div class="preview-body">
+          <Message v-if="previewError" severity="error" :closable="false">{{ previewError }}</Message>
+          <ProgressBar v-if="previewLoading" mode="indeterminate" style="height: 6px" />
+          <img v-if="!previewLoading && previewType === 'image'" :src="previewUrl" class="preview-image" alt="image-preview" />
+          <iframe v-if="!previewLoading && previewType === 'pdf'" :src="previewUrl" class="preview-pdf"></iframe>
+          <pre v-if="!previewLoading && previewType === 'text'" class="preview-text">{{ previewText }}</pre>
+        </div>
+      </Dialog>
     </template>
   </Card>
 </template>

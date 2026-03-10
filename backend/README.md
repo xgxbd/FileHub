@@ -35,6 +35,12 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 - `POST /auth/refresh`：刷新令牌
 - `GET /auth/me`：当前用户信息（Bearer Token）
 
+## 文件列表 MVP 接口
+
+- `GET /files`：获取文件列表（需 Bearer Token）
+  - 支持参数：`keyword`、`min_size`、`max_size`、`page`、`page_size`
+  - 普通用户仅返回自己的文件，管理员返回全部文件
+
 ## 最小验证
 
 ```bash

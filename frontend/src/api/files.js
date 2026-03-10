@@ -56,3 +56,26 @@ export async function downloadFile({
 
   return response.blob();
 }
+
+export async function previewFile({
+  accessToken,
+  fileId
+}) {
+  const response = await fetch(`${API_PREFIX}/files/${fileId}/preview`, {
+    method: "GET",
+    headers: {
+      Accept: "*/*",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.detail || "预览失败");
+  }
+
+  return {
+    blob: await response.blob(),
+    contentType: response.headers.get("content-type") || ""
+  };
+}

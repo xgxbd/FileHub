@@ -1898,3 +1898,28 @@
   - 本轮不包含完整浏览器 E2E，需后续补强
 - 下一个任务：
   - 提交B：实现后端主链路 smoke 验证脚本
+
+---
+
+## 2026-03-10 21:40:02 CST
+
+- 任务：第十二轮开发-提交B：主链路烟雾验证脚本
+- 时间：2026-03-10 21:40:02 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `backend/scripts/smoke_core_flow.py`
+  - 覆盖链路：注册、登录、上传、下载、删除、恢复
+  - 脚本执行成功返回统一通过标记
+- 已完成事项：
+  - 后端主链路 smoke 验证脚本已可执行
+  - 脚本验证通过：`SMOKE_PASS: register/login/upload/download/delete/restore`
+- 未完成事项：
+  - 提交C：性能基线脚本
+  - 提交D：发布清单与回滚预案文档
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python scripts/smoke_core_flow.py`
+- 风险说明：
+  - 脚本为单进程轻量验证，不能替代并发压测
+- 下一个任务：
+  - 提交C：实现轻量性能基线统计脚本

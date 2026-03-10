@@ -55,6 +55,11 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 - `GET /admin/logs`：管理员查询操作日志（需 Bearer Token，且角色为 `admin`）
   - 支持参数：`action`、`user_id`、`start_at`、`end_at`、`page`、`page_size`
 
+## 管理端文件管理 MVP 接口
+
+- `GET /admin/files`：管理员查询全量文件
+  - 支持参数：`owner_id`、`keyword`、`status(active/deleted/all)`、`page`、`page_size`
+
 ## 分片上传 MVP 接口
 
 - `POST /upload/sessions`：创建上传会话

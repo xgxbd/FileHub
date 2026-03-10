@@ -20,6 +20,7 @@ npm run dev
   - `/register` 注册
   - `/files` 文件中心（需登录）
   - `/recycle` 回收站（需登录）
+  - `/admin/files` 管理端文件管理页（需管理员）
   - `/admin/logs` 操作日志页（需管理员）
 - 状态管理：Pinia `auth` store
 - 会话恢复：应用启动自动执行 `initSession`
@@ -50,6 +51,12 @@ npm run dev
 - 新增管理员日志页 `/admin/logs`
 - 支持按操作类型、用户ID、时间范围筛选
 - 仅管理员可访问，普通用户自动回退至 `/files`
+
+## 管理端文件管理接入（第十一轮）
+
+- 新增管理员文件管理页 `/admin/files`
+- 支持按 owner、关键字、状态筛选文件
+- 支持删除、恢复、彻底删除状态操作
 
 ## 联调验证
 

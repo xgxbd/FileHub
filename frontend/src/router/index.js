@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
+import AdminLogsView from "../views/AdminLogsView.vue";
 import FileCenterView from "../views/FileCenterView.vue";
 import LoginView from "../views/LoginView.vue";
 import RecycleBinView from "../views/RecycleBinView.vue";
@@ -36,6 +37,12 @@ const router = createRouter({
       name: "recycle",
       component: RecycleBinView,
       meta: { requiresAuth: true }
+    },
+    {
+      path: "/admin/logs",
+      name: "admin-logs",
+      component: AdminLogsView,
+      meta: { requiresAuth: true, requiresAdmin: true }
     }
   ]
 });
@@ -54,6 +61,10 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAuth && !authStore.accessToken) {
     return { name: "login", query: { redirect: to.fullPath } };
+  }
+
+  if (to.meta.requiresAdmin && authStore.user?.role !== "admin") {
+    return { name: "files" };
   }
 
   if (to.meta.guestOnly && authStore.accessToken) {

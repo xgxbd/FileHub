@@ -8,6 +8,7 @@ from app.models.user import User
 from app.schemas.file import FileListResponse
 from app.services.file_service import list_files
 from app.services.object_storage import object_storage_service
+from app.services.operation_log_service import record_operation
 
 router = APIRouter(prefix="/recycle", tags=["recycle"])
 
@@ -53,6 +54,15 @@ def restore_file(
     db.add(file_record)
     db.commit()
 
+    record_operation(
+        db=db,
+        user=current_user,
+        action="restore",
+        target_type="file",
+        target_id=str(file_record.id),
+        detail={"file_name": file_record.file_name},
+    )
+
     return {"file_id": file_record.id, "status": file_record.status}
 
 
@@ -71,7 +81,17 @@ def purge_file(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权彻底删除该文件")
 
     object_storage_service.delete_object(object_key=file_record.object_key)
+    file_name = file_record.file_name
     db.delete(file_record)
     db.commit()
+
+    record_operation(
+        db=db,
+        user=current_user,
+        action="purge",
+        target_type="file",
+        target_id=str(file_id),
+        detail={"file_name": file_name},
+    )
 
     return {"file_id": file_id, "status": "purged"}

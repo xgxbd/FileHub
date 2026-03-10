@@ -174,3 +174,32 @@
   - 目前仅为目录与配置骨架，服务尚不可运行
 - 下一个任务：
   - 搭建后端 FastAPI 最小运行骨架并提供 `/healthz`
+
+---
+
+## 2026-03-10 17:26:28 CST
+
+- 任务：第一轮开发-提交2：搭建 FastAPI 最小骨架与健康检查
+- 时间：2026-03-10 17:26:28 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增后端应用入口 `backend/app/main.py`
+  - 新增健康检查路由 `GET /healthz`
+  - 新增配置模块 `backend/app/core/config.py`
+  - 调整依赖为 `uvicorn==0.36.0`（MVP 骨架去掉标准扩展）
+  - 在 `backend/README.md` 补充最小运行指引
+- 已完成事项：
+  - FastAPI 骨架可被正常导入
+  - `/healthz` 路由已挂载（进程内验证通过）
+  - 虚拟环境已使用 Python 3.12 创建并完成依赖安装
+- 未完成事项：
+  - Vue 3 + PrimeVue 前端骨架
+  - 前后端最小联通页面
+  - 本轮最终收口文档
+- 当前可测试内容：
+  - 在后端虚拟环境执行 `from app.main import app` 可正常导入
+  - 进程内校验可确认 `/healthz` 路由存在并返回 `status=ok`
+- 风险说明：
+  - 当前环境限制端口绑定，无法在本环境直接通过本机端口进行 `curl` 验证
+- 下一个任务：
+  - 搭建 Vue3 + PrimeVue 最小可运行前端骨架页面

@@ -41,6 +41,13 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
   - 支持参数：`keyword`、`min_size`、`max_size`、`page`、`page_size`
   - 普通用户仅返回自己的文件，管理员返回全部文件
 
+## 分片上传 MVP 接口
+
+- `POST /upload/sessions`：创建上传会话
+- `GET /upload/sessions/{upload_id}`：查询会话状态（已上传分片）
+- `PUT /upload/sessions/{upload_id}/chunks/{chunk_index}`：上传单个分片
+- `POST /upload/sessions/{upload_id}/complete`：合并分片并完成入库
+
 ## 最小验证
 
 ```bash

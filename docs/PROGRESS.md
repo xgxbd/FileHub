@@ -1647,3 +1647,26 @@
   - 管理员初始化依赖环境变量配置，部署流程需确保变量注入
 - 下一个任务：
   - 提交D：补充管理员初始化最小验证脚本
+
+---
+
+## 2026-03-10 21:19:52 CST
+
+- 任务：第十轮开发-提交D：管理员初始化联调辅助脚本
+- 时间：2026-03-10 21:19:52 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `backend/scripts/check_admin_bootstrap.py`
+  - 支持一键触发启动初始化并输出管理员账号状态
+  - 补充脚本自带路径处理，避免手动设置 `PYTHONPATH`
+- 已完成事项：
+  - 管理员初始化联调验证可脚本化执行
+  - 脚本验证通过：可输出 `admin_user_found=true` 与 `admin_role=admin`
+- 未完成事项：
+  - 提交E：文档收口与环境变量示例更新
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && ADMIN_BOOTSTRAP_ENABLED=true ... python scripts/check_admin_bootstrap.py`
+- 风险说明：
+  - 该脚本用于本地验证，不应在生产环境直接暴露默认凭据
+- 下一个任务：
+  - 提交E：更新 `.env.example` 与 README，完成第十轮收口

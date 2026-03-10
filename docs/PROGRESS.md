@@ -333,3 +333,29 @@
   - 若运行环境缺少 MySQL/Redis，将采用 SQLite + mock 验证实现正确性
 - 下一个任务：
   - 提交B：落地数据库配置骨架与 users 模型
+
+---
+
+## 2026-03-10 17:41:12 CST
+
+- 任务：第二轮开发-提交B：数据库与用户模型骨架
+- 时间：2026-03-10 17:41:12 CST
+- git 分支及 Commit ID：`feature/round2-auth-mvp`；提交前基线 `a0eb7c0`
+- 本次修改：
+  - 扩展后端配置：新增 `database_url`、Redis/JWT 相关配置项
+  - 新增数据库基础模块：`app/db/base.py`、`app/db/session.py`
+  - 新增用户模型：`app/models/user.py`
+  - 新增模型与DB导出入口：`app/models/__init__.py`、`app/db/__init__.py`
+  - 更新 `backend/.env.example`，补齐 `DATABASE_URL` 与 `JWT_ALGORITHM`
+- 已完成事项：
+  - 认证模块的持久化骨架已建立
+  - `users` 模型字段满足 MVP 要求
+- 未完成事项：
+  - 安全工具层（密码/JWT/refresh会话）
+  - 认证接口（注册/登录/刷新/me）
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python -c "from app.models.user import User; from app.db.session import engine; print(User.__tablename__); print(engine.url)"`
+- 风险说明：
+  - 当前默认回落 SQLite，生产环境必须显式配置 MySQL `DATABASE_URL`
+- 下一个任务：
+  - 提交C：实现安全工具层与 refresh token 会话存储抽象

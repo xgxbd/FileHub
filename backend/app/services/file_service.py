@@ -57,3 +57,42 @@ def list_files(
         page=page,
         page_size=page_size,
     )
+
+
+def list_files_for_admin(
+    *,
+    db: Session,
+    keyword: str | None,
+    min_size: int | None,
+    max_size: int | None,
+    owner_id: int | None,
+    status_filter: str,
+    page: int,
+    page_size: int,
+) -> FileListResponse:
+    base_query = select(FileObject)
+    if status_filter == "active":
+        base_query = base_query.where(FileObject.is_deleted.is_(False))
+    elif status_filter == "deleted":
+        base_query = base_query.where(FileObject.is_deleted.is_(True))
+
+    if owner_id is not None:
+        base_query = base_query.where(FileObject.owner_id == owner_id)
+
+    filtered_query = _apply_filters(
+        query=base_query,
+        keyword=keyword,
+        min_size=min_size,
+        max_size=max_size,
+    )
+    total = db.scalar(select(func.count()).select_from(filtered_query.subquery())) or 0
+    records = (
+        db.execute(
+            filtered_query.order_by(FileObject.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        .scalars()
+        .all()
+    )
+    return FileListResponse(items=records, total=total, page=page, page_size=page_size)

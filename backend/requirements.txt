@@ -1,0 +1,12 @@
+fastapi==0.117.1
+uvicorn[standard]==0.36.0
+sqlalchemy==2.0.40
+alembic==1.15.2
+pydantic==2.11.2
+pydantic-settings==2.8.1
+python-jose[cryptography]==3.4.0
+passlib[bcrypt]==1.7.4
+redis==5.2.1
+minio==7.2.15
+python-multipart==0.0.20
+

@@ -10,3 +10,5 @@
 npm install
 npm run dev
 ```
+
+默认通过 Vite 代理将 `/api/*` 转发到 `http://127.0.0.1:8000/*`，用于本地联调后端接口。

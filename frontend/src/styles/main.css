@@ -71,3 +71,22 @@ body {
   line-height: 1.7;
   color: #3e4c63;
 }
+
+.health-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.health-message {
+  color: #2f3e56;
+  font-size: 0.92rem;
+}
+
+.check-time {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: #60708b;
+}

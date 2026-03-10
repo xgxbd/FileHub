@@ -3,6 +3,7 @@ import { useAuthStore } from "../stores/auth";
 
 import FileCenterView from "../views/FileCenterView.vue";
 import LoginView from "../views/LoginView.vue";
+import RecycleBinView from "../views/RecycleBinView.vue";
 import RegisterView from "../views/RegisterView.vue";
 
 const router = createRouter({
@@ -28,6 +29,12 @@ const router = createRouter({
       path: "/files",
       name: "files",
       component: FileCenterView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: "/recycle",
+      name: "recycle",
+      component: RecycleBinView,
       meta: { requiresAuth: true }
     }
   ]

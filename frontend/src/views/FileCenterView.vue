@@ -12,7 +12,7 @@ import Message from "primevue/message";
 import ProgressBar from "primevue/progressbar";
 import Tag from "primevue/tag";
 
-import { downloadFile, fetchFileList, previewFile } from "../api/files";
+import { downloadFile, fetchFileList, previewFile, softDeleteFile } from "../api/files";
 import { completeUploadSession, createUploadSession, uploadChunk } from "../api/upload";
 import { useAuthStore } from "../stores/auth";
 
@@ -35,7 +35,9 @@ const uploadProgress = ref(0);
 const uploadMessage = ref("");
 const uploadError = ref("");
 const downloadError = ref("");
+const deleteError = ref("");
 const downloadingFileId = ref(null);
+const deletingFileId = ref(null);
 const previewVisible = ref(false);
 const previewLoading = ref(false);
 const previewError = ref("");
@@ -189,6 +191,27 @@ async function triggerDownload(fileItem) {
   }
 }
 
+async function triggerSoftDelete(fileItem) {
+  if (!authStore.accessToken) return;
+  if (!window.confirm(`确认将文件“${fileItem.file_name}”移入回收站吗？`)) {
+    return;
+  }
+
+  deleteError.value = "";
+  deletingFileId.value = fileItem.id;
+  try {
+    await softDeleteFile({
+      accessToken: authStore.accessToken,
+      fileId: fileItem.id
+    });
+    await loadFiles();
+  } catch (err) {
+    deleteError.value = err instanceof Error ? err.message : "删除失败";
+  } finally {
+    deletingFileId.value = null;
+  }
+}
+
 function resetPreviewState() {
   previewLoading.value = false;
   previewError.value = "";
@@ -262,6 +285,7 @@ onMounted(() => {
         <Message v-if="uploadMessage" severity="success" :closable="false">{{ uploadMessage }}</Message>
         <Message v-if="uploadError" severity="error" :closable="false">{{ uploadError }}</Message>
         <Message v-if="downloadError" severity="error" :closable="false">{{ downloadError }}</Message>
+        <Message v-if="deleteError" severity="error" :closable="false">{{ deleteError }}</Message>
       </div>
       <div class="file-filter-row">
         <div class="file-filter-item">
@@ -315,6 +339,15 @@ onMounted(() => {
                 icon="pi pi-download"
                 :loading="downloadingFileId === data.id"
                 @click="triggerDownload(data)"
+              />
+              <Button
+                label="删除"
+                size="small"
+                severity="danger"
+                text
+                icon="pi pi-trash"
+                :loading="deletingFileId === data.id"
+                @click="triggerSoftDelete(data)"
               />
             </div>
           </template>

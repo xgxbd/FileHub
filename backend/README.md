@@ -40,8 +40,15 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 - `GET /files`：获取文件列表（需 Bearer Token）
   - 支持参数：`keyword`、`min_size`、`max_size`、`page`、`page_size`
   - 普通用户仅返回自己的文件，管理员返回全部文件
+- `DELETE /files/{file_id}`：软删除文件（移入回收站）
 - `GET /files/{file_id}/download`：下载文件（支持 `Range` 断点续传）
 - `GET /files/{file_id}/preview`：在线预览（支持 `image/*`、`application/pdf`、`text/*`）
+
+## 回收站 MVP 接口
+
+- `GET /recycle/files`：获取回收站文件列表（需 Bearer Token）
+- `POST /recycle/files/{file_id}/restore`：恢复回收站文件
+- `DELETE /recycle/files/{file_id}/purge`：彻底删除回收站文件
 
 ## 分片上传 MVP 接口
 

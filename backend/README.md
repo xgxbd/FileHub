@@ -27,3 +27,19 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 健康检查接口：
 
 - `GET http://127.0.0.1:8000/healthz`
+
+## 认证 MVP 接口
+
+- `POST /auth/register`：注册
+- `POST /auth/login`：登录
+- `POST /auth/refresh`：刷新令牌
+- `GET /auth/me`：当前用户信息（Bearer Token）
+
+## 最小验证
+
+```bash
+cd backend
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+pytest -q
+```

@@ -415,3 +415,30 @@
   - 当前自动建表基于 `create_all`，后续需要迁移到 Alembic 正式迁移流程
 - 下一个任务：
   - 提交E：补充自动化测试与后端文档收口
+
+---
+
+## 2026-03-10 17:49:01 CST
+
+- 任务：第二轮开发-提交E：认证测试补齐与文档收口
+- 时间：2026-03-10 17:49:01 CST
+- git 分支及 Commit ID：`feature/round2-auth-mvp`；提交前基线 `d524b57`
+- 本次修改：
+  - 新增认证接口测试：`backend/tests/test_auth_api.py`
+  - 新增测试路径配置：`backend/tests/conftest.py`
+  - 更新后端说明文档：`backend/README.md`（新增认证接口与测试命令）
+  - 依赖补充：`pytest==8.3.5`
+- 已完成事项：
+  - 认证最小闭环具备自动化验证
+  - `pytest -q` 测试通过（1 passed）
+  - 文档已补齐认证接口与运行方式
+- 未完成事项：
+  - 前端登录注册页面与会话管理接入
+  - Alembic 正式迁移脚手架
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - 启动后端后可手动验证 `/auth/register`、`/auth/login`、`/auth/refresh`、`/auth/me`
+- 风险说明：
+  - 目前 `startup` 使用 `on_event`，FastAPI 已给出弃用提示，后续需切到 lifespan
+- 下一个任务：
+  - 第三轮：前端登录/注册页面与 Token 会话管理接入

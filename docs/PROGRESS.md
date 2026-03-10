@@ -2026,3 +2026,29 @@
   - 现有性能基线在无 MinIO 环境下偏保守，需在真实依赖环境复测
 - 下一个任务：
   - 进入发布准备：切 `release/*` 分支，按发布清单执行并形成发布记录
+
+---
+
+## 2026-03-10 22:02:54 CST
+
+- 任务：发布准备-`release/v0.1.0` 候选验证与发布说明整理
+- 时间：2026-03-10 22:02:54 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `docs/RELEASE_NOTES_v0.1.0.md`
+  - 串行执行发布验证（pytest/smoke/perf/build）并记录结果
+  - 记录并行执行冲突根因：`pytest` 与 smoke 共享 `tmp/uploads` 导致目录竞争
+- 已完成事项：
+  - 发布候选分支已创建并完成核心验证
+  - 验证结果：后端 `21 passed`、smoke 通过、perf 输出、前端 build 通过
+- 未完成事项：
+  - 发布审批与合并 `release/v0.1.0` 到 `main`/`develop`
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd backend && source .venv/bin/activate && python scripts/smoke_core_flow.py`
+  - `cd backend && source .venv/bin/activate && python scripts/perf_baseline.py`
+  - `cd frontend && npm run build`
+- 风险说明：
+  - 验证流程需串行执行，避免共享临时目录冲突
+- 下一个任务：
+  - 合并 `release/v0.1.0` 到 `main` 并回合到 `develop`

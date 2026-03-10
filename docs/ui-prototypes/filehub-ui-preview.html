@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileHub UI Themes</title>
+    <style>
+      :root {
+        --bg: #f4f6fb;
+        --surface: #ffffff;
+        --surface-2: #eef2ff;
+        --text: #1f2937;
+        --muted: #5f6b7d;
+        --primary: #0f766e;
+        --accent: #f59e0b;
+        --border: #dce3ee;
+        --success: #16a34a;
+        --danger: #dc2626;
+        --shadow: 0 18px 45px rgba(16, 24, 40, 0.1);
+        --radius: 20px;
+        --font-title: "Avenir Next", "SF Pro Display", "PingFang SC", sans-serif;
+        --font-body: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        background: radial-gradient(circle at 10% 10%, #e6fcf6 0%, var(--bg) 45%, #fef7ec 100%);
+        font-family: var(--font-body);
+      }
+
+      .canvas {
+        width: min(1360px, calc(100vw - 48px));
+        margin: 24px auto;
+        border-radius: calc(var(--radius) + 6px);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+
+      .topbar {
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.98));
+        backdrop-filter: blur(8px);
+      }
+
+      .brand {
+        font-family: var(--font-title);
+        font-weight: 700;
+        font-size: 24px;
+        letter-spacing: 0.5px;
+      }
+
+      .badge {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--primary) 16%, white);
+        color: var(--primary);
+      }
+
+      .main {
+        display: grid;
+        grid-template-columns: 240px 1fr 320px;
+        min-height: 760px;
+      }
+
+      .sidebar {
+        padding: 20px 16px;
+        border-right: 1px solid var(--border);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 72%, white), white);
+      }
+
+      .menu {
+        display: grid;
+        gap: 10px;
+      }
+
+      .menu-item {
+        padding: 10px 12px;
+        border-radius: 12px;
+        color: var(--muted);
+        border: 1px solid transparent;
+      }
+
+      .menu-item.active {
+        color: var(--primary);
+        border-color: color-mix(in srgb, var(--primary) 28%, white);
+        background: color-mix(in srgb, var(--primary) 12%, white);
+        font-weight: 600;
+      }
+
+      .content {
+        padding: 22px;
+        background: linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 40%, white), var(--surface));
+      }
+
+      .headline {
+        margin-bottom: 18px;
+      }
+
+      .headline h1 {
+        margin: 0;
+        font-family: var(--font-title);
+        font-size: 30px;
+        letter-spacing: 0.2px;
+      }
+
+      .headline p {
+        margin: 8px 0 0;
+        color: var(--muted);
+      }
+
+      .kpis {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-bottom: 16px;
+      }
+
+      .kpi {
+        border-radius: 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 14px 16px;
+      }
+
+      .kpi .label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .kpi .value {
+        margin-top: 8px;
+        font-size: 26px;
+        font-family: var(--font-title);
+        font-weight: 700;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .btn {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 9px 14px;
+        background: var(--surface);
+      }
+
+      .btn.primary {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--surface);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+
+      th,
+      td {
+        text-align: left;
+        font-size: 14px;
+        padding: 13px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .status {
+        display: inline-block;
+        border-radius: 999px;
+        font-size: 12px;
+        padding: 4px 10px;
+      }
+
+      .status.ok {
+        color: var(--success);
+        background: color-mix(in srgb, var(--success) 14%, white);
+      }
+
+      .status.warn {
+        color: #c2410c;
+        background: #ffedd5;
+      }
+
+      .status.del {
+        color: var(--danger);
+        background: #fee2e2;
+      }
+
+      .panel {
+        border-left: 1px solid var(--border);
+        background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--surface-2) 52%, white));
+        padding: 20px;
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--surface);
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 15px;
+      }
+
+      .timeline {
+        display: grid;
+        gap: 10px;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--primary);
+        margin-top: 6px;
+      }
+
+      .event {
+        display: grid;
+        grid-template-columns: 12px 1fr;
+        gap: 10px;
+        color: var(--muted);
+      }
+
+      .footer-note {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+
+      .theme-aurora {
+        --bg: #f3f9ff;
+        --surface: rgba(255, 255, 255, 0.88);
+        --surface-2: #ddf6f3;
+        --text: #0f172a;
+        --muted: #475569;
+        --primary: #0f766e;
+        --accent: #f97316;
+        --border: rgba(15, 118, 110, 0.18);
+        --shadow: 0 26px 60px rgba(14, 116, 144, 0.18);
+        --radius: 22px;
+      }
+
+      .theme-aurora body,
+      body.theme-aurora {
+        background: radial-gradient(circle at 5% 5%, #cffafe 0%, #f3f9ff 45%, #fff7ed 100%);
+      }
+
+      .theme-carbon {
+        --bg: #111827;
+        --surface: #1f2937;
+        --surface-2: #111827;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --primary: #34d399;
+        --accent: #f59e0b;
+        --border: #374151;
+        --shadow: 0 22px 55px rgba(0, 0, 0, 0.45);
+        --radius: 10px;
+        --font-title: "DIN Alternate", "Avenir Next Condensed", "PingFang SC", sans-serif;
+        --font-body: "IBM Plex Sans", "PingFang SC", sans-serif;
+      }
+
+      body.theme-carbon {
+        background: linear-gradient(140deg, #0b1220, #1a2435);
+      }
+
+      body.theme-carbon .topbar {
+        background: #111827;
+      }
+
+      body.theme-carbon .btn.primary {
+        color: #052e2b;
+      }
+
+      .theme-editorial {
+        --bg: #f6f2e9;
+        --surface: #fffdfa;
+        --surface-2: #f2eada;
+        --text: #252218;
+        --muted: #6e6755;
+        --primary: #b45309;
+        --accent: #065f46;
+        --border: #e2d8c4;
+        --shadow: 0 20px 40px rgba(85, 65, 28, 0.16);
+        --radius: 6px;
+        --font-title: "STSong", "Times New Roman", serif;
+        --font-body: "Source Han Serif SC", "Songti SC", serif;
+      }
+
+      body.theme-editorial {
+        background: radial-gradient(circle at 25% 10%, #fffaf0 0%, #f6f2e9 58%, #ece4d4 100%);
+      }
+
+      body.theme-editorial .canvas {
+        border-width: 2px;
+      }
+
+      body.theme-editorial .menu-item {
+        border-radius: 6px;
+      }
+
+      .theme-neon {
+        --bg: #07141d;
+        --surface: #0f1c27;
+        --surface-2: #102737;
+        --text: #d9f5ff;
+        --muted: #81b3c9;
+        --primary: #22d3ee;
+        --accent: #fb7185;
+        --border: #1f5166;
+        --shadow: 0 24px 56px rgba(0, 0, 0, 0.45);
+        --radius: 16px;
+        --font-title: "Eurostile", "Trebuchet MS", "PingFang SC", sans-serif;
+        --font-body: "Lucida Sans", "PingFang SC", sans-serif;
+      }
+
+      body.theme-neon {
+        background:
+          radial-gradient(circle at 90% 0%, rgba(34, 211, 238, 0.14), transparent 34%),
+          radial-gradient(circle at 0% 90%, rgba(251, 113, 133, 0.12), transparent 32%),
+          #07141d;
+      }
+
+      body.theme-neon .kpi,
+      body.theme-neon .card,
+      body.theme-neon table {
+        box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.18);
+      }
+
+      .theme-grove {
+        --bg: #eef6ef;
+        --surface: #ffffff;
+        --surface-2: #dff0df;
+        --text: #1f3a2f;
+        --muted: #4d695d;
+        --primary: #15803d;
+        --accent: #ca8a04;
+        --border: #c9e1cf;
+        --shadow: 0 20px 48px rgba(17, 94, 46, 0.15);
+        --radius: 18px;
+        --font-title: "Gill Sans", "Trebuchet MS", "PingFang SC", sans-serif;
+        --font-body: "Optima", "PingFang SC", sans-serif;
+      }
+
+      body.theme-grove {
+        background:
+          radial-gradient(circle at 10% 0%, #d8f5de 0%, transparent 30%),
+          radial-gradient(circle at 90% 100%, #fef3c7 0%, transparent 30%),
+          #eef6ef;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas">
+      <header class="topbar">
+        <div class="brand">FileHub</div>
+        <div style="display: flex; gap: 10px; align-items: center">
+          <span class="badge" id="themeName">主题</span>
+          <span>管理员 · 王晨</span>
+        </div>
+      </header>
+      <section class="main">
+        <aside class="sidebar">
+          <div class="menu">
+            <div class="menu-item active">文件中心</div>
+            <div class="menu-item">最近上传</div>
+            <div class="menu-item">共享文件</div>
+            <div class="menu-item">回收站</div>
+            <div class="menu-item">管理后台</div>
+            <div class="menu-item">日志审计</div>
+            <div class="menu-item">个人设置</div>
+          </div>
+        </aside>
+        <main class="content">
+          <div class="headline">
+            <h1>企业文件仓库</h1>
+            <p>今日上传 281 个分片，下载成功率 99.98%，平均响应 83ms</p>
+          </div>
+          <div class="kpis">
+            <div class="kpi">
+              <div class="label">总文件数</div>
+              <div class="value">48,320</div>
+            </div>
+            <div class="kpi">
+              <div class="label">存储占用</div>
+              <div class="value">17.2 TB</div>
+            </div>
+            <div class="kpi">
+              <div class="label">待合并分片</div>
+              <div class="value">46</div>
+            </div>
+            <div class="kpi">
+              <div class="label">回收站文件</div>
+              <div class="value">129</div>
+            </div>
+          </div>
+          <div class="toolbar">
+            <button class="btn primary">上传文件</button>
+            <button class="btn">新建文件夹</button>
+            <button class="btn">批量下载</button>
+            <button class="btn">筛选：本周</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>文件名</th>
+                <th>大小</th>
+                <th>类型</th>
+                <th>更新时间</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>项目验收报告_v4.pdf</td>
+                <td>82.4 MB</td>
+                <td>PDF</td>
+                <td>2026-03-10 14:18</td>
+                <td><span class="status ok">可预览</span></td>
+              </tr>
+              <tr>
+                <td>发布包_release_20260310.zip</td>
+                <td>2.3 GB</td>
+                <td>ZIP</td>
+                <td>2026-03-10 13:55</td>
+                <td><span class="status warn">分片处理中</span></td>
+              </tr>
+              <tr>
+                <td>运营素材-春季海报.psd</td>
+                <td>367 MB</td>
+                <td>PSD</td>
+                <td>2026-03-10 12:47</td>
+                <td><span class="status del">已移入回收站</span></td>
+              </tr>
+              <tr>
+                <td>接口压测结果.txt</td>
+                <td>42 KB</td>
+                <td>TXT</td>
+                <td>2026-03-10 11:22</td>
+                <td><span class="status ok">可预览</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="footer-note">注：以上为高保真视觉评审稿，交互行为以后续原型定义为准。</div>
+        </main>
+        <aside class="panel">
+          <div class="card">
+            <h3>上传队列</h3>
+            <div>release_20260310.zip · 73%</div>
+            <div style="margin-top: 8px">media_archive.tar · 41%</div>
+          </div>
+          <div class="card">
+            <h3>文件预览</h3>
+            <div style="height: 110px; border: 1px dashed var(--border); border-radius: 12px; display: grid; place-items: center">
+              PDF 首屏缩略图
+            </div>
+          </div>
+          <div class="card">
+            <h3>操作日志</h3>
+            <div class="timeline">
+              <div class="event"><div class="dot"></div><div>15:20 上传分片 128/256</div></div>
+              <div class="event"><div class="dot"></div><div>15:18 下载项目验收报告_v4.pdf</div></div>
+              <div class="event"><div class="dot"></div><div>15:02 恢复运营素材-春季海报.psd</div></div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const theme = params.get("theme") || "aurora";
+      const body = document.body;
+      const map = {
+        aurora: ["theme-aurora", "风格 A · Aurora 玻璃渐变"],
+        carbon: ["theme-carbon", "风格 B · Carbon 商务深色"],
+        editorial: ["theme-editorial", "风格 C · Editorial 杂志复古"],
+        neon: ["theme-neon", "风格 D · Neon 科技网格"],
+        grove: ["theme-grove", "风格 E · Grove 自然有机"]
+      };
+      const [className, label] = map[theme] || map.aurora;
+      body.classList.add(className);
+      document.getElementById("themeName").innerText = label;
+    </script>
+  </body>
+</html>
+

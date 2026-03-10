@@ -385,3 +385,33 @@
   - Redis 回落内存仅用于开发/测试；生产环境必须保证 Redis 可用
 - 下一个任务：
   - 提交D：实现认证接口与鉴权依赖并挂载路由
+
+---
+
+## 2026-03-10 17:47:14 CST
+
+- 任务：第二轮开发-提交D：实现认证接口与鉴权依赖
+- 时间：2026-03-10 17:47:14 CST
+- git 分支及 Commit ID：`feature/round2-auth-mvp`；提交前基线 `e5f480f`
+- 本次修改：
+  - 新增认证请求/响应模型：`backend/app/schemas/auth.py`
+  - 新增认证服务：`backend/app/services/auth_service.py`
+  - 新增鉴权依赖：`backend/app/api/deps.py`
+  - 新增认证接口：`backend/app/api/auth.py`（register/login/refresh/me）
+  - 路由挂载与启动初始化：`backend/app/api/router.py`、`backend/app/main.py`、`backend/app/db/init_db.py`
+  - 调整 `users` 主键类型为 `Integer` 以兼容 SQLite 验证
+  - 补充测试依赖 `httpx==0.28.1`
+- 已完成事项：
+  - 认证模块最小闭环接口已可用
+  - Access Token 鉴权已可访问 `/auth/me`
+  - Refresh Token 轮换链路可用
+- 未完成事项：
+  - 持久化测试文件（pytest）
+  - 后端 README 与接口验收文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && DATABASE_URL=sqlite:///./auth_flow_test.db python - <<'PY' ... PY`
+  - 验证结果：`register 201 / login 200 / me 200 / refresh 200`
+- 风险说明：
+  - 当前自动建表基于 `create_all`，后续需要迁移到 Alembic 正式迁移流程
+- 下一个任务：
+  - 提交E：补充自动化测试与后端文档收口

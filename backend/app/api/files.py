@@ -31,12 +31,34 @@ def get_files(
     return list_files(
         db=db,
         current_user=current_user,
+        deleted_only=False,
         keyword=keyword,
         min_size=min_size,
         max_size=max_size,
         page=page,
         page_size=page_size,
     )
+
+
+@router.delete("/{file_id}")
+def soft_delete_file(
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    file_record = db.get(FileObject, file_id)
+    if not file_record or file_record.is_deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件不存在")
+
+    if current_user.role != "admin" and file_record.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权删除该文件")
+
+    file_record.is_deleted = True
+    file_record.status = "deleted"
+    db.add(file_record)
+    db.commit()
+
+    return {"file_id": file_record.id, "status": file_record.status}
 
 
 @router.get("/{file_id}/download")

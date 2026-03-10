@@ -803,3 +803,30 @@
   - MinIO 在本地未启动时需要回落策略以保证开发测试可执行
 - 下一个任务：
   - 提交B：实现上传会话存储与创建/查询接口
+
+---
+
+## 2026-03-10 19:46:38 CST
+
+- 任务：第五轮开发-提交B：上传会话创建与查询接口
+- 时间：2026-03-10 19:46:38 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 扩展配置：上传会话 TTL、上传临时目录、MinIO 配置项
+  - 新增上传会话 schema：`backend/app/schemas/upload.py`
+  - 新增上传会话存储服务（Redis + 内存回落）：`backend/app/services/upload_session_service.py`
+  - 新增接口：`POST /upload/sessions`、`GET /upload/sessions/{upload_id}`
+  - 主路由接入上传接口
+- 已完成事项：
+  - 已登录用户可创建上传会话并查询会话状态
+  - 会话状态包含已上传分片数组，支持续传准备
+- 未完成事项：
+  - 分片上传接口与完成合并接口
+  - 上传链路自动化测试与前端上传面板
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && DATABASE_URL=sqlite:///./upload_session_check.db python - <<'PY' ... PY`
+  - 验证结果：创建会话 `201`，查询会话 `200`
+- 风险说明：
+  - Redis 不可用时回落内存，仅适合开发测试
+- 下一个任务：
+  - 提交C：实现分片上传与合并完成（写入 MinIO 与 file_objects）

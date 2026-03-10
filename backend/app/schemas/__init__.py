@@ -6,6 +6,7 @@ from app.schemas.auth import (
     UserProfile,
 )
 from app.schemas.file import FileItem, FileListResponse
+from app.schemas.upload import UploadSessionCreateRequest, UploadSessionResponse
 
 __all__ = [
     "AuthTokens",
@@ -14,5 +15,7 @@ __all__ = [
     "LoginRequest",
     "RefreshRequest",
     "RegisterRequest",
+    "UploadSessionCreateRequest",
+    "UploadSessionResponse",
     "UserProfile",
 ]

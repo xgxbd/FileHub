@@ -7,6 +7,7 @@ from app.services.security import (
     get_password_hash,
     verify_password,
 )
+from app.services.upload_session_service import UploadSessionStore, upload_session_store
 
 __all__ = [
     "RefreshSessionStore",
@@ -16,5 +17,7 @@ __all__ = [
     "get_password_hash",
     "list_files",
     "refresh_token_ttl_seconds",
+    "UploadSessionStore",
+    "upload_session_store",
     "verify_password",
 ]

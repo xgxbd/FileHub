@@ -13,6 +13,14 @@ class Settings(BaseSettings):
     redis_host: str = "127.0.0.1"
     redis_port: int = 6379
     redis_db: int = 0
+    upload_session_ttl_seconds: int = 86400
+    upload_tmp_dir: str = "./tmp/uploads"
+
+    minio_endpoint: str = "127.0.0.1:9000"
+    minio_access_key: str = "minioadmin"
+    minio_secret_key: str = "minioadmin"
+    minio_bucket: str = "filehub"
+    minio_secure: bool = False
 
     jwt_secret: str = "change_me_in_production"
     jwt_algorithm: str = "HS256"

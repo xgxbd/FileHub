@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -13,6 +14,7 @@ os.environ["DATABASE_URL"] = "sqlite:///./test_suite.db"
 
 from app.db import Base, engine
 from app.models import FileObject, User
+from app.core.config import settings
 
 
 @pytest.fixture(autouse=True)
@@ -20,4 +22,10 @@ def reset_test_database():
     _ = (User, FileObject)
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    tmp_upload_dir = Path(settings.upload_tmp_dir)
+    tmp_object_dir = tmp_upload_dir.resolve().parent / "object_store"
+    if tmp_upload_dir.exists():
+        shutil.rmtree(tmp_upload_dir)
+    if tmp_object_dir.exists():
+        shutil.rmtree(tmp_object_dir)
     yield

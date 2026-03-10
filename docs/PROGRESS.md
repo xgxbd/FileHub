@@ -780,3 +780,185 @@
   - `on_event` 存在弃用警告，后续需迁移 lifespan
 - 下一个任务：
   - 第五轮开发：先设计分片上传 MVP，再按最小提交实现上传会话、分片接收、合并与前端接入
+
+---
+
+## 2026-03-10 19:44:22 CST
+
+- 任务：第五轮开发-提交A：分片上传MVP设计与最小提交拆分
+- 时间：2026-03-10 19:44:22 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `docs/ROUND5_CHUNK_UPLOAD_MVP_DESIGN.md`
+  - 明确分片上传会话、分片接收、断点续传、合并完成接口
+  - 拆分提交 A-F 并定义每步可验证标准
+- 已完成事项：
+  - 第五轮设计阶段完成
+  - 实施路径与验证口径明确
+- 未完成事项：
+  - 提交 B-F 的代码实现
+- 当前可测试内容：
+  - 设计文档可直接评审
+- 风险说明：
+  - MinIO 在本地未启动时需要回落策略以保证开发测试可执行
+- 下一个任务：
+  - 提交B：实现上传会话存储与创建/查询接口
+
+---
+
+## 2026-03-10 19:46:38 CST
+
+- 任务：第五轮开发-提交B：上传会话创建与查询接口
+- 时间：2026-03-10 19:46:38 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 扩展配置：上传会话 TTL、上传临时目录、MinIO 配置项
+  - 新增上传会话 schema：`backend/app/schemas/upload.py`
+  - 新增上传会话存储服务（Redis + 内存回落）：`backend/app/services/upload_session_service.py`
+  - 新增接口：`POST /upload/sessions`、`GET /upload/sessions/{upload_id}`
+  - 主路由接入上传接口
+- 已完成事项：
+  - 已登录用户可创建上传会话并查询会话状态
+  - 会话状态包含已上传分片数组，支持续传准备
+- 未完成事项：
+  - 分片上传接口与完成合并接口
+  - 上传链路自动化测试与前端上传面板
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && DATABASE_URL=sqlite:///./upload_session_check.db python - <<'PY' ... PY`
+  - 验证结果：创建会话 `201`，查询会话 `200`
+- 风险说明：
+  - Redis 不可用时回落内存，仅适合开发测试
+- 下一个任务：
+  - 提交C：实现分片上传与合并完成（写入 MinIO 与 file_objects）
+
+---
+
+## 2026-03-10 19:54:00 CST
+
+- 任务：第五轮开发-提交C：分片上传与完成合并链路
+- 时间：2026-03-10 19:54:00 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - `PUT /upload/sessions/{upload_id}/chunks/{chunk_index}`：分片接收并落地临时文件
+  - `POST /upload/sessions/{upload_id}/complete`：分片合并、对象存储写入、文件元数据入库
+  - 新增对象存储服务 `backend/app/services/object_storage.py`（MinIO + 本地回落）
+  - 扩展上传会话状态字段（`object_key`、`completed`）
+  - 扩展 `file_objects` 增加 `file_hash`
+- 已完成事项：
+  - 后端分片上传主链路可用（创建会话 -> 上传分片 -> 完成合并）
+  - 完成后可在 `/files` 查询到新增文件元数据
+  - 已完成 MinIO 不可用场景的回落修复
+- 未完成事项：
+  - 上传链路自动化测试补齐
+  - 前端上传面板接入
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && DATABASE_URL=sqlite:///./upload_complete_check.db python - <<'PY' ... PY`
+  - 验证结果：`/complete` 返回 `200`，`/files` 总数为 `1`
+- 风险说明：
+  - MinIO 回落本地仅用于开发测试，生产必须启用 MinIO
+- 下一个任务：
+  - 提交D：补齐分片上传自动化测试（会话/分片/完成）
+
+---
+
+## 2026-03-10 19:55:33 CST
+
+- 任务：第五轮开发-提交D：分片上传自动化测试
+- 时间：2026-03-10 19:55:33 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `backend/tests/test_upload_chunk_api.py`，覆盖会话鉴权与分片上传完成主链路
+  - 更新 `backend/tests/conftest.py`，每个用例前重置数据库并清理上传临时目录
+  - 更新 `.gitignore`，忽略测试数据库与上传临时目录产物
+- 已完成事项：
+  - 分片上传链路已有自动化回归测试
+  - 后端测试通过：`5 passed`
+- 未完成事项：
+  - 前端上传面板接入分片上传 API
+  - 本轮文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+- 风险说明：
+  - 当前测试默认使用本地回落对象存储，未覆盖真实 MinIO 网络异常重试策略
+- 下一个任务：
+  - 提交E：前端文件中心接入分片上传面板与上传进度展示
+
+---
+
+## 2026-03-10 20:08:51 CST
+
+- 任务：第五轮开发-提交E：前端分片上传面板接入
+- 时间：2026-03-10 20:08:51 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增上传 API 调用封装：`frontend/src/api/upload.js`
+  - 升级 `FileCenterView.vue`：选择文件、创建会话、切片上传、完成合并、上传进度展示
+  - 新增上传面板样式
+- 已完成事项：
+  - 前端已接入分片上传链路（最小可用）
+  - 上传完成后自动刷新文件列表
+- 未完成事项：
+  - 上传失败重试策略优化
+  - 本轮文档收口与规范收尾
+- 当前可测试内容：
+  - `cd frontend && npm run build`（构建通过）
+  - 启动前后端后在 `/files` 页面选择文件并执行上传
+- 风险说明：
+  - 当前上传为串行分片，后续可改为并发提升吞吐
+  - 构建存在大 chunk 警告，后续需分包优化
+- 下一个任务：
+  - 提交F：更新前后端文档并完成第五轮收口
+
+---
+
+## 2026-03-10 20:10:20 CST
+
+- 任务：第五轮开发-提交F：分片上传能力文档收口
+- 时间：2026-03-10 20:10:20 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新后端文档，补充分片上传接口清单
+  - 更新前端文档，补充分片上传面板接入说明
+  - 本轮收口前复跑后端测试与前端构建
+- 已完成事项：
+  - 第五轮“分片上传MVP（设计+实现）”完成
+  - 后端测试通过：`5 passed`
+  - 前端构建通过：`npm run build`
+- 未完成事项：
+  - 下载断点续传（Range）
+  - 文件预览（图片/PDF/TXT）与回收站
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - 启动前后端后在 `/files` 页面执行分片上传并校验列表刷新
+- 风险说明：
+  - 前端构建仍有大 chunk 警告，后续需做分包
+  - 对象存储在无 MinIO 时回落本地，仅适用于开发测试
+- 下一个任务：
+  - 先做第五轮规范收尾，再进入下一轮（下载断点续传 MVP）
+
+---
+
+## 2026-03-10 20:11:04 CST
+
+- 任务：第五轮开发规范收尾检查与归档
+- 时间：2026-03-10 20:11:04 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 核查第五轮提交完整性（A-F）与提交信息规范
+  - 复跑后端测试与前端构建并归档结果
+- 已完成事项：
+  - 第五轮最小任务 A-F 均已完成并推送
+  - 提交信息均为具体中文自然语言
+  - 验证通过：后端 `pytest -q`（5 passed）、前端 `npm run build`
+- 未完成事项：
+  - 下载断点续传、文件预览、回收站、操作日志
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - 启动服务后在 `/files` 页面执行分片上传并验证列表刷新
+- 风险说明：
+  - 前端构建存在大 chunk 警告，后续需路由分包优化
+  - `on_event` 弃用警告待迁移 lifespan
+- 下一个任务：
+  - 第六轮开发：先设计下载断点续传（Range）MVP，再分步实现后端下载接口与前端下载能力

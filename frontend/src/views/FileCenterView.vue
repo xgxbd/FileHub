@@ -8,9 +8,11 @@ import DataTable from "primevue/datatable";
 import InputNumber from "primevue/inputnumber";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
+import ProgressBar from "primevue/progressbar";
 import Tag from "primevue/tag";
 
 import { fetchFileList } from "../api/files";
+import { completeUploadSession, createUploadSession, uploadChunk } from "../api/upload";
 import { useAuthStore } from "../stores/auth";
 
 const authStore = useAuthStore();
@@ -25,6 +27,12 @@ const pageSize = ref(10);
 const keyword = ref("");
 const minSize = ref(null);
 const maxSize = ref(null);
+
+const selectedFile = ref(null);
+const uploadLoading = ref(false);
+const uploadProgress = ref(0);
+const uploadMessage = ref("");
+const uploadError = ref("");
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -79,6 +87,72 @@ async function onPageChange(event) {
   await loadFiles();
 }
 
+function onFileChange(event) {
+  const file = event.target.files?.[0] || null;
+  selectedFile.value = file;
+  uploadProgress.value = 0;
+  uploadMessage.value = "";
+  uploadError.value = "";
+}
+
+async function startUpload() {
+  if (!selectedFile.value) {
+    uploadError.value = "请先选择文件";
+    return;
+  }
+  if (!authStore.accessToken) {
+    uploadError.value = "当前未登录";
+    return;
+  }
+
+  uploadLoading.value = true;
+  uploadError.value = "";
+  uploadMessage.value = "";
+  uploadProgress.value = 0;
+
+  const chunkSize = 1024 * 1024;
+  const totalChunks = Math.ceil(selectedFile.value.size / chunkSize);
+
+  try {
+    const session = await createUploadSession({
+      accessToken: authStore.accessToken,
+      payload: {
+        file_name: selectedFile.value.name,
+        total_size: selectedFile.value.size,
+        chunk_size: chunkSize,
+        total_chunks: totalChunks,
+        mime_type: selectedFile.value.type || "application/octet-stream"
+      }
+    });
+
+    for (let index = 0; index < totalChunks; index += 1) {
+      const start = index * chunkSize;
+      const end = Math.min(start + chunkSize, selectedFile.value.size);
+      const blob = selectedFile.value.slice(start, end);
+
+      await uploadChunk({
+        accessToken: authStore.accessToken,
+        uploadId: session.upload_id,
+        chunkIndex: index,
+        chunkBlob: blob
+      });
+      uploadProgress.value = Math.floor(((index + 1) / totalChunks) * 100);
+    }
+
+    await completeUploadSession({
+      accessToken: authStore.accessToken,
+      uploadId: session.upload_id
+    });
+
+    uploadMessage.value = "上传完成";
+    await loadFiles();
+  } catch (err) {
+    uploadError.value = err instanceof Error ? err.message : "上传失败";
+  } finally {
+    uploadLoading.value = false;
+  }
+}
+
 onMounted(() => {
   loadFiles();
 });
@@ -90,6 +164,19 @@ onMounted(() => {
     <template #subtitle>文件列表与基础筛选（MVP）</template>
     <template #content>
       <p class="intro-text">当前用户：{{ authStore.user?.username || "未知用户" }}，可按文件名和大小进行筛选。</p>
+      <div class="upload-panel">
+        <div class="upload-actions">
+          <input type="file" @change="onFileChange" />
+          <Button label="开始上传" icon="pi pi-upload" :loading="uploadLoading" @click="startUpload" />
+        </div>
+        <div class="upload-status">
+          <span v-if="selectedFile">已选择：{{ selectedFile.name }}</span>
+          <span v-else>未选择文件</span>
+        </div>
+        <ProgressBar :value="uploadProgress"></ProgressBar>
+        <Message v-if="uploadMessage" severity="success" :closable="false">{{ uploadMessage }}</Message>
+        <Message v-if="uploadError" severity="error" :closable="false">{{ uploadError }}</Message>
+      </div>
       <div class="file-filter-row">
         <div class="file-filter-item">
           <label class="auth-label">文件名关键字</label>

@@ -54,6 +54,12 @@ body {
   color: #5c6b85;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .layout-main {
   flex: 1;
   display: grid;

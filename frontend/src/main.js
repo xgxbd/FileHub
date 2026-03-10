@@ -5,18 +5,26 @@ import Aura from "@primeuix/themes/aura";
 
 import App from "./App.vue";
 import router from "./router";
+import { useAuthStore } from "./stores/auth";
 import "./styles/main.css";
 import "primeicons/primeicons.css";
 
-const app = createApp(App);
-const pinia = createPinia();
+async function bootstrap() {
+  const app = createApp(App);
+  const pinia = createPinia();
 
-app.use(pinia);
-app.use(router);
-app.use(PrimeVue, {
-  theme: {
-    preset: Aura
-  }
-});
+  app.use(pinia);
+  app.use(router);
+  app.use(PrimeVue, {
+    theme: {
+      preset: Aura
+    }
+  });
 
-app.mount("#app");
+  const authStore = useAuthStore(pinia);
+  await authStore.initSession();
+
+  app.mount("#app");
+}
+
+bootstrap();

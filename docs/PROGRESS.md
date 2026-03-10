@@ -1670,3 +1670,29 @@
   - 该脚本用于本地验证，不应在生产环境直接暴露默认凭据
 - 下一个任务：
   - 提交E：更新 `.env.example` 与 README，完成第十轮收口
+
+---
+
+## 2026-03-10 21:22:31 CST
+
+- 任务：第十轮开发-提交E：管理员初始化文档收口
+- 时间：2026-03-10 21:22:31 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新 `backend/.env.example`：新增管理员初始化配置项
+  - 更新 `backend/README.md`：新增管理员初始化说明与验证命令
+  - 更新根文档 `README.md`：同步管理员初始化能力状态
+  - 收口前复跑后端测试
+- 已完成事项：
+  - 第十轮“管理员初始化MVP（设计+实现）”完成
+  - 后端测试通过：`pytest -q`（19 passed）
+- 未完成事项：
+  - 第十轮规范收尾
+  - 下一轮任务（管理端文件管理与发布前测试）
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `ADMIN_BOOTSTRAP_ENABLED=true ... python scripts/check_admin_bootstrap.py`
+- 风险说明：
+  - 部署环境若未替换默认管理员密码存在安全风险
+- 下一个任务：
+  - 执行第十轮规范收尾检查并归档结果

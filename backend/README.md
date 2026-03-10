@@ -70,3 +70,20 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 pytest -q
 ```
+
+## 管理员初始化（第十轮）
+
+- 通过环境变量控制启动自动初始化：
+  - `ADMIN_BOOTSTRAP_ENABLED=true`
+  - `ADMIN_EMAIL`、`ADMIN_USERNAME`、`ADMIN_PASSWORD`
+- 启动时若账号不存在会自动创建；已存在则仅校正为 `admin` 角色（不重置密码）
+- 建议验证命令：
+  ```bash
+  cd backend
+  source .venv/bin/activate
+  ADMIN_BOOTSTRAP_ENABLED=true \
+  ADMIN_EMAIL=admin@example.com \
+  ADMIN_USERNAME=admin \
+  ADMIN_PASSWORD='StrongPassw0rd!' \
+  python scripts/check_admin_bootstrap.py
+  ```

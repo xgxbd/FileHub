@@ -92,3 +92,18 @@ pytest -q
   ADMIN_PASSWORD='StrongPassw0rd!' \
   python scripts/check_admin_bootstrap.py
   ```
+
+## 质量基线脚本（第十二轮）
+
+- 主链路烟雾验证：
+  ```bash
+  cd backend
+  source .venv/bin/activate
+  python scripts/smoke_core_flow.py
+  ```
+- 轻量性能基线：
+  ```bash
+  cd backend
+  source .venv/bin/activate
+  python scripts/perf_baseline.py
+  ```

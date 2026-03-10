@@ -1876,3 +1876,153 @@
   - 弃用告警与前端 chunk 体积问题仍未治理
 - 下一个任务：
   - 第十二轮开发：先设计发布前测试基线（E2E与性能），再补齐自动化验证脚本
+
+---
+
+## 2026-03-10 21:38:46 CST
+
+- 任务：第十二轮开发-提交A：质量基线与发布准备MVP设计
+- 时间：2026-03-10 21:38:46 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `docs/ROUND12_QUALITY_BASELINE_MVP_DESIGN.md`
+  - 明确 smoke 脚本、性能基线脚本、发布回滚文档范围
+  - 拆分提交 A-E 并定义验证标准
+- 已完成事项：
+  - 第十二轮设计阶段完成
+- 未完成事项：
+  - 提交B-E 实现与验证
+- 当前可测试内容：
+  - 设计文档可直接评审
+- 风险说明：
+  - 本轮不包含完整浏览器 E2E，需后续补强
+- 下一个任务：
+  - 提交B：实现后端主链路 smoke 验证脚本
+
+---
+
+## 2026-03-10 21:40:02 CST
+
+- 任务：第十二轮开发-提交B：主链路烟雾验证脚本
+- 时间：2026-03-10 21:40:02 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `backend/scripts/smoke_core_flow.py`
+  - 覆盖链路：注册、登录、上传、下载、删除、恢复
+  - 脚本执行成功返回统一通过标记
+- 已完成事项：
+  - 后端主链路 smoke 验证脚本已可执行
+  - 脚本验证通过：`SMOKE_PASS: register/login/upload/download/delete/restore`
+- 未完成事项：
+  - 提交C：性能基线脚本
+  - 提交D：发布清单与回滚预案文档
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python scripts/smoke_core_flow.py`
+- 风险说明：
+  - 脚本为单进程轻量验证，不能替代并发压测
+- 下一个任务：
+  - 提交C：实现轻量性能基线统计脚本
+
+---
+
+## 2026-03-10 21:46:15 CST
+
+- 任务：第十二轮开发-提交C：轻量性能基线脚本
+- 时间：2026-03-10 21:46:15 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `backend/scripts/perf_baseline.py`
+  - 统计接口平均耗时：文件列表、文件下载、上传完成
+  - 输出统一性能基线指标文本
+- 已完成事项：
+  - 性能基线脚本可执行并输出指标
+  - 本次基线结果（ms）：`files_list_avg=2.12`、`files_download_avg=12075.71`、`upload_complete_avg=6061.99`
+- 未完成事项：
+  - 提交D：发布清单与回滚预案文档
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python scripts/perf_baseline.py`
+- 风险说明：
+  - 未连接 MinIO 时会走重试回退路径，下载/上传耗时基线会偏高
+- 下一个任务：
+  - 提交D：补充发布清单与回滚预案文档
+
+---
+
+## 2026-03-10 21:47:09 CST
+
+- 任务：第十二轮开发-提交D：发布清单与回滚预案文档
+- 时间：2026-03-10 21:47:09 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `docs/RELEASE_CHECKLIST.md`
+  - 新增 `docs/ROLLBACK_PLAN.md`
+  - 固化发布前检查项、触发条件、回滚步骤与回滚后验证
+- 已完成事项：
+  - 发布与回滚文档具备可执行模板
+- 未完成事项：
+  - 提交E：文档收口
+  - 第十二轮规范收尾
+- 当前可测试内容：
+  - 按发布清单逐项执行验证命令
+  - 按回滚预案执行演练流程
+- 风险说明：
+  - 当前回滚流程依赖手工执行，后续可补充自动化脚本
+- 下一个任务：
+  - 提交E：更新 README 与第十二轮文档收口
+
+---
+
+## 2026-03-10 21:53:37 CST
+
+- 任务：第十二轮开发-提交E：质量基线与发布准备文档收口
+- 时间：2026-03-10 21:53:37 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新 `backend/README.md`：补充 smoke/perf 脚本使用说明
+  - 更新根文档 `README.md`：同步质量基线与发布文档能力
+  - 收口前复跑 smoke 脚本、perf 脚本与前端构建
+- 已完成事项：
+  - 第十二轮“质量基线与发布准备MVP（设计+实现）”完成
+  - Smoke 验证通过：`SMOKE_PASS: register/login/upload/download/delete/restore`
+  - Perf 基线输出：`files_list_avg=2.34ms`、`files_download_avg=12050.58ms`、`upload_complete_avg=6055.77ms`
+  - 前端构建通过：`npm run build`
+- 未完成事项：
+  - 第十二轮规范收尾
+  - 后续增强：真实并发压测与完整浏览器 E2E
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python scripts/smoke_core_flow.py`
+  - `cd backend && source .venv/bin/activate && python scripts/perf_baseline.py`
+  - `cd frontend && npm run build`
+- 风险说明：
+  - 本地未连 MinIO 时会触发重试回退，下载/上传耗时偏高
+- 下一个任务：
+  - 执行第十二轮规范收尾检查并归档结果
+
+---
+
+## 2026-03-10 21:54:01 CST
+
+- 任务：第十二轮开发规范收尾检查与归档
+- 时间：2026-03-10 21:54:01 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 核查第十二轮提交完整性（A-E）与提交信息规范
+  - 归档验证结果：smoke/perf/前端构建均已执行通过
+- 已完成事项：
+  - 第十二轮最小任务 A-E 均已完成并推送
+  - 提交信息均为具体中文自然语言
+  - 发布前最小质量基线与回滚文档已落地
+- 未完成事项：
+  - 完整浏览器 E2E 自动化
+  - 并发压测与性能优化（chunk/MinIO链路）
+- 当前可测试内容：
+  - `python scripts/smoke_core_flow.py`
+  - `python scripts/perf_baseline.py`
+  - `npm run build`
+  - `docs/RELEASE_CHECKLIST.md`、`docs/ROLLBACK_PLAN.md`
+- 风险说明：
+  - 现有性能基线在无 MinIO 环境下偏保守，需在真实依赖环境复测
+- 下一个任务：
+  - 进入发布准备：切 `release/*` 分支，按发布清单执行并形成发布记录

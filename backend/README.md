@@ -50,6 +50,11 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 - `POST /recycle/files/{file_id}/restore`：恢复回收站文件
 - `DELETE /recycle/files/{file_id}/purge`：彻底删除回收站文件
 
+## 操作日志 MVP 接口
+
+- `GET /admin/logs`：管理员查询操作日志（需 Bearer Token，且角色为 `admin`）
+  - 支持参数：`action`、`user_id`、`start_at`、`end_at`、`page`、`page_size`
+
 ## 分片上传 MVP 接口
 
 - `POST /upload/sessions`：创建上传会话

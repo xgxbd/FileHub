@@ -26,13 +26,14 @@ def list_files(
     *,
     db: Session,
     current_user: User,
+    deleted_only: bool = False,
     keyword: str | None,
     min_size: int | None,
     max_size: int | None,
     page: int,
     page_size: int,
 ) -> FileListResponse:
-    base_query = select(FileObject).where(FileObject.is_deleted.is_(False))
+    base_query = select(FileObject).where(FileObject.is_deleted.is_(deleted_only))
 
     if current_user.role != "admin":
         base_query = base_query.where(FileObject.owner_id == current_user.id)

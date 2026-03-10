@@ -69,6 +69,15 @@ class ObjectStorageService:
                 fp.seek(start)
                 return fp.read(length)
 
+    def delete_object(self, *, object_key: str) -> None:
+        try:
+            self._ensure_bucket()
+            self._client.remove_object(settings.minio_bucket, object_key)
+        except Exception:
+            fallback = self._fallback_path(object_key)
+            if fallback.exists():
+                fallback.unlink()
+
     def _ensure_bucket(self) -> None:
         if not self._client.bucket_exists(settings.minio_bucket):
             self._client.make_bucket(settings.minio_bucket)

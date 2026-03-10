@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     jwt_access_expire_minutes: int = 30
     jwt_refresh_expire_days: int = 7
 
+    admin_bootstrap_enabled: bool = False
+    admin_email: str = "admin@filehub.local"
+    admin_username: str = "admin"
+    admin_password: str = "ChangeMe123!"
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 

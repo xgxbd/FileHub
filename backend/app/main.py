@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.core.config import settings
-from app.db import init_db
+from app.db import SessionLocal, init_db
+from app.services.admin_bootstrap_service import ensure_admin_user
 
 app = FastAPI(title=settings.app_name, debug=settings.app_debug)
 
@@ -24,3 +25,5 @@ app.include_router(api_router)
 @app.on_event("startup")
 def startup_event() -> None:
     init_db()
+    with SessionLocal() as db:
+        ensure_admin_user(db)

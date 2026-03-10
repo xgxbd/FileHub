@@ -30,3 +30,29 @@ export async function fetchFileList({
   }
   return payload;
 }
+
+export async function downloadFile({
+  accessToken,
+  fileId,
+  rangeHeader
+}) {
+  const headers = {
+    Accept: "*/*",
+    Authorization: `Bearer ${accessToken}`
+  };
+  if (rangeHeader) {
+    headers.Range = rangeHeader;
+  }
+
+  const response = await fetch(`${API_PREFIX}/files/${fileId}/download`, {
+    method: "GET",
+    headers
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.detail || "下载失败");
+  }
+
+  return response.blob();
+}

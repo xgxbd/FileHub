@@ -985,3 +985,28 @@
   - 浏览器前端对“真正续传控制”能力有限，MVP 以后端 Range 能力为主
 - 下一个任务：
   - 提交B：实现后端下载接口与 Range 请求解析
+
+---
+
+## 2026-03-10 20:14:54 CST
+
+- 任务：第六轮开发-提交B：后端Range下载接口
+- 时间：2026-03-10 20:14:54 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 扩展对象存储服务：支持对象大小查询与按字节范围读取
+  - 在 `GET /files/{file_id}/download` 增加 Range 解析与 206 响应
+  - 增加下载权限校验与 `Content-Range`、`Accept-Ranges` 响应头
+- 已完成事项：
+  - 后端已支持断点续传所需 Range 下载能力
+  - 全量下载（200）与分段下载（206）均可用
+- 未完成事项：
+  - Range 下载自动化测试
+  - 前端下载按钮接入
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && DATABASE_URL=sqlite:///./range_download_check.db python - <<'PY' ... PY`
+  - 验证结果：`200 206 True True bytes 10-14/20`
+- 风险说明：
+  - MinIO 不可用时回落本地读取，仅用于开发测试
+- 下一个任务：
+  - 提交C：补齐下载接口自动化测试（鉴权、全量、Range、越界）

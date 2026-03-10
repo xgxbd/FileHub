@@ -1,11 +1,15 @@
-from fastapi import APIRouter, Depends, Query
+import re
+
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db import get_db
+from app.models.file_object import FileObject
 from app.models.user import User
 from app.schemas.file import FileListResponse
 from app.services.file_service import list_files
+from app.services.object_storage import object_storage_service
 
 router = APIRouter(prefix="/files", tags=["files"])
 
@@ -29,3 +33,60 @@ def get_files(
         page=page,
         page_size=page_size,
     )
+
+
+@router.get("/{file_id}/download")
+def download_file(
+    file_id: int,
+    range_header: str | None = Header(default=None, alias="Range"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    file_record = db.get(FileObject, file_id)
+    if not file_record or file_record.is_deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件不存在")
+
+    if current_user.role != "admin" and file_record.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权下载该文件")
+
+    total_size = object_storage_service.get_file_size(object_key=file_record.object_key)
+    start = 0
+    end = total_size - 1
+    status_code = status.HTTP_200_OK
+
+    if range_header:
+        match = re.match(r"bytes=(\d*)-(\d*)", range_header.strip())
+        if not match:
+            raise HTTPException(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, detail="无效Range")
+
+        start_group, end_group = match.groups()
+        if start_group and end_group:
+            start = int(start_group)
+            end = int(end_group)
+        elif start_group:
+            start = int(start_group)
+            end = total_size - 1
+        elif end_group:
+            suffix = int(end_group)
+            if suffix <= 0:
+                raise HTTPException(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, detail="无效Range")
+            start = max(total_size - suffix, 0)
+            end = total_size - 1
+        else:
+            raise HTTPException(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, detail="无效Range")
+
+        if start < 0 or end < start or start >= total_size:
+            raise HTTPException(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, detail="Range越界")
+        end = min(end, total_size - 1)
+        status_code = status.HTTP_206_PARTIAL_CONTENT
+
+    data = object_storage_service.read_range(object_key=file_record.object_key, start=start, end=end)
+    headers = {
+        "Accept-Ranges": "bytes",
+        "Content-Length": str(len(data)),
+        "Content-Disposition": f'attachment; filename=\"{file_record.file_name}\"',
+    }
+    if status_code == status.HTTP_206_PARTIAL_CONTENT:
+        headers["Content-Range"] = f"bytes {start}-{end}/{total_size}"
+
+    return Response(content=data, media_type=file_record.mime_type, status_code=status_code, headers=headers)

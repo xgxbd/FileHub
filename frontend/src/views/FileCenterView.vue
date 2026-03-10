@@ -11,7 +11,7 @@ import Message from "primevue/message";
 import ProgressBar from "primevue/progressbar";
 import Tag from "primevue/tag";
 
-import { fetchFileList } from "../api/files";
+import { downloadFile, fetchFileList } from "../api/files";
 import { completeUploadSession, createUploadSession, uploadChunk } from "../api/upload";
 import { useAuthStore } from "../stores/auth";
 
@@ -33,6 +33,8 @@ const uploadLoading = ref(false);
 const uploadProgress = ref(0);
 const uploadMessage = ref("");
 const uploadError = ref("");
+const downloadError = ref("");
+const downloadingFileId = ref(null);
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -153,6 +155,32 @@ async function startUpload() {
   }
 }
 
+async function triggerDownload(fileItem) {
+  if (!authStore.accessToken) return;
+
+  downloadError.value = "";
+  downloadingFileId.value = fileItem.id;
+  try {
+    const blob = await downloadFile({
+      accessToken: authStore.accessToken,
+      fileId: fileItem.id,
+      rangeHeader: "bytes=0-"
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileItem.file_name;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    downloadError.value = err instanceof Error ? err.message : "下载失败";
+  } finally {
+    downloadingFileId.value = null;
+  }
+}
+
 onMounted(() => {
   loadFiles();
 });
@@ -176,6 +204,7 @@ onMounted(() => {
         <ProgressBar :value="uploadProgress"></ProgressBar>
         <Message v-if="uploadMessage" severity="success" :closable="false">{{ uploadMessage }}</Message>
         <Message v-if="uploadError" severity="error" :closable="false">{{ uploadError }}</Message>
+        <Message v-if="downloadError" severity="error" :closable="false">{{ downloadError }}</Message>
       </div>
       <div class="file-filter-row">
         <div class="file-filter-item">
@@ -218,6 +247,17 @@ onMounted(() => {
         <Column field="status" header="状态"></Column>
         <Column header="创建时间">
           <template #body="{ data }">{{ formatTime(data.created_at) }}</template>
+        </Column>
+        <Column header="操作">
+          <template #body="{ data }">
+            <Button
+              label="下载"
+              size="small"
+              icon="pi pi-download"
+              :loading="downloadingFileId === data.id"
+              @click="triggerDownload(data)"
+            />
+          </template>
         </Column>
       </DataTable>
     </template>

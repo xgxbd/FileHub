@@ -203,3 +203,30 @@
   - 当前环境限制端口绑定，无法在本环境直接通过本机端口进行 `curl` 验证
 - 下一个任务：
   - 搭建 Vue3 + PrimeVue 最小可运行前端骨架页面
+
+---
+
+## 2026-03-10 17:29:58 CST
+
+- 任务：第一轮开发-提交3：搭建 Vue3 + PrimeVue 最小可运行前端骨架
+- 时间：2026-03-10 17:29:58 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 Vite 前端入口与构建配置（`frontend/index.html`、`frontend/vite.config.js`）
+  - 新增 Vue 应用入口、路由与首页壳（`frontend/src/main.js`、`frontend/src/router/index.js`、`frontend/src/views/HomeView.vue`、`frontend/src/App.vue`）
+  - 新增基础样式文件 `frontend/src/styles/main.css`
+  - 更新前端运行说明并生成 `frontend/package-lock.json`
+- 已完成事项：
+  - Vue 3 + PrimeVue + Vue Router 基础链路可运行
+  - `npm run build` 构建通过
+  - 前端最小骨架页面已可展示
+- 未完成事项：
+  - 前后端健康检查联通（前端调用 `/healthz`）
+  - 第一轮开发收口文档整理
+- 当前可测试内容：
+  - 在 `frontend/` 目录执行 `npm install && npm run dev` 可启动前端
+  - 执行 `npm run build` 可完成打包
+- 风险说明：
+  - 当前仅为壳页面，未接入业务状态管理与鉴权
+- 下一个任务：
+  - 增加前端健康检查 API 调用并完成最小前后端联通验证

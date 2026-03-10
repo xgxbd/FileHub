@@ -111,3 +111,29 @@ body {
   font-size: 0.9rem;
   color: #3e4c63;
 }
+
+.file-filter-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.file-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 960px) {
+  .file-filter-row {
+    grid-template-columns: 1fr;
+  }
+}

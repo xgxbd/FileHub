@@ -359,3 +359,29 @@
   - 当前默认回落 SQLite，生产环境必须显式配置 MySQL `DATABASE_URL`
 - 下一个任务：
   - 提交C：实现安全工具层与 refresh token 会话存储抽象
+
+---
+
+## 2026-03-10 17:43:42 CST
+
+- 任务：第二轮开发-提交C：认证安全工具层与 refresh 会话抽象
+- 时间：2026-03-10 17:43:42 CST
+- git 分支及 Commit ID：`feature/round2-auth-mvp`；提交前基线 `9675308`
+- 本次修改：
+  - 新增密码/JWT 安全工具：`backend/app/services/security.py`
+  - 新增 refresh token 会话存储抽象：`backend/app/services/refresh_session.py`
+  - 新增服务导出入口：`backend/app/services/__init__.py`
+  - 依赖锁定 `bcrypt==4.0.1` 修复 `passlib` 兼容问题
+- 已完成事项：
+  - 已具备 access/refresh token 生成与解析能力
+  - 已具备 refresh token 会话保存、校验、撤销能力（Redis 不可用时内存回落）
+  - 已完成兼容性 bug 根因分析与修复
+- 未完成事项：
+  - 认证 API（注册/登录/刷新/me）
+  - 接口层测试与文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python - <<'PY' ... PY`（token 生成/解析与会话校验脚本）
+- 风险说明：
+  - Redis 回落内存仅用于开发/测试；生产环境必须保证 Redis 可用
+- 下一个任务：
+  - 提交D：实现认证接口与鉴权依赖并挂载路由

@@ -1971,3 +1971,31 @@
   - 当前回滚流程依赖手工执行，后续可补充自动化脚本
 - 下一个任务：
   - 提交E：更新 README 与第十二轮文档收口
+
+---
+
+## 2026-03-10 21:53:37 CST
+
+- 任务：第十二轮开发-提交E：质量基线与发布准备文档收口
+- 时间：2026-03-10 21:53:37 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新 `backend/README.md`：补充 smoke/perf 脚本使用说明
+  - 更新根文档 `README.md`：同步质量基线与发布文档能力
+  - 收口前复跑 smoke 脚本、perf 脚本与前端构建
+- 已完成事项：
+  - 第十二轮“质量基线与发布准备MVP（设计+实现）”完成
+  - Smoke 验证通过：`SMOKE_PASS: register/login/upload/download/delete/restore`
+  - Perf 基线输出：`files_list_avg=2.34ms`、`files_download_avg=12050.58ms`、`upload_complete_avg=6055.77ms`
+  - 前端构建通过：`npm run build`
+- 未完成事项：
+  - 第十二轮规范收尾
+  - 后续增强：真实并发压测与完整浏览器 E2E
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python scripts/smoke_core_flow.py`
+  - `cd backend && source .venv/bin/activate && python scripts/perf_baseline.py`
+  - `cd frontend && npm run build`
+- 风险说明：
+  - 本地未连 MinIO 时会触发重试回退，下载/上传耗时偏高
+- 下一个任务：
+  - 执行第十二轮规范收尾检查并归档结果

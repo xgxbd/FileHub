@@ -1,0 +1,92 @@
+:root {
+  color-scheme: light;
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f5f7fb;
+  color: #1d2735;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.layout-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid #e7ebf3;
+  background: #ffffff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  font-size: 1.2rem;
+  color: #3b82f6;
+}
+
+.brand-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.phase-tag {
+  font-size: 0.85rem;
+  color: #5c6b85;
+}
+
+.layout-main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.p-card {
+  width: min(720px, 100%);
+}
+
+.intro-text {
+  margin-top: 0;
+  margin-bottom: 16px;
+  line-height: 1.7;
+  color: #3e4c63;
+}
+
+.health-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.health-message {
+  color: #2f3e56;
+  font-size: 0.92rem;
+}
+
+.check-time {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: #60708b;
+}

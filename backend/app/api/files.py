@@ -10,6 +10,7 @@ from app.models.user import User
 from app.schemas.file import FileListResponse
 from app.services.file_service import list_files
 from app.services.object_storage import object_storage_service
+from app.services.operation_log_service import record_operation
 
 router = APIRouter(prefix="/files", tags=["files"])
 
@@ -57,6 +58,15 @@ def soft_delete_file(
     file_record.status = "deleted"
     db.add(file_record)
     db.commit()
+
+    record_operation(
+        db=db,
+        user=current_user,
+        action="soft_delete",
+        target_type="file",
+        target_id=str(file_record.id),
+        detail={"file_name": file_record.file_name},
+    )
 
     return {"file_id": file_record.id, "status": file_record.status}
 
@@ -114,6 +124,18 @@ def download_file(
     }
     if status_code == status.HTTP_206_PARTIAL_CONTENT:
         headers["Content-Range"] = f"bytes {start}-{end}/{total_size}"
+
+    record_operation(
+        db=db,
+        user=current_user,
+        action="download",
+        target_type="file",
+        target_id=str(file_record.id),
+        detail={
+            "file_name": file_record.file_name,
+            "range": range_header or "bytes=0-",
+        },
+    )
 
     return Response(content=data, media_type=file_record.mime_type, status_code=status_code, headers=headers)
 

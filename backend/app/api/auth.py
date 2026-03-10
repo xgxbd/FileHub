@@ -5,6 +5,7 @@ from app.api.deps import get_current_user
 from app.db import get_db
 from app.models.user import User
 from app.schemas.auth import AuthTokens, LoginRequest, RefreshRequest, RegisterRequest, UserProfile
+from app.services.operation_log_service import record_operation
 from app.services.auth_service import authenticate_user, issue_tokens, refresh_user_tokens, register_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -24,7 +25,16 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> UserPro
 @router.post("/login", response_model=AuthTokens)
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> AuthTokens:
     user = authenticate_user(db=db, account=payload.account, password=payload.password)
-    return AuthTokens(**issue_tokens(user=user))
+    tokens = AuthTokens(**issue_tokens(user=user))
+    record_operation(
+        db=db,
+        user=user,
+        action="login",
+        target_type="user",
+        target_id=str(user.id),
+        detail={"account": payload.account},
+    )
+    return tokens
 
 
 @router.post("/refresh", response_model=AuthTokens)

@@ -13,13 +13,13 @@ if str(ROOT_DIR) not in sys.path:
 os.environ["DATABASE_URL"] = "sqlite:///./test_suite.db"
 
 from app.db import Base, engine
-from app.models import FileObject, User
+from app.models import FileObject, OperationLog, User
 from app.core.config import settings
 
 
 @pytest.fixture(autouse=True)
 def reset_test_database():
-    _ = (User, FileObject)
+    _ = (User, FileObject, OperationLog)
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     tmp_upload_dir = Path(settings.upload_tmp_dir)

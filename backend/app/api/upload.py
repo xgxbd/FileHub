@@ -11,6 +11,7 @@ from app.schemas.upload import (
     UploadSessionCreateRequest,
     UploadSessionResponse,
 )
+from app.services.operation_log_service import record_operation
 from app.services.object_storage import object_storage_service
 from app.services.upload_session_service import upload_session_store
 
@@ -127,6 +128,18 @@ def complete_upload_session(
     db.refresh(file_record)
 
     upload_session_store.complete_session(upload_id=upload_id, file_id=file_record.id)
+
+    record_operation(
+        db=db,
+        user=current_user,
+        action="upload_complete",
+        target_type="file",
+        target_id=str(file_record.id),
+        detail={
+            "file_name": file_record.file_name,
+            "size_bytes": file_record.size_bytes,
+        },
+    )
 
     return UploadCompleteResponse(
         upload_id=upload_id,

@@ -29,6 +29,14 @@ function logout() {
           <span class="phase-tag">当前用户：{{ userLabel }}</span>
           <Button size="small" severity="secondary" text label="文件中心" @click="router.push('/files')" />
           <Button size="small" severity="secondary" text label="回收站" @click="router.push('/recycle')" />
+          <Button
+            v-if="authStore.user?.role === 'admin'"
+            size="small"
+            severity="secondary"
+            text
+            label="操作日志"
+            @click="router.push('/admin/logs')"
+          />
           <Button size="small" label="退出" icon="pi pi-sign-out" @click="logout" />
         </template>
         <template v-else>

@@ -830,3 +830,31 @@
   - Redis 不可用时回落内存，仅适合开发测试
 - 下一个任务：
   - 提交C：实现分片上传与合并完成（写入 MinIO 与 file_objects）
+
+---
+
+## 2026-03-10 19:54:00 CST
+
+- 任务：第五轮开发-提交C：分片上传与完成合并链路
+- 时间：2026-03-10 19:54:00 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - `PUT /upload/sessions/{upload_id}/chunks/{chunk_index}`：分片接收并落地临时文件
+  - `POST /upload/sessions/{upload_id}/complete`：分片合并、对象存储写入、文件元数据入库
+  - 新增对象存储服务 `backend/app/services/object_storage.py`（MinIO + 本地回落）
+  - 扩展上传会话状态字段（`object_key`、`completed`）
+  - 扩展 `file_objects` 增加 `file_hash`
+- 已完成事项：
+  - 后端分片上传主链路可用（创建会话 -> 上传分片 -> 完成合并）
+  - 完成后可在 `/files` 查询到新增文件元数据
+  - 已完成 MinIO 不可用场景的回落修复
+- 未完成事项：
+  - 上传链路自动化测试补齐
+  - 前端上传面板接入
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && DATABASE_URL=sqlite:///./upload_complete_check.db python - <<'PY' ... PY`
+  - 验证结果：`/complete` 返回 `200`，`/files` 总数为 `1`
+- 风险说明：
+  - MinIO 回落本地仅用于开发测试，生产必须启用 MinIO
+- 下一个任务：
+  - 提交D：补齐分片上传自动化测试（会话/分片/完成）

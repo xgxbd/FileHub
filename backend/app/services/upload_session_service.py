@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -46,9 +47,11 @@ class UploadSessionStore:
             "file_hash": file_hash,
             "status": "uploading",
             "uploaded_chunks": [],
+            "object_key": f"{owner_id}/{upload_id}/{file_name}",
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
         self.save_session(upload_id=upload_id, session=session)
+        self._session_dir(upload_id).mkdir(parents=True, exist_ok=True)
         return session
 
     def save_session(self, *, upload_id: str, session: dict) -> None:
@@ -79,6 +82,29 @@ class UploadSessionStore:
         session["uploaded_chunks"] = sorted(chunks)
         self.save_session(upload_id=upload_id, session=session)
         return session
+
+    def complete_session(self, *, upload_id: str, file_id: int) -> dict | None:
+        session = self.get_session(upload_id=upload_id)
+        if not session:
+            return None
+        session["status"] = "completed"
+        session["file_id"] = file_id
+        self.save_session(upload_id=upload_id, session=session)
+        return session
+
+    @staticmethod
+    def _session_dir(upload_id: str) -> Path:
+        return Path(settings.upload_tmp_dir) / upload_id
+
+    def chunk_path(self, *, upload_id: str, chunk_index: int) -> Path:
+        base = self._session_dir(upload_id)
+        base.mkdir(parents=True, exist_ok=True)
+        return base / f"{chunk_index}.part"
+
+    def merged_path(self, *, upload_id: str) -> Path:
+        base = self._session_dir(upload_id)
+        base.mkdir(parents=True, exist_ok=True)
+        return base / "merged.bin"
 
 
 upload_session_store = UploadSessionStore()

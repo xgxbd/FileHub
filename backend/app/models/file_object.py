@@ -13,5 +13,6 @@ class FileObject(TimestampMixin, Base):
     object_key: Mapped[str] = mapped_column(String(512), nullable=False, unique=True)
     size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     mime_type: Mapped[str] = mapped_column(String(128), nullable=False, default="application/octet-stream")
+    file_hash: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="active")
     is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

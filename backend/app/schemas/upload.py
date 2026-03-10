@@ -18,3 +18,17 @@ class UploadSessionResponse(BaseModel):
     chunk_size: int
     total_chunks: int
     uploaded_chunks: list[int]
+
+
+class UploadChunkResponse(BaseModel):
+    upload_id: str
+    chunk_index: int
+    uploaded_count: int
+
+
+class UploadCompleteResponse(BaseModel):
+    upload_id: str
+    file_id: int
+    file_name: str
+    object_key: str
+    size_bytes: int

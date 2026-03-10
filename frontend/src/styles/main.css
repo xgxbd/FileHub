@@ -54,6 +54,12 @@ body {
   color: #5c6b85;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .layout-main {
   flex: 1;
   display: grid;
@@ -89,4 +95,19 @@ body {
   margin-bottom: 16px;
   font-size: 0.85rem;
   color: #60708b;
+}
+
+.auth-card {
+  width: min(460px, 100%);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-label {
+  font-size: 0.9rem;
+  color: #3e4c63;
 }

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
 import AdminLogsView from "../views/AdminLogsView.vue";
+import AdminFilesView from "../views/AdminFilesView.vue";
 import FileCenterView from "../views/FileCenterView.vue";
 import LoginView from "../views/LoginView.vue";
 import RecycleBinView from "../views/RecycleBinView.vue";
@@ -42,6 +43,12 @@ const router = createRouter({
       path: "/admin/logs",
       name: "admin-logs",
       component: AdminLogsView,
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: "/admin/files",
+      name: "admin-files",
+      component: AdminFilesView,
       meta: { requiresAuth: true, requiresAdmin: true }
     }
   ]

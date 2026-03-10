@@ -34,6 +34,14 @@ function logout() {
             size="small"
             severity="secondary"
             text
+            label="文件管理"
+            @click="router.push('/admin/files')"
+          />
+          <Button
+            v-if="authStore.user?.role === 'admin'"
+            size="small"
+            severity="secondary"
+            text
             label="操作日志"
             @click="router.push('/admin/logs')"
           />

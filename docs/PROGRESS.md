@@ -647,3 +647,31 @@
   - 当前未引入 Alembic 迁移，模型变更依赖 `create_all`，后续需统一迁移方案
 - 下一个任务：
   - 提交B：实现后端文件元数据模型与 `GET /files` 列表接口
+
+---
+
+## 2026-03-10 18:18:19 CST
+
+- 任务：第四轮开发-提交B：后端文件元数据模型与列表接口
+- 时间：2026-03-10 18:18:19 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增文件模型 `backend/app/models/file_object.py`
+  - 新增文件列表 schema `backend/app/schemas/file.py`
+  - 新增文件列表服务 `backend/app/services/file_service.py`
+  - 新增接口 `GET /files`：`backend/app/api/files.py`
+  - 接入主路由与建表初始化（`api/router.py`、`db/init_db.py`）
+- 已完成事项：
+  - 已登录用户可调用 `/files` 获取文件元数据分页列表
+  - 支持关键字、大小区间、分页参数
+  - 普通用户仅查询自己的文件；管理员可查询全部
+- 未完成事项：
+  - 后端自动化测试补齐（鉴权/筛选/分页）
+  - 前端文件列表页接入真实接口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && DATABASE_URL=sqlite:///./files_api_check.db python - <<'PY' ... PY`
+  - 验证结果：`GET /files` 返回 `200` 且 `total=0`
+- 风险说明：
+  - 当前仍基于 `create_all` 自动建表，后续需迁移至 Alembic
+- 下一个任务：
+  - 提交C：新增文件列表接口自动化测试（鉴权、筛选、分页）

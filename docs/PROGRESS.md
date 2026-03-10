@@ -311,3 +311,162 @@
   - `.venv` 使用 Python 3.12，若本机仅有 3.14 会遇到依赖兼容问题
 - 下一个任务：
   - 从 `develop` 拉取第二轮 `feature/*` 分支，先落地认证模块最小闭环（注册/登录/刷新）
+
+---
+
+## 2026-03-10 17:39:39 CST
+
+- 任务：第二轮开发-提交A：认证模块MVP实施设计与最小提交拆分
+- 时间：2026-03-10 17:39:39 CST
+- git 分支及 Commit ID：`feature/round2-auth-mvp`；提交前基线 `b469e3f`
+- 本次修改：
+  - 新增 `docs/ROUND2_AUTH_MVP_DESIGN.md`
+  - 明确认证模块边界、数据结构、接口、Redis会话策略与最小提交计划（A-E）
+- 已完成事项：
+  - 已完成“先设计后实现”要求中的设计阶段
+  - 已给出每个最小提交的可验证标准
+- 未完成事项：
+  - 提交B-E的代码实现与验证
+- 当前可测试内容：
+  - 设计文档可直接评审与确认
+- 风险说明：
+  - 若运行环境缺少 MySQL/Redis，将采用 SQLite + mock 验证实现正确性
+- 下一个任务：
+  - 提交B：落地数据库配置骨架与 users 模型
+
+---
+
+## 2026-03-10 17:41:12 CST
+
+- 任务：第二轮开发-提交B：数据库与用户模型骨架
+- 时间：2026-03-10 17:41:12 CST
+- git 分支及 Commit ID：`feature/round2-auth-mvp`；提交前基线 `a0eb7c0`
+- 本次修改：
+  - 扩展后端配置：新增 `database_url`、Redis/JWT 相关配置项
+  - 新增数据库基础模块：`app/db/base.py`、`app/db/session.py`
+  - 新增用户模型：`app/models/user.py`
+  - 新增模型与DB导出入口：`app/models/__init__.py`、`app/db/__init__.py`
+  - 更新 `backend/.env.example`，补齐 `DATABASE_URL` 与 `JWT_ALGORITHM`
+- 已完成事项：
+  - 认证模块的持久化骨架已建立
+  - `users` 模型字段满足 MVP 要求
+- 未完成事项：
+  - 安全工具层（密码/JWT/refresh会话）
+  - 认证接口（注册/登录/刷新/me）
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python -c "from app.models.user import User; from app.db.session import engine; print(User.__tablename__); print(engine.url)"`
+- 风险说明：
+  - 当前默认回落 SQLite，生产环境必须显式配置 MySQL `DATABASE_URL`
+- 下一个任务：
+  - 提交C：实现安全工具层与 refresh token 会话存储抽象
+
+---
+
+## 2026-03-10 17:43:42 CST
+
+- 任务：第二轮开发-提交C：认证安全工具层与 refresh 会话抽象
+- 时间：2026-03-10 17:43:42 CST
+- git 分支及 Commit ID：`feature/round2-auth-mvp`；提交前基线 `9675308`
+- 本次修改：
+  - 新增密码/JWT 安全工具：`backend/app/services/security.py`
+  - 新增 refresh token 会话存储抽象：`backend/app/services/refresh_session.py`
+  - 新增服务导出入口：`backend/app/services/__init__.py`
+  - 依赖锁定 `bcrypt==4.0.1` 修复 `passlib` 兼容问题
+- 已完成事项：
+  - 已具备 access/refresh token 生成与解析能力
+  - 已具备 refresh token 会话保存、校验、撤销能力（Redis 不可用时内存回落）
+  - 已完成兼容性 bug 根因分析与修复
+- 未完成事项：
+  - 认证 API（注册/登录/刷新/me）
+  - 接口层测试与文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python - <<'PY' ... PY`（token 生成/解析与会话校验脚本）
+- 风险说明：
+  - Redis 回落内存仅用于开发/测试；生产环境必须保证 Redis 可用
+- 下一个任务：
+  - 提交D：实现认证接口与鉴权依赖并挂载路由
+
+---
+
+## 2026-03-10 17:47:14 CST
+
+- 任务：第二轮开发-提交D：实现认证接口与鉴权依赖
+- 时间：2026-03-10 17:47:14 CST
+- git 分支及 Commit ID：`feature/round2-auth-mvp`；提交前基线 `e5f480f`
+- 本次修改：
+  - 新增认证请求/响应模型：`backend/app/schemas/auth.py`
+  - 新增认证服务：`backend/app/services/auth_service.py`
+  - 新增鉴权依赖：`backend/app/api/deps.py`
+  - 新增认证接口：`backend/app/api/auth.py`（register/login/refresh/me）
+  - 路由挂载与启动初始化：`backend/app/api/router.py`、`backend/app/main.py`、`backend/app/db/init_db.py`
+  - 调整 `users` 主键类型为 `Integer` 以兼容 SQLite 验证
+  - 补充测试依赖 `httpx==0.28.1`
+- 已完成事项：
+  - 认证模块最小闭环接口已可用
+  - Access Token 鉴权已可访问 `/auth/me`
+  - Refresh Token 轮换链路可用
+- 未完成事项：
+  - 持久化测试文件（pytest）
+  - 后端 README 与接口验收文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && DATABASE_URL=sqlite:///./auth_flow_test.db python - <<'PY' ... PY`
+  - 验证结果：`register 201 / login 200 / me 200 / refresh 200`
+- 风险说明：
+  - 当前自动建表基于 `create_all`，后续需要迁移到 Alembic 正式迁移流程
+- 下一个任务：
+  - 提交E：补充自动化测试与后端文档收口
+
+---
+
+## 2026-03-10 17:49:01 CST
+
+- 任务：第二轮开发-提交E：认证测试补齐与文档收口
+- 时间：2026-03-10 17:49:01 CST
+- git 分支及 Commit ID：`feature/round2-auth-mvp`；提交前基线 `d524b57`
+- 本次修改：
+  - 新增认证接口测试：`backend/tests/test_auth_api.py`
+  - 新增测试路径配置：`backend/tests/conftest.py`
+  - 更新后端说明文档：`backend/README.md`（新增认证接口与测试命令）
+  - 依赖补充：`pytest==8.3.5`
+- 已完成事项：
+  - 认证最小闭环具备自动化验证
+  - `pytest -q` 测试通过（1 passed）
+  - 文档已补齐认证接口与运行方式
+- 未完成事项：
+  - 前端登录注册页面与会话管理接入
+  - Alembic 正式迁移脚手架
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - 启动后端后可手动验证 `/auth/register`、`/auth/login`、`/auth/refresh`、`/auth/me`
+- 风险说明：
+  - 目前 `startup` 使用 `on_event`，FastAPI 已给出弃用提示，后续需切到 lifespan
+- 下一个任务：
+  - 第三轮：前端登录/注册页面与 Token 会话管理接入
+
+---
+
+## 2026-03-10 17:55:55 CST
+
+- 任务：第二轮开发规范收尾检查与归档
+- 时间：2026-03-10 17:55:55 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 对第二轮最小任务（A-E）执行完整性核查
+  - 对提交粒度与提交信息规范执行合规检查
+  - 复跑后端认证测试并归档收尾结论
+- 已完成事项：
+  - 第二轮最小任务 A-E 均已完成并独立提交
+  - 每次最小修改均已提交且已推送远端
+  - 提交信息均为具体中文自然语言
+  - 认证链路自动化测试通过（1 passed）
+- 未完成事项：
+  - 前端登录/注册与会话接入
+  - Alembic 迁移脚手架与正式迁移链路
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - 启动后端后手工验证：`/auth/register`、`/auth/login`、`/auth/refresh`、`/auth/me`
+- 风险说明：
+  - `@app.on_event("startup")` 存在弃用警告，后续需迁移至 lifespan
+  - 当前 refresh 会话在 Redis 不可用时回落内存，仅适用于开发/测试
+- 下一个任务：
+  - 第三轮开发：前端登录/注册页面与 Token 会话管理接入，并与认证接口联调

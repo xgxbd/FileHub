@@ -18,8 +18,10 @@ router = APIRouter(prefix="/recycle", tags=["recycle"])
 @router.get("/files", response_model=FileListResponse)
 def get_recycle_files(
     keyword: str | None = Query(default=None),
-    min_size: int | None = Query(default=None, ge=0),
-    max_size: int | None = Query(default=None, ge=0),
+    sort_by: str = Query(
+        default="created_at_desc",
+        description="排序方式：created_at_desc/created_at_asc/file_name_asc/file_name_desc/size_desc/size_asc",
+    ),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -30,8 +32,9 @@ def get_recycle_files(
         current_user=current_user,
         deleted_only=True,
         keyword=keyword,
-        min_size=min_size,
-        max_size=max_size,
+        min_size=None,
+        max_size=None,
+        sort_by=sort_by,
         page=page,
         page_size=page_size,
     )

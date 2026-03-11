@@ -5,7 +5,6 @@ import Button from "primevue/button";
 import Card from "primevue/card";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
-import InputNumber from "primevue/inputnumber";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import Tag from "primevue/tag";
@@ -32,12 +31,20 @@ const page = ref(1);
 const pageSize = ref(10);
 
 const keyword = ref("");
-const minSize = ref(null);
-const maxSize = ref(null);
+const sortBy = ref("created_at_desc");
 const restoringFileId = ref(null);
 const purgingFileId = ref(null);
 const restoringFolderPath = ref("");
 const purgingFolderPath = ref("");
+
+const sortOptions = [
+  { label: "最新删除", value: "created_at_desc" },
+  { label: "最早删除", value: "created_at_asc" },
+  { label: "文件名 A-Z", value: "file_name_asc" },
+  { label: "文件名 Z-A", value: "file_name_desc" },
+  { label: "文件大小从大到小", value: "size_desc" },
+  { label: "文件大小从小到大", value: "size_asc" }
+];
 
 function normalizeFilePath(raw) {
   return String(raw || "")
@@ -81,8 +88,7 @@ async function loadRecycleFiles() {
     const payload = await fetchRecycleFileList({
       accessToken: authStore.accessToken,
       keyword: keyword.value.trim(),
-      minSize: minSize.value,
-      maxSize: maxSize.value,
+      sortBy: sortBy.value,
       page: page.value,
       pageSize: pageSize.value
     });
@@ -105,8 +111,7 @@ async function search() {
 
 async function resetFilters() {
   keyword.value = "";
-  minSize.value = null;
-  maxSize.value = null;
+  sortBy.value = "created_at_desc";
   page.value = 1;
   await loadRecycleFiles();
 }
@@ -219,12 +224,12 @@ onMounted(() => {
           <InputText v-model="keyword" placeholder="例如：report、photo" />
         </div>
         <div class="file-filter-item">
-          <label class="auth-label">最小大小（字节）</label>
-          <InputNumber v-model="minSize" :useGrouping="false" />
-        </div>
-        <div class="file-filter-item">
-          <label class="auth-label">最大大小（字节）</label>
-          <InputNumber v-model="maxSize" :useGrouping="false" />
+          <label class="auth-label">排序方式</label>
+          <select v-model="sortBy" class="sort-select">
+            <option v-for="option in sortOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
         </div>
       </div>
 

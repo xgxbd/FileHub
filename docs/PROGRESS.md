@@ -3887,3 +3887,37 @@
   - 孤儿文件清理属于数据清理操作，仅适用于当前本地开发库；执行后会删除无法预览、无法下载且对象内容已丢失的历史元数据
 - 下一个任务：
   - 提交B：执行当前开发库孤儿文件清理并改造回收站为关键字加排序
+
+---
+
+## 2026-03-11 15:26:28 CST
+
+- 任务：第三十轮开发-提交B：清理当前开发库孤儿文件并改造回收站排序
+- 时间：2026-03-11 15:26:28 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `4e9297e`
+- 本次修改：
+  - 执行 `cd backend && source .venv/bin/activate && python scripts/cleanup_orphan_files.py`
+  - 当前本地开发库活跃文件由历史脏数据收敛到仅剩 1 条真实存在记录
+  - 更新 `backend/app/api/recycle.py`
+  - 回收站文件接口新增 `sort_by` 参数并透传排序
+  - 更新 `frontend/src/api/files.js`
+  - 回收站文件列表请求改为传递排序方式
+  - 更新 `frontend/src/views/RecycleBinView.vue`
+  - 移除最小/最大字节筛选，改为关键字 + 排序方式
+  - 更新 `backend/tests/test_recycle_api.py`
+  - 补充回收站排序接口回归测试
+- 已完成事项：
+  - 当前开发库中旧 txt 无法预览的问题已通过清理孤儿元数据处理
+  - 回收站页面已改为与文件列表一致的排序模型
+  - 回收站接口排序回归测试通过
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd backend && sqlite3 filehub.db "select count(*) from file_objects where is_deleted=0;"`
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_recycle_api.py`
+  - `cd frontend && npm run build`
+- 风险说明：
+  - 本次孤儿文件清理会删除对象内容已经丢失的历史元数据；若其中有需要保留的演示记录，需要重新上传生成真实对象
+- 下一个任务：
+  - 继续收敛文件树、预览与回收站的交互细节，并保持现有 UI 方案 D 一致性

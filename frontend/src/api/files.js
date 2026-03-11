@@ -194,8 +194,7 @@ export async function softDeleteFile({
 export async function fetchRecycleFileList({
   accessToken,
   keyword,
-  minSize,
-  maxSize,
+  sortBy,
   page = 1,
   pageSize = 20
 }) {
@@ -204,8 +203,7 @@ export async function fetchRecycleFileList({
   params.set("page_size", String(pageSize));
 
   if (keyword) params.set("keyword", keyword);
-  if (minSize !== null && minSize !== undefined && minSize !== "") params.set("min_size", String(minSize));
-  if (maxSize !== null && maxSize !== undefined && maxSize !== "") params.set("max_size", String(maxSize));
+  if (sortBy) params.set("sort_by", sortBy);
 
   const response = await fetch(`${API_PREFIX}/recycle/files?${params.toString()}`, {
     method: "GET",

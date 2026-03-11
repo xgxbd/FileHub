@@ -107,3 +107,14 @@ pytest -q
   source .venv/bin/activate
   python scripts/perf_baseline.py
   ```
+
+## 告警治理（第十四轮）
+
+- 应用生命周期已从 `on_event("startup")` 迁移至 `lifespan`
+- Range 下载接口已使用 `HTTP_416_RANGE_NOT_SATISFIABLE` 常量
+
+## 认证哈希迁移（第十五轮）
+
+- 密码哈希与校验已从 `passlib` 迁移为 `bcrypt` 原生实现
+- `requirements.txt` 已移除 `passlib[bcrypt]`
+- 兼容性保障：既有 bcrypt 哈希账号可继续登录（见 `test_auth_api.py`）

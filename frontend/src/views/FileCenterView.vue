@@ -1,22 +1,30 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 
 import Button from "primevue/button";
 import Card from "primevue/card";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
-import Dialog from "primevue/dialog";
-import InputNumber from "primevue/inputnumber";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
-import ProgressBar from "primevue/progressbar";
 import Tag from "primevue/tag";
+import Tree from "primevue/tree";
 
-import { downloadFile, fetchFileList, previewFile, softDeleteFile } from "../api/files";
-import { completeUploadSession, createUploadSession, uploadChunk } from "../api/upload";
+import {
+  createFolder,
+  deleteFolder,
+  downloadFile,
+  fetchFileList,
+  fetchFolderTree,
+  renameFolder,
+  softDeleteFile
+} from "../api/files";
 import { useAuthStore } from "../stores/auth";
 
+const router = useRouter();
 const authStore = useAuthStore();
+const ROOT_DIRECTORY_MARKER = "__root__";
 
 const loading = ref(false);
 const error = ref("");
@@ -26,25 +34,111 @@ const page = ref(1);
 const pageSize = ref(10);
 
 const keyword = ref("");
-const minSize = ref(null);
-const maxSize = ref(null);
+const selectedDirectory = ref(ROOT_DIRECTORY_MARKER);
+const sortBy = ref("created_at_desc");
 
-const selectedFile = ref(null);
-const uploadLoading = ref(false);
-const uploadProgress = ref(0);
-const uploadMessage = ref("");
-const uploadError = ref("");
 const downloadError = ref("");
 const deleteError = ref("");
+const treeError = ref("");
 const downloadingFileId = ref(null);
 const deletingFileId = ref(null);
-const previewVisible = ref(false);
-const previewLoading = ref(false);
-const previewError = ref("");
-const previewType = ref("");
-const previewText = ref("");
-const previewUrl = ref("");
-const previewName = ref("");
+const treeLoading = ref(false);
+const creatingFolder = ref(false);
+const deletingFolder = ref(false);
+const renamingFolder = ref(false);
+const selectedTreeKeys = ref({ [`dir:${ROOT_DIRECTORY_MARKER}`]: true });
+const expandedTreeKeys = ref({ [`dir:${ROOT_DIRECTORY_MARKER}`]: true });
+const treeNodes = ref([
+  {
+    key: `dir:${ROOT_DIRECTORY_MARKER}`,
+    label: "根目录 /",
+    data: { directory: ROOT_DIRECTORY_MARKER },
+    children: []
+  }
+]);
+
+const sortOptions = [
+  { label: "最新上传", value: "created_at_desc" },
+  { label: "最早上传", value: "created_at_asc" },
+  { label: "文件名 A-Z", value: "file_name_asc" },
+  { label: "文件名 Z-A", value: "file_name_desc" },
+  { label: "文件大小从大到小", value: "size_desc" },
+  { label: "文件大小从小到大", value: "size_asc" }
+];
+
+const currentDirectoryLabel = computed(() => {
+  if (selectedDirectory.value === ROOT_DIRECTORY_MARKER) {
+    return "/";
+  }
+  return `/${selectedDirectory.value}/`;
+});
+
+function normalizeFolder(raw) {
+  return String(raw || "")
+    .replace(/\\/g, "/")
+    .split("/")
+    .map((part) => part.trim())
+    .filter((part) => part && part !== "." && part !== "..")
+    .join("/");
+}
+
+function sortTree(node) {
+  if (!Array.isArray(node.children)) return;
+  node.children.sort((a, b) => a.label.localeCompare(b.label, "zh-CN"));
+  node.children.forEach((child) => sortTree(child));
+}
+
+function buildTree(paths) {
+  const root = {
+    key: `dir:${ROOT_DIRECTORY_MARKER}`,
+    label: "根目录 /",
+    data: { directory: ROOT_DIRECTORY_MARKER },
+    children: []
+  };
+  const nodeMap = new Map();
+  nodeMap.set(ROOT_DIRECTORY_MARKER, root);
+
+  paths.forEach((folderPath) => {
+    const folder = normalizeFolder(folderPath);
+    if (!folder) return;
+
+    const segments = folder.split("/");
+    let currentPath = "";
+    segments.forEach((segment, index) => {
+      currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+      if (nodeMap.has(currentPath)) return;
+
+      const parentPath = index === 0 ? ROOT_DIRECTORY_MARKER : segments.slice(0, index).join("/");
+      const parentNode = nodeMap.get(parentPath);
+      if (!parentNode) return;
+
+      const node = {
+        key: `dir:${currentPath}`,
+        label: segment,
+        data: { directory: currentPath },
+        children: []
+      };
+      parentNode.children.push(node);
+      nodeMap.set(currentPath, node);
+    });
+  });
+
+  sortTree(root);
+  return [root];
+}
+
+function buildExpandedKeysForPath(path) {
+  const normalized = normalizeFolder(path);
+  const expanded = { [`dir:${ROOT_DIRECTORY_MARKER}`]: true };
+  if (!normalized) return expanded;
+
+  let current = "";
+  for (const segment of normalized.split("/")) {
+    current = current ? `${current}/${segment}` : segment;
+    expanded[`dir:${current}`] = true;
+  }
+  return expanded;
+}
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -57,17 +151,36 @@ function formatTime(iso) {
   return new Date(iso).toLocaleString("zh-CN");
 }
 
+function fileBaseName(fileName) {
+  const normalized = normalizeFolder(fileName);
+  const parts = normalized.split("/");
+  return parts[parts.length - 1] || normalized;
+}
+
+function fileDirectoryLabel(fileName) {
+  const normalized = normalizeFolder(fileName);
+  const parts = normalized.split("/");
+  if (parts.length <= 1) return "/";
+  return `/${parts.slice(0, -1).join("/")}/`;
+}
+
 async function loadFiles() {
+  return loadFilesWithMode({ silent: false });
+}
+
+async function loadFilesWithMode({ silent = false } = {}) {
   if (!authStore.accessToken) return;
 
-  loading.value = true;
+  if (!silent) {
+    loading.value = true;
+  }
   error.value = "";
   try {
     const payload = await fetchFileList({
       accessToken: authStore.accessToken,
       keyword: keyword.value.trim(),
-      minSize: minSize.value,
-      maxSize: maxSize.value,
+      directory: selectedDirectory.value,
+      sortBy: sortBy.value,
       page: page.value,
       pageSize: pageSize.value
     });
@@ -76,7 +189,31 @@ async function loadFiles() {
   } catch (err) {
     error.value = err instanceof Error ? err.message : "加载文件列表失败";
   } finally {
-    loading.value = false;
+    if (!silent) {
+      loading.value = false;
+    }
+  }
+}
+
+async function loadDirectoryTree() {
+  if (!authStore.accessToken) return;
+
+  treeLoading.value = true;
+  treeError.value = "";
+
+  try {
+    const folders = await fetchFolderTree({
+      accessToken: authStore.accessToken
+    });
+    treeNodes.value = buildTree(folders.map((item) => item.path));
+    expandedTreeKeys.value = {
+      ...buildExpandedKeysForPath(selectedDirectory.value === ROOT_DIRECTORY_MARKER ? "" : selectedDirectory.value),
+      ...expandedTreeKeys.value
+    };
+  } catch (err) {
+    treeError.value = err instanceof Error ? err.message : "加载文件树失败";
+  } finally {
+    treeLoading.value = false;
   }
 }
 
@@ -87,8 +224,34 @@ async function search() {
 
 async function resetFilters() {
   keyword.value = "";
-  minSize.value = null;
-  maxSize.value = null;
+  sortBy.value = "created_at_desc";
+  page.value = 1;
+  await loadFiles();
+}
+
+async function clearDirectoryFilter() {
+  treeError.value = "";
+  selectedDirectory.value = ROOT_DIRECTORY_MARKER;
+  selectedTreeKeys.value = { [`dir:${ROOT_DIRECTORY_MARKER}`]: true };
+  expandedTreeKeys.value = buildExpandedKeysForPath("");
+  page.value = 1;
+  await loadFiles();
+}
+
+async function onDirectorySelect(nodeOrEvent) {
+  const selectedNode = nodeOrEvent?.data ? nodeOrEvent : nodeOrEvent?.node;
+  const directoryFromNode = selectedNode?.data?.directory;
+  const directoryFromKey = String(selectedNode?.key || "").replace(/^dir:/, "");
+  const nextDirectory = directoryFromNode || directoryFromKey || ROOT_DIRECTORY_MARKER;
+  const nextKey = selectedNode?.key || `dir:${ROOT_DIRECTORY_MARKER}`;
+
+  treeError.value = "";
+  selectedDirectory.value = nextDirectory;
+  selectedTreeKeys.value = { [nextKey]: true };
+  expandedTreeKeys.value = {
+    ...expandedTreeKeys.value,
+    ...buildExpandedKeysForPath(nextDirectory === ROOT_DIRECTORY_MARKER ? "" : nextDirectory)
+  };
   page.value = 1;
   await loadFiles();
 }
@@ -97,72 +260,6 @@ async function onPageChange(event) {
   page.value = event.page + 1;
   pageSize.value = event.rows;
   await loadFiles();
-}
-
-function onFileChange(event) {
-  const file = event.target.files?.[0] || null;
-  selectedFile.value = file;
-  uploadProgress.value = 0;
-  uploadMessage.value = "";
-  uploadError.value = "";
-}
-
-async function startUpload() {
-  if (!selectedFile.value) {
-    uploadError.value = "请先选择文件";
-    return;
-  }
-  if (!authStore.accessToken) {
-    uploadError.value = "当前未登录";
-    return;
-  }
-
-  uploadLoading.value = true;
-  uploadError.value = "";
-  uploadMessage.value = "";
-  uploadProgress.value = 0;
-
-  const chunkSize = 1024 * 1024;
-  const totalChunks = Math.ceil(selectedFile.value.size / chunkSize);
-
-  try {
-    const session = await createUploadSession({
-      accessToken: authStore.accessToken,
-      payload: {
-        file_name: selectedFile.value.name,
-        total_size: selectedFile.value.size,
-        chunk_size: chunkSize,
-        total_chunks: totalChunks,
-        mime_type: selectedFile.value.type || "application/octet-stream"
-      }
-    });
-
-    for (let index = 0; index < totalChunks; index += 1) {
-      const start = index * chunkSize;
-      const end = Math.min(start + chunkSize, selectedFile.value.size);
-      const blob = selectedFile.value.slice(start, end);
-
-      await uploadChunk({
-        accessToken: authStore.accessToken,
-        uploadId: session.upload_id,
-        chunkIndex: index,
-        chunkBlob: blob
-      });
-      uploadProgress.value = Math.floor(((index + 1) / totalChunks) * 100);
-    }
-
-    await completeUploadSession({
-      accessToken: authStore.accessToken,
-      uploadId: session.upload_id
-    });
-
-    uploadMessage.value = "上传完成";
-    await loadFiles();
-  } catch (err) {
-    uploadError.value = err instanceof Error ? err.message : "上传失败";
-  } finally {
-    uploadLoading.value = false;
-  }
 }
 
 async function triggerDownload(fileItem) {
@@ -179,7 +276,7 @@ async function triggerDownload(fileItem) {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = fileItem.file_name;
+    anchor.download = fileBaseName(fileItem.file_name);
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
@@ -204,7 +301,7 @@ async function triggerSoftDelete(fileItem) {
       accessToken: authStore.accessToken,
       fileId: fileItem.id
     });
-    await loadFiles();
+    await Promise.all([loadFilesWithMode({ silent: true }), loadDirectoryTree()]);
   } catch (err) {
     deleteError.value = err instanceof Error ? err.message : "删除失败";
   } finally {
@@ -212,163 +309,270 @@ async function triggerSoftDelete(fileItem) {
   }
 }
 
-function resetPreviewState() {
-  previewLoading.value = false;
-  previewError.value = "";
-  previewType.value = "";
-  previewText.value = "";
-  if (previewUrl.value) {
-    URL.revokeObjectURL(previewUrl.value);
-  }
-  previewUrl.value = "";
+function triggerPreview(fileItem) {
+  router.push({ path: `/preview/${fileItem.id}`, query: { name: fileBaseName(fileItem.file_name) } });
 }
 
-async function triggerPreview(fileItem) {
+function jumpUploadWithCurrentDirectory() {
+  const folder = selectedDirectory.value;
+  if (!folder || folder === ROOT_DIRECTORY_MARKER) {
+    router.push("/upload");
+    return;
+  }
+  router.push({ path: "/upload", query: { folder } });
+}
+
+async function promptCreateFolder() {
   if (!authStore.accessToken) return;
 
-  resetPreviewState();
-  previewVisible.value = true;
-  previewLoading.value = true;
-  previewName.value = fileItem.file_name;
+  const rawName = window.prompt(`在 ${currentDirectoryLabel.value} 下创建新文件夹`, "");
+  if (rawName === null) return;
 
+  const folderName = rawName.trim();
+  if (!folderName) {
+    treeError.value = "文件夹名称不能为空";
+    return;
+  }
+
+  creatingFolder.value = true;
+  treeError.value = "";
   try {
-    const { blob, contentType } = await previewFile({
+    const created = await createFolder({
       accessToken: authStore.accessToken,
-      fileId: fileItem.id
+      parentDirectory: selectedDirectory.value,
+      folderName
     });
-
-    if (contentType.startsWith("text/")) {
-      previewType.value = "text";
-      previewText.value = await blob.text();
-    } else if (contentType.startsWith("image/")) {
-      previewType.value = "image";
-      previewUrl.value = URL.createObjectURL(blob);
-    } else if (contentType.includes("pdf")) {
-      previewType.value = "pdf";
-      previewUrl.value = URL.createObjectURL(blob);
-    } else {
-      previewError.value = "当前类型不支持预览";
-    }
+    selectedDirectory.value = created.path;
+    selectedTreeKeys.value = { [`dir:${created.path}`]: true };
+    expandedTreeKeys.value = buildExpandedKeysForPath(created.path);
+    page.value = 1;
+    await loadDirectoryTree();
+    await loadFiles();
   } catch (err) {
-    previewError.value = err instanceof Error ? err.message : "预览失败";
+    treeError.value = err instanceof Error ? err.message : "创建文件夹失败";
   } finally {
-    previewLoading.value = false;
+    creatingFolder.value = false;
   }
 }
 
-function closePreview() {
-  previewVisible.value = false;
-  resetPreviewState();
+async function removeCurrentFolder() {
+  if (!authStore.accessToken || selectedDirectory.value === ROOT_DIRECTORY_MARKER) return;
+  if (!window.confirm(`确认删除文件夹“${currentDirectoryLabel.value}”吗？该操作会将当前目录及其中内容移入回收站。`)) {
+    return;
+  }
+
+  deletingFolder.value = true;
+  treeError.value = "";
+  try {
+    await deleteFolder({
+      accessToken: authStore.accessToken,
+      path: selectedDirectory.value,
+      recursive: true
+    });
+    const parentPath = normalizeFolder(selectedDirectory.value).split("/").slice(0, -1).join("/");
+    selectedDirectory.value = parentPath || ROOT_DIRECTORY_MARKER;
+    selectedTreeKeys.value = {
+      [`dir:${selectedDirectory.value === ROOT_DIRECTORY_MARKER ? ROOT_DIRECTORY_MARKER : selectedDirectory.value}`]: true
+    };
+    expandedTreeKeys.value = buildExpandedKeysForPath(selectedDirectory.value === ROOT_DIRECTORY_MARKER ? "" : selectedDirectory.value);
+    page.value = 1;
+    await loadDirectoryTree();
+    await loadFiles();
+  } catch (err) {
+    treeError.value = err instanceof Error ? err.message : "删除文件夹失败";
+  } finally {
+    deletingFolder.value = false;
+  }
 }
 
-onMounted(() => {
-  loadFiles();
+async function promptRenameFolder() {
+  if (!authStore.accessToken || selectedDirectory.value === ROOT_DIRECTORY_MARKER) return;
+
+  const currentName = normalizeFolder(selectedDirectory.value).split("/").pop() || "";
+  const rawName = window.prompt(`重命名文件夹 ${currentDirectoryLabel.value}`, currentName);
+  if (rawName === null) return;
+
+  const nextName = rawName.trim();
+  if (!nextName) {
+    treeError.value = "文件夹名称不能为空";
+    return;
+  }
+
+  renamingFolder.value = true;
+  treeError.value = "";
+  try {
+    const renamed = await renameFolder({
+      accessToken: authStore.accessToken,
+      path: selectedDirectory.value,
+      newName: nextName
+    });
+    selectedDirectory.value = renamed.path;
+    selectedTreeKeys.value = { [`dir:${renamed.path}`]: true };
+    expandedTreeKeys.value = buildExpandedKeysForPath(renamed.path);
+    page.value = 1;
+    await loadDirectoryTree();
+    await loadFiles();
+  } catch (err) {
+    treeError.value = err instanceof Error ? err.message : "重命名文件夹失败";
+  } finally {
+    renamingFolder.value = false;
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([loadFiles(), loadDirectoryTree()]);
+});
+
+watch(sortBy, async (nextValue, prevValue) => {
+  if (nextValue === prevValue) return;
+  page.value = 1;
+  await loadFiles();
 });
 </script>
 
 <template>
   <Card>
     <template #title>文件仓库首页</template>
-    <template #subtitle>文件列表与基础筛选（MVP）</template>
+    <template #subtitle>文件树、目录筛选与文件操作</template>
     <template #content>
-      <p class="intro-text">当前用户：{{ authStore.user?.username || "未知用户" }}，可按文件名和大小进行筛选。</p>
-      <div class="upload-panel">
-        <div class="upload-actions">
-          <input type="file" @change="onFileChange" />
-          <Button label="开始上传" icon="pi pi-upload" :loading="uploadLoading" @click="startUpload" />
-        </div>
-        <div class="upload-status">
-          <span v-if="selectedFile">已选择：{{ selectedFile.name }}</span>
-          <span v-else>未选择文件</span>
-        </div>
-        <ProgressBar :value="uploadProgress"></ProgressBar>
-        <Message v-if="uploadMessage" severity="success" :closable="false">{{ uploadMessage }}</Message>
-        <Message v-if="uploadError" severity="error" :closable="false">{{ uploadError }}</Message>
-        <Message v-if="downloadError" severity="error" :closable="false">{{ downloadError }}</Message>
-        <Message v-if="deleteError" severity="error" :closable="false">{{ deleteError }}</Message>
-      </div>
-      <div class="file-filter-row">
-        <div class="file-filter-item">
-          <label class="auth-label">文件名关键字</label>
-          <InputText v-model="keyword" placeholder="例如：report、photo" />
-        </div>
-        <div class="file-filter-item">
-          <label class="auth-label">最小大小（字节）</label>
-          <InputNumber v-model="minSize" :useGrouping="false" />
-        </div>
-        <div class="file-filter-item">
-          <label class="auth-label">最大大小（字节）</label>
-          <InputNumber v-model="maxSize" :useGrouping="false" />
-        </div>
-      </div>
-      <div class="file-filter-actions">
-        <Button label="查询" icon="pi pi-search" :loading="loading" @click="search" />
-        <Button label="重置" severity="secondary" text @click="resetFilters" />
-      </div>
-      <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
-      <div class="health-row">
-        <Tag severity="success" value="已登录" />
-        <span class="health-message">共 {{ total }} 个文件</span>
-      </div>
-      <DataTable
-        :value="items"
-        :loading="loading"
-        paginator
-        lazy
-        :rows="pageSize"
-        :first="(page - 1) * pageSize"
-        :totalRecords="total"
-        @page="onPageChange"
-      >
-        <Column field="file_name" header="文件名"></Column>
-        <Column header="大小">
-          <template #body="{ data }">{{ formatBytes(data.size_bytes) }}</template>
-        </Column>
-        <Column field="mime_type" header="类型"></Column>
-        <Column field="status" header="状态"></Column>
-        <Column header="创建时间">
-          <template #body="{ data }">{{ formatTime(data.created_at) }}</template>
-        </Column>
-        <Column header="操作">
-          <template #body="{ data }">
-            <div class="file-row-actions">
-              <Button label="预览" size="small" severity="secondary" text icon="pi pi-eye" @click="triggerPreview(data)" />
-              <Button
-                label="下载"
-                size="small"
-                icon="pi pi-download"
-                :loading="downloadingFileId === data.id"
-                @click="triggerDownload(data)"
-              />
-              <Button
-                label="删除"
-                size="small"
-                severity="danger"
-                text
-                icon="pi pi-trash"
-                :loading="deletingFileId === data.id"
-                @click="triggerSoftDelete(data)"
-              />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <p class="intro-text">当前用户：{{ authStore.user?.username || "未知用户" }}，可按目录与条件筛选。</p>
 
-      <Dialog
-        :visible="previewVisible"
-        modal
-        :header="`预览：${previewName}`"
-        :style="{ width: '70vw' }"
-        @update:visible="(val) => { if (!val) closePreview(); }"
-      >
-        <div class="preview-body">
-          <Message v-if="previewError" severity="error" :closable="false">{{ previewError }}</Message>
-          <ProgressBar v-if="previewLoading" mode="indeterminate" style="height: 6px" />
-          <img v-if="!previewLoading && previewType === 'image'" :src="previewUrl" class="preview-image" alt="image-preview" />
-          <iframe v-if="!previewLoading && previewType === 'pdf'" :src="previewUrl" class="preview-pdf"></iframe>
-          <pre v-if="!previewLoading && previewType === 'text'" class="preview-text">{{ previewText }}</pre>
-        </div>
-      </Dialog>
+      <div class="file-filter-actions">
+        <Button label="上传到当前目录" icon="pi pi-upload" @click="jumpUploadWithCurrentDirectory" />
+        <Button label="回收站" severity="secondary" text @click="router.push('/recycle')" />
+        <Tag severity="info" :value="`当前目录：${currentDirectoryLabel}`" />
+      </div>
+
+      <div class="file-center-layout">
+        <section class="panel folder-tree-panel">
+          <div class="folder-tree-header">
+                <strong>文件树</strong>
+                <div class="file-row-actions folder-tree-actions">
+                  <Button
+                    size="small"
+                    text
+                    label="新建文件夹"
+                    icon="pi pi-folder-plus"
+                    :loading="creatingFolder"
+                    @click="promptCreateFolder"
+                  />
+                  <Button
+                    size="small"
+                    text
+                    severity="secondary"
+                    label="重命名"
+                    icon="pi pi-pencil"
+                    :disabled="selectedDirectory === ROOT_DIRECTORY_MARKER"
+                    :loading="renamingFolder"
+                    @click="promptRenameFolder"
+                  />
+                  <Button
+                    size="small"
+                    text
+                    severity="danger"
+                    label="删除当前文件夹"
+                    icon="pi pi-folder-minus"
+                    :disabled="selectedDirectory === ROOT_DIRECTORY_MARKER"
+                    :loading="deletingFolder"
+                    @click="removeCurrentFolder"
+                  />
+                  <Button size="small" text severity="secondary" label="根目录" icon="pi pi-home" @click="clearDirectoryFilter" />
+                  <Button size="small" text severity="secondary" label="刷新" icon="pi pi-refresh" @click="loadDirectoryTree" />
+                </div>
+          </div>
+
+          <Message v-if="treeError" severity="error" :closable="false">{{ treeError }}</Message>
+          <Tree
+            :value="treeNodes"
+            :loading="treeLoading"
+            selectionMode="single"
+            :metaKeySelection="false"
+            v-model:selectionKeys="selectedTreeKeys"
+            v-model:expandedKeys="expandedTreeKeys"
+            @node-select="onDirectorySelect"
+          />
+        </section>
+
+        <section class="panel">
+          <div class="file-filter-row">
+            <div class="file-filter-item">
+              <label class="auth-label">文件名关键字</label>
+              <InputText v-model="keyword" placeholder="例如：report、photo" />
+            </div>
+            <div class="file-filter-item">
+              <label class="auth-label">排序方式</label>
+              <select v-model="sortBy" class="sort-select">
+                <option v-for="option in sortOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="file-filter-actions">
+            <Button label="查询" icon="pi pi-search" :loading="loading" @click="search" />
+            <Button label="重置条件" severity="secondary" text @click="resetFilters" />
+          </div>
+
+          <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
+          <Message v-if="downloadError" severity="error" :closable="false">{{ downloadError }}</Message>
+          <Message v-if="deleteError" severity="error" :closable="false">{{ deleteError }}</Message>
+
+          <div class="health-row">
+            <Tag severity="success" value="已登录" />
+            <span class="health-message">共 {{ total }} 个文件</span>
+          </div>
+
+          <DataTable
+            :value="items"
+            :loading="loading"
+            paginator
+            lazy
+            :rows="pageSize"
+            :first="(page - 1) * pageSize"
+            :totalRecords="total"
+            @page="onPageChange"
+          >
+            <Column header="文件名">
+              <template #body="{ data }">{{ fileBaseName(data.file_name) }}</template>
+            </Column>
+            <Column header="所在目录">
+              <template #body="{ data }">{{ fileDirectoryLabel(data.file_name) }}</template>
+            </Column>
+            <Column header="大小">
+              <template #body="{ data }">{{ formatBytes(data.size_bytes) }}</template>
+            </Column>
+            <Column field="mime_type" header="类型"></Column>
+            <Column field="status" header="状态"></Column>
+            <Column header="创建时间">
+              <template #body="{ data }">{{ formatTime(data.created_at) }}</template>
+            </Column>
+            <Column header="操作">
+              <template #body="{ data }">
+                <div class="file-row-actions">
+                  <Button label="预览" size="small" severity="secondary" text icon="pi pi-eye" @click="triggerPreview(data)" />
+                  <Button
+                    label="下载"
+                    size="small"
+                    icon="pi pi-download"
+                    :loading="downloadingFileId === data.id"
+                    @click="triggerDownload(data)"
+                  />
+                  <Button
+                    label="删除"
+                    size="small"
+                    severity="danger"
+                    text
+                    icon="pi pi-trash"
+                    :loading="deletingFileId === data.id"
+                    @click="triggerSoftDelete(data)"
+                  />
+                </div>
+              </template>
+            </Column>
+          </DataTable>
+        </section>
+      </div>
     </template>
   </Card>
 </template>

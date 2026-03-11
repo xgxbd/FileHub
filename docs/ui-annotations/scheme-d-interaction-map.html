@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileHub 方案D 可视化交互标注图</title>
+    <style>
+      :root {
+        --bg: #f6f6f6;
+        --card: #ffffff;
+        --line: #dddddd;
+        --text: #111111;
+        --muted: #666666;
+        --accent: #111111;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Helvetica Neue", "PingFang SC", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .page {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        margin-bottom: 18px;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-family: "Iowan Old Style", "Songti SC", serif;
+        font-size: 30px;
+      }
+
+      .header p {
+        margin: 8px 0 0;
+        color: var(--muted);
+      }
+
+      .tips {
+        border: 1px solid var(--line);
+        background: var(--card);
+        padding: 12px;
+        margin-bottom: 14px;
+        font-size: 13px;
+      }
+
+      .section {
+        border: 1px solid var(--line);
+        background: var(--card);
+        margin-bottom: 16px;
+      }
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        padding: 10px 12px;
+      }
+
+      .section-title h2 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .section-title span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .shot {
+        position: relative;
+        border: 1px solid var(--line);
+        background: #fff;
+        height: 540px;
+        overflow: hidden;
+      }
+
+      iframe {
+        width: 1280px;
+        height: 720px;
+        border: 0;
+        transform: scale(0.75);
+        transform-origin: 0 0;
+        pointer-events: none;
+      }
+
+      .dot {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-size: 12px;
+        line-height: 24px;
+        text-align: center;
+        font-weight: 700;
+        box-shadow: 0 0 0 2px #fff;
+      }
+
+      .legend {
+        border: 1px solid var(--line);
+        padding: 10px;
+        background: #fff;
+      }
+
+      .legend h3 {
+        margin: 0 0 10px;
+        font-size: 14px;
+      }
+
+      .legend ol {
+        margin: 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .legend li {
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .legend b {
+        font-weight: 700;
+      }
+
+      .footer {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+
+      @media (max-width: 1080px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <h1>FileHub 方案 D 可视化标注图</h1>
+        <p>范围：登录、文件列表、上传、预览、回收站、后台管理、操作日志。每个数字标注对应右侧说明。</p>
+      </div>
+
+      <div class="tips">
+        测试建议：按页面从上到下执行 1~N 号操作。每项都应出现“预期反馈”，若不符合即可判定问题。
+      </div>
+
+      <section class="section">
+        <div class="section-title"><h2>1. 登录页</h2><span>/login</span></div>
+        <div class="layout">
+          <div class="shot">
+            <iframe src="../ui-prototypes/v5/scheme-d/login.html"></iframe>
+            <span class="dot" style="left: 710px; top: 332px">1</span>
+            <span class="dot" style="left: 706px; top: 368px">2</span>
+            <span class="dot" style="left: 705px; top: 404px">3</span>
+            <span class="dot" style="left: 705px; top: 440px">4</span>
+          </div>
+          <div class="legend">
+            <h3>可点击项</h3>
+            <ol>
+              <li><b>账号输入框</b>：输入用户名或邮箱。</li>
+              <li><b>密码输入框</b>：输入密码。</li>
+              <li><b>登录</b>：成功跳转文件列表；失败显示错误消息。</li>
+              <li><b>注册</b>：跳转注册页。</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>2. 文件列表页</h2><span>/files</span></div>
+        <div class="layout">
+          <div class="shot">
+            <iframe src="../ui-prototypes/v5/scheme-d/files.html"></iframe>
+            <span class="dot" style="left: 72px; top: 123px">1</span>
+            <span class="dot" style="left: 133px; top: 123px">2</span>
+            <span class="dot" style="left: 410px; top: 224px">3</span>
+            <span class="dot" style="left: 500px; top: 224px">4</span>
+            <span class="dot" style="left: 588px; top: 224px">5</span>
+            <span class="dot" style="left: 702px; top: 286px">6</span>
+            <span class="dot" style="left: 755px; top: 286px">7</span>
+            <span class="dot" style="left: 808px; top: 286px">8</span>
+          </div>
+          <div class="legend">
+            <h3>可点击项</h3>
+            <ol>
+              <li><b>文件列表导航</b>：切回文件列表。</li>
+              <li><b>上传导航</b>：进入上传页。</li>
+              <li><b>上传文件</b>：跳转 `/upload`。</li>
+              <li><b>批量下载</b>：下载选中文件（未选中时无动作）。</li>
+              <li><b>筛选</b>：触发文件列表查询。</li>
+              <li><b>预览</b>：跳转 `/preview/:fileId`。</li>
+              <li><b>下载</b>：触发浏览器下载。</li>
+              <li><b>删除</b>：弹确认，确认后进入回收站。</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>3. 上传页</h2><span>/upload</span></div>
+        <div class="layout">
+          <div class="shot">
+            <iframe src="../ui-prototypes/v5/scheme-d/upload.html"></iframe>
+            <span class="dot" style="left: 330px; top: 289px">1</span>
+            <span class="dot" style="left: 639px; top: 341px">2</span>
+            <span class="dot" style="left: 720px; top: 341px">3</span>
+          </div>
+          <div class="legend">
+            <h3>可点击项</h3>
+            <ol>
+              <li><b>文件选择框</b>：选择待上传文件。</li>
+              <li><b>开始上传</b>：创建会话 -> 分片上传 -> 合并完成。</li>
+              <li><b>返回文件列表</b>：跳转 `/files`。</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>4. 预览页</h2><span>/preview/:fileId?</span></div>
+        <div class="layout">
+          <div class="shot">
+            <iframe src="../ui-prototypes/v5/scheme-d/preview.html"></iframe>
+            <span class="dot" style="left: 315px; top: 222px">1</span>
+            <span class="dot" style="left: 522px; top: 222px">2</span>
+            <span class="dot" style="left: 610px; top: 222px">3</span>
+            <span class="dot" style="left: 772px; top: 417px">4</span>
+          </div>
+          <div class="legend">
+            <h3>可点击项</h3>
+            <ol>
+              <li><b>文件ID输入</b>：输入要预览的文件 ID。</li>
+              <li><b>加载预览</b>：请求预览接口并展示内容。</li>
+              <li><b>返回文件列表</b>：跳转 `/files`。</li>
+              <li><b>下载</b>：下载当前文件。</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>5. 回收站页</h2><span>/recycle</span></div>
+        <div class="layout">
+          <div class="shot">
+            <iframe src="../ui-prototypes/v5/scheme-d/trash.html"></iframe>
+            <span class="dot" style="left: 336px; top: 222px">1</span>
+            <span class="dot" style="left: 426px; top: 222px">2</span>
+            <span class="dot" style="left: 522px; top: 222px">3</span>
+            <span class="dot" style="left: 614px; top: 222px">4</span>
+            <span class="dot" style="left: 753px; top: 285px">5</span>
+            <span class="dot" style="left: 836px; top: 285px">6</span>
+          </div>
+          <div class="legend">
+            <h3>可点击项</h3>
+            <ol>
+              <li><b>仅看我删除</b>：过滤本人删除记录。</li>
+              <li><b>最近30天</b>：按时间过滤。</li>
+              <li><b>恢复所选</b>：恢复选中记录。</li>
+              <li><b>彻底删除</b>：不可恢复删除。</li>
+              <li><b>行内恢复</b>：恢复当前行。</li>
+              <li><b>行内彻底删除</b>：彻底删除当前行。</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>6. 后台管理页</h2><span>/admin/files</span></div>
+        <div class="layout">
+          <div class="shot">
+            <iframe src="../ui-prototypes/v5/scheme-d/admin.html"></iframe>
+            <span class="dot" style="left: 319px; top: 334px">1</span>
+            <span class="dot" style="left: 399px; top: 334px">2</span>
+            <span class="dot" style="left: 480px; top: 334px">3</span>
+          </div>
+          <div class="legend">
+            <h3>可点击项</h3>
+            <ol>
+              <li><b>用户管理</b>：进入用户管理（后续扩展）。</li>
+              <li><b>存储策略</b>：进入存储策略（后续扩展）。</li>
+              <li><b>导出报表</b>：导出后台统计报表。</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><h2>7. 操作日志页</h2><span>/admin/logs</span></div>
+        <div class="layout">
+          <div class="shot">
+            <iframe src="../ui-prototypes/v5/scheme-d/logs.html"></iframe>
+            <span class="dot" style="left: 345px; top: 222px">1</span>
+            <span class="dot" style="left: 443px; top: 222px">2</span>
+            <span class="dot" style="left: 560px; top: 222px">3</span>
+            <span class="dot" style="left: 642px; top: 222px">4</span>
+          </div>
+          <div class="legend">
+            <h3>可点击项</h3>
+            <ol>
+              <li><b>用户筛选</b>：按用户过滤日志。</li>
+              <li><b>操作类型筛选</b>：按上传/下载/删除过滤。</li>
+              <li><b>时间筛选</b>：按时间范围过滤。</li>
+              <li><b>查询</b>：执行筛选刷新日志列表。</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer">
+        详细行为与异常反馈请配合文档：`docs/UI_INTERACTION_MAP_SCHEME_D.md`。
+      </div>
+    </div>
+  </body>
+</html>

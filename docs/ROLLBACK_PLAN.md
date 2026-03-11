@@ -29,9 +29,29 @@
 - `GET /healthz` 正常返回
 - 登录/上传/下载/回收链路可用
 - 管理员页面 `/admin/files`、`/admin/logs` 可访问
-- `python scripts/smoke_core_flow.py` 执行通过
+- `APP_SERVE_FRONTEND=false python scripts/smoke_core_flow.py` 执行通过
+- `cd frontend && npm run e2e:hosted` 至少通过托管模式 smoke 验证
 
 ## 5. 记录要求
 
 - 记录回滚时间、触发原因、影响范围、恢复时间
 - 在 `docs/PROGRESS.md` 追加回滚事件条目
+
+## 6. 最小回滚执行模板
+
+```bash
+# 1. 切回上一个稳定版本
+git checkout <stable-tag-or-commit>
+
+# 2. 恢复环境配置
+cp <release-backup-env> backend/.env
+
+# 3. 重启后端
+cd backend
+source .venv/bin/activate
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+# 4. 托管模式验收
+cd ../frontend
+npm run e2e:hosted
+```

@@ -2052,3 +2052,2293 @@
   - 验证流程需串行执行，避免共享临时目录冲突
 - 下一个任务：
   - 合并 `release/v0.1.0` 到 `main` 并回合到 `develop`
+
+---
+
+## 2026-03-10 22:04:08 CST
+
+- 任务：发布闭环：`release/v0.1.0` 合并与标签发布
+- 时间：2026-03-10 22:04:08 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - `release/v0.1.0` 合并到 `main`
+  - 创建并推送标签：`v0.1.0`
+  - `release/v0.1.0` 回合并到 `develop`
+- 已完成事项：
+  - GitFlow 发布闭环完成（main/develop/tag）
+  - 远端已存在：`main` 最新发布点与 `v0.1.0` 标签
+- 未完成事项：
+  - 下一版本规划（v0.1.1+）
+- 当前可测试内容：
+  - 切换到 `main` 验证发布代码
+  - 按 `docs/RELEASE_CHECKLIST.md` 复核
+- 风险说明：
+  - 仍存在性能与弃用告警优化空间，建议在下个里程碑治理
+- 下一个任务：
+  - 从 `develop` 规划并创建 `feature/v0.1.1-*` 新一轮优化任务
+
+---
+
+## 2026-03-11 08:08:47 CST
+
+- 任务：第十三轮开发-提交A：前端关键流程E2E设计与任务拆分
+- 时间：2026-03-11 08:08:47 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `docs/ROUND13_FRONTEND_E2E_MVP_DESIGN.md`
+  - 明确 Playwright 方案与关键流程覆盖范围
+  - 拆分提交 A-E 并定义验证标准
+- 已完成事项：
+  - 第十三轮设计阶段完成
+- 未完成事项：
+  - 提交B-E 实现与验证
+- 当前可测试内容：
+  - 设计文档可直接评审
+- 风险说明：
+  - E2E 依赖本地服务启动稳定性，需在脚本中限制超时并加等待策略
+- 下一个任务：
+  - 提交B：搭建 Playwright 基建并接入执行命令
+
+---
+
+## 2026-03-11 08:10:16 CST
+
+- 任务：第十三轮开发-提交B：Playwright E2E 基建接入
+- 时间：2026-03-11 08:10:16 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 前端新增 Playwright 依赖与配置文件
+  - 新增基础 E2E 用例 `frontend/e2e/health.spec.js`
+  - 新增 npm 命令：`e2e`、`e2e:list`、`e2e:headed`
+  - 新增 Playwright 产物忽略规则
+- 已完成事项：
+  - E2E 基建已可使用
+  - 用例发现验证通过：`npm run e2e:list`（列出 1 条用例）
+- 未完成事项：
+  - 提交C：实现关键流程用例（登录/上传/下载/删除/恢复）
+  - 提交D：稳定性补充与重复执行验证
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd frontend && npm run e2e:list`
+- 风险说明：
+  - 真实执行 E2E 仍依赖浏览器安装与本地服务启动稳定性
+- 下一个任务：
+  - 提交C：新增关键流程 E2E 用例并跑通
+
+---
+
+## 2026-03-11 08:14:08 CST
+
+- 任务：第十三轮开发-提交C：关键流程E2E用例实现
+- 时间：2026-03-11 08:14:08 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `frontend/e2e/core-flow.spec.js`，覆盖注册登录上传下载删除恢复主链路
+  - 修正 `health.spec.js` 选择器作用域，消除按钮重名冲突
+- 已完成事项：
+  - 关键流程 E2E 已实现并跑通
+  - 执行结果：`npm run e2e`（2 passed）
+- 未完成事项：
+  - 提交D：稳定性补充与重复执行验证
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - E2E 依赖本地服务启动速度，不同机器执行时间可能波动
+- 下一个任务：
+  - 提交D：补充最小重试与二次执行稳定性验证
+
+---
+
+## 2026-03-11 08:32:55 CST
+
+- 任务：第十三轮开发-提交D：E2E稳定性补充与重复执行验证
+- 时间：2026-03-11 08:32:55 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增脚本 `npm run e2e:repeat`，用于连续两次执行 E2E
+  - 完成重复执行验证：两轮均 2/2 通过
+- 已完成事项：
+  - 前端关键流程 E2E 具备最小稳定性验证能力
+  - 连续两次结果：`2 passed` + `2 passed`
+- 未完成事项：
+  - 提交E：E2E文档收口
+  - 第十三轮规范收尾
+- 当前可测试内容：
+  - `cd frontend && npm run e2e:repeat`
+- 风险说明：
+  - E2E 运行依赖本机网络与端口，沙箱环境需提权执行
+- 下一个任务：
+  - 提交E：更新 README 与执行指南，完成第十三轮收口
+
+---
+
+## 2026-03-11 08:34:26 CST
+
+- 任务：第十三轮开发-提交E：前端E2E文档收口
+- 时间：2026-03-11 08:34:26 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新 `frontend/README.md`：补充 E2E 命令与执行说明
+  - 更新 `docs/RELEASE_CHECKLIST.md`：加入前端 E2E 发布前检查项
+  - 更新根文档 `README.md`：同步关键流程 E2E 能力
+  - 收口前执行 `e2e:list` 与前端构建
+- 已完成事项：
+  - 第十三轮“前端关键流程E2E（设计+实现）”完成
+  - `npm run e2e:list` 通过（2 tests）
+  - 前端构建通过：`npm run build`
+- 未完成事项：
+  - 第十三轮规范收尾
+  - 下一轮任务（性能与弃用告警治理）
+- 当前可测试内容：
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:repeat`
+  - `cd frontend && npm run build`
+- 风险说明：
+  - E2E 在当前环境需要提权启动本地服务端口
+- 下一个任务：
+  - 执行第十三轮规范收尾检查并归档结果
+
+---
+
+## 2026-03-11 08:35:09 CST
+
+- 任务：第十三轮开发规范收尾检查与归档
+- 时间：2026-03-11 08:35:09 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 核查第十三轮提交完整性（A-E）与提交信息规范
+  - 归档验证结果：`npm run e2e` 通过、`npm run e2e:repeat` 通过、`npm run build` 通过
+- 已完成事项：
+  - 第十三轮最小任务 A-E 均已完成并推送
+  - 提交信息均为具体中文自然语言
+  - 前端关键流程 E2E 自动化（登录/上传/下载/删除/恢复）闭环完成
+- 未完成事项：
+  - 性能优化（前端分包、对象存储链路耗时）
+  - 后端弃用告警治理（`on_event`、416 常量）
+- 当前可测试内容：
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:repeat`
+  - `cd frontend && npm run build`
+- 风险说明：
+  - E2E 运行依赖端口占用状态，执行前需确认本地环境干净
+- 下一个任务：
+  - 第十四轮开发：先设计性能与告警治理MVP，再实现分包与后端弃用项修复
+
+---
+
+## 2026-03-11 08:36:05 CST
+
+- 任务：第十四轮开发-提交A：性能与告警治理MVP设计
+- 时间：2026-03-11 08:36:05 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `docs/ROUND14_PERFORMANCE_WARNING_GOVERNANCE_DESIGN.md`
+  - 明确后端弃用告警治理与前端分包优化范围
+  - 拆分提交 A-E 并定义验证标准
+- 已完成事项：
+  - 第十四轮设计阶段完成
+- 未完成事项：
+  - 提交B-E 的实现与验证
+- 当前可测试内容：
+  - 设计文档可直接评审
+- 风险说明：
+  - 路由懒加载改造需关注路由守卫与权限逻辑兼容
+- 下一个任务：
+  - 提交B：完成后端弃用告警治理
+
+---
+
+## 2026-03-11 08:38:58 CST
+
+- 任务：第十四轮开发-提交B：后端弃用告警治理
+- 时间：2026-03-11 08:38:58 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - `main.py` 启动流程迁移到 `lifespan`
+  - 下载接口 416 常量改为 `HTTP_416_RANGE_NOT_SATISFIABLE`
+- 已完成事项：
+  - FastAPI `on_event` 与 416 常量弃用告警已消除
+  - 后端测试通过：`pytest -q`（21 passed）
+  - 现存告警仅剩第三方依赖 `passlib` 的 `crypt` 弃用提醒
+- 未完成事项：
+  - 提交C：前端分包优化
+  - 提交D：全量回归（pytest/build/e2e）
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+- 风险说明：
+  - `passlib` 依赖告警来自上游库，需后续评估替代方案
+- 下一个任务：
+  - 提交C：前端路由懒加载与分包优化
+
+---
+
+## 2026-03-11 08:40:39 CST
+
+- 任务：第十四轮开发-提交C：前端分包与首包优化
+- 时间：2026-03-11 08:40:39 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 路由组件改为懒加载
+  - Vite `manualChunks` 精确拆分 `vue/pinia/vue-router` 公共包
+  - 修正分包匹配规则，避免 `primevue` 被误并入 `vue-vendor`
+- 已完成事项：
+  - 前端构建主包显著下降，路由页按需加载
+  - 构建结果已消除 >500k 的 chunk 告警
+- 未完成事项：
+  - 提交D：回归验证（pytest/build/e2e）
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+- 风险说明：
+  - 首次进入各路由页面会触发按需加载请求，弱网下首屏切换可能有轻微延迟
+- 下一个任务：
+  - 提交D：执行后端测试、前端构建、前端E2E回归
+
+---
+
+## 2026-03-11 08:43:49 CST
+
+- 任务：第十四轮开发-提交D：优化后全量回归验证
+- 时间：2026-03-11 08:43:49 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 顺序执行后端测试、前端构建、前端E2E回归
+  - 归档验证输出结果
+- 已完成事项：
+  - 后端测试通过：`pytest -q`（21 passed，1 warning）
+  - 前端构建通过：`npm run build`
+  - 前端 E2E 通过：`npm run e2e`（2 passed）
+- 未完成事项：
+  - 提交E：文档收口
+  - 第十四轮规范收尾
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - 仍存在第三方依赖 `passlib` 的 `crypt` 弃用告警
+- 下一个任务：
+  - 提交E：更新文档并完成第十四轮收口
+
+---
+
+## 2026-03-11 08:44:57 CST
+
+- 任务：第十四轮开发-提交E：性能与告警治理文档收口
+- 时间：2026-03-11 08:44:57 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新 `backend/README.md`：补充后端告警治理说明
+  - 更新 `frontend/README.md`：补充前端懒加载与分包优化说明
+  - 更新根文档 `README.md`：同步第十四轮治理状态
+  - 收口前复跑前端构建
+- 已完成事项：
+  - 第十四轮“性能与告警治理MVP（设计+实现）”完成
+  - 前端构建通过：`npm run build`
+- 未完成事项：
+  - 第十四轮规范收尾
+  - 下一轮任务（v0.1.1 优化项）
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - `passlib` 依赖告警仍需在后续版本处理
+- 下一个任务：
+  - 执行第十四轮规范收尾检查并归档结果
+
+---
+
+## 2026-03-11 08:45:36 CST
+
+- 任务：第十四轮开发规范收尾检查与归档
+- 时间：2026-03-11 08:45:36 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 核查第十四轮提交完整性（A-E）与提交信息规范
+  - 归档验证结果：`pytest -q` 通过、`npm run build` 通过、`npm run e2e` 通过
+- 已完成事项：
+  - 第十四轮最小任务 A-E 均已完成并推送
+  - 提交信息均为具体中文自然语言
+  - 后端关键弃用告警已清理，前端大包告警已消除
+- 未完成事项：
+  - 剩余第三方依赖告警（`passlib` -> `crypt`）
+  - v0.1.1 规划与增量优化
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - 密码哈希库升级涉及兼容迁移，需谨慎做平滑替换
+- 下一个任务：
+  - 第十五轮开发：先设计认证加密库告警治理，再实现平滑迁移
+
+---
+
+## 2026-03-11 08:46:36 CST
+
+- 任务：第十五轮开发-提交A：认证哈希告警治理设计
+- 时间：2026-03-11 08:46:36 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `docs/ROUND15_AUTH_HASH_WARNING_MIGRATION_DESIGN.md`
+  - 明确 `passlib -> bcrypt` 迁移边界与兼容策略
+  - 拆分提交 A-E 并定义验证标准
+- 已完成事项：
+  - 第十五轮设计阶段完成
+- 未完成事项：
+  - 提交B-E 的实现与验证
+- 当前可测试内容：
+  - 设计文档可直接评审
+- 风险说明：
+  - 哈希实现替换需验证历史密码哈希兼容性
+- 下一个任务：
+  - 提交B：实现认证哈希逻辑迁移并验证告警消除
+
+---
+
+## 2026-03-11 08:49:16 CST
+
+- 任务：第十五轮开发-提交B：认证哈希实现迁移
+- 时间：2026-03-11 08:49:16 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 密码哈希与校验从 `passlib` 迁移到 `bcrypt` 原生实现
+  - 依赖声明移除 `passlib[bcrypt]`
+- 已完成事项：
+  - 认证哈希逻辑迁移完成
+  - 后端测试通过：`pytest -q`（21 passed）
+  - 测试输出已无弃用告警
+- 未完成事项：
+  - 提交C：补充哈希兼容测试
+  - 提交D：文档收口
+  - 提交E：规范收尾
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+- 风险说明：
+  - 生产环境如存在非 bcrypt 历史哈希格式，需单独识别与迁移
+- 下一个任务：
+  - 提交C：新增兼容测试验证旧 bcrypt 哈希可登录
+
+---
+
+## 2026-03-11 08:52:10 CST
+
+- 任务：第十五轮开发-提交C：哈希兼容性测试补齐
+- 时间：2026-03-11 08:52:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 在 `test_auth_api.py` 新增“既有 bcrypt 哈希可登录”测试
+  - 验证历史 bcrypt 哈希格式在新实现下可正常鉴权
+- 已完成事项：
+  - 认证哈希兼容性测试覆盖完成
+  - 后端测试通过：`pytest -q`（22 passed）
+- 未完成事项：
+  - 提交D：文档收口
+  - 提交E：规范收尾
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+- 风险说明：
+  - 若存在非 bcrypt 历史哈希，仍需单独迁移策略
+- 下一个任务：
+  - 提交D：更新依赖与迁移说明文档
+
+---
+
+## 2026-03-11 08:55:10 CST
+
+- 任务：第十五轮开发-提交D：认证哈希迁移文档收口
+- 时间：2026-03-11 08:55:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新 `backend/README.md`：新增认证哈希迁移说明
+  - 更新根文档 `README.md`：同步 `passlib -> bcrypt` 迁移状态
+  - 收口前复跑后端测试
+- 已完成事项：
+  - 认证哈希迁移文档已完成
+  - 后端测试通过：`pytest -q`（22 passed）
+- 未完成事项：
+  - 提交E：第十五轮规范收尾
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+- 风险说明：
+  - 依赖升级后需在部署环境做一次完整登录回归
+- 下一个任务：
+  - 提交E：执行第十五轮规范收尾检查并归档
+
+---
+
+## 2026-03-11 08:55:42 CST
+
+- 任务：第十五轮开发规范收尾检查与归档
+- 时间：2026-03-11 08:55:42 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 核查第十五轮提交完整性（A-E）与提交信息规范
+  - 归档验证结果：`pytest -q`（22 passed）
+- 已完成事项：
+  - 第十五轮最小任务 A-E 均已完成并推送
+  - 提交信息均为具体中文自然语言
+  - 认证哈希迁移与告警清理闭环完成
+- 未完成事项：
+  - 当前任务清单中无阻塞项
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run build`
+- 风险说明：
+  - 版本后续演进建议转入 v0.1.1 迭代规划
+- 下一个任务：
+  - 合并第十五轮到 `develop` 并同步主干基线
+
+---
+
+## 2026-03-11 09:18:47 CST
+
+- 任务：第十六轮开发-提交A：方案D对齐设计与最小提交拆分
+- 时间：2026-03-11 09:18:47 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `53a7364`
+- 本次修改：
+  - 新增 `docs/ROUND16_UI_SCHEME_D_ALIGNMENT_DESIGN.md`
+  - 明确 V5 方案 D 的页面结构、路由映射、样式令牌与最小提交计划
+- 已完成事项：
+  - 完成“先设计后实现”的设计阶段
+  - 明确 7 个页面独立化与壳层组件化改造路径
+- 未完成事项：
+  - 恢复 `docs/ui-prototypes/v5/scheme-d/preview.html` 等 V5 资产
+  - 前端页面按方案 D 完整落地
+- 当前可测试内容：
+  - 设计文档可直接评审：`docs/ROUND16_UI_SCHEME_D_ALIGNMENT_DESIGN.md`
+- 风险说明：
+  - 现有页面业务逻辑集中在 `FileCenterView`，拆分上传/预览页面时需防止行为回归
+- 下一个任务：
+  - 提交B：恢复 V5 设计资产并校验方案 D 路径可访问
+
+---
+
+## 2026-03-11 09:19:44 CST
+
+- 任务：第十六轮开发-提交B：恢复V5高保真原型与预览资产
+- 时间：2026-03-11 09:19:44 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `e6c2129`
+- 本次修改：
+  - 从历史提交恢复 `docs/ui-prototypes/v5/*` 全量原型文件
+  - 恢复 `docs/ui-previews/v5/*` 五套预览图
+  - 确认你选定路径 `docs/ui-prototypes/v5/scheme-d/preview.html` 已回到当前分支
+- 已完成事项：
+  - V5 设计资产已在当前分支可追踪、可评审
+  - 选定方案 D 的原型路径已恢复
+- 未完成事项：
+  - 前端运行代码尚未切换为方案 D 布局
+  - 方案 D 作为唯一后续 UI 基线的文档约束尚未固化
+- 当前可测试内容：
+  - 可直接打开 `docs/ui-prototypes/v5/scheme-d/preview.html`
+  - 可对比 `docs/ui-previews/v5/v5-d-files.png`
+- 风险说明：
+  - 当前仅恢复设计资产，业务前端页面仍是旧骨架样式
+- 下一个任务：
+  - 提交C：落地方案 D 全局样式令牌与应用壳布局
+
+---
+
+## 2026-03-11 09:21:58 CST
+
+- 任务：第十六轮开发-提交C：方案D全局样式令牌与应用壳切换
+- 时间：2026-03-11 09:21:58 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `6162a08`
+- 本次修改：
+  - 重写 `frontend/src/App.vue`，落地方案 D 壳层结构（Topbar/Shell/Sidebar/KPI/Content）
+  - 更新 `frontend/src/router/index.js`，为页面补充方案 D 的标题、副标题、KPI 元信息
+  - 重写 `frontend/src/styles/main.css`，切换为方案 D 颜色令牌与布局比例
+- 已完成事项：
+  - 前端全局框架已从骨架样式切换为方案 D 布局基线
+  - 7 类页面的导航入口已统一收敛到壳层
+- 未完成事项：
+  - 上传页与预览页仍是占位页，尚未接入业务逻辑
+  - 页面细节与方案 D 的组件层级仍需进一步对齐
+- 当前可测试内容：
+  - `cd frontend && npm run build`（通过）
+  - 登录后可见方案 D 顶栏、导航、KPI 区域
+- 风险说明：
+  - 壳层切换后路由结构已扩展，下一步拆分页面时需保持既有 API 调用行为一致
+- 下一个任务：
+  - 提交D：新增独立上传页与预览页并接入现有上传/预览能力
+
+---
+
+## 2026-03-11 09:25:20 CST
+
+- 任务：第十六轮开发-提交D：上传页与预览页独立化并接入业务能力
+- 时间：2026-03-11 09:25:20 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `5cc4c3d`
+- 本次修改：
+  - 新增 `frontend/src/views/UploadView.vue` 并接入分片上传接口链路
+  - 新增 `frontend/src/views/PreviewView.vue` 并接入文件预览与下载能力
+  - 重构 `frontend/src/views/FileCenterView.vue`，移除内嵌上传/预览，改为独立路由跳转
+  - 更新 `frontend/src/router/index.js` 增加 `/upload`、`/preview/:fileId?` 路由
+  - 扩展 `frontend/src/styles/main.css` 的方案 D 上传/预览布局样式
+- 已完成事项：
+  - 登录、文件列表、上传、预览、回收站、后台管理、操作日志均可独立页面访问
+  - 上传与预览不再是列表页内嵌弹层，已符合独立页面要求
+- 未完成事项：
+  - `docs/UI_OPTIONS.md` 仍保留旧版 V2 文案，尚未切换为“方案 D 已定版”说明
+  - 方案 D 后续开发约束尚未固化到单独规范文档
+- 当前可测试内容：
+  - `cd frontend && npm run build`（通过）
+  - 登录后访问 `/files`、`/upload`、`/preview/:fileId`、`/recycle`、`/admin/files`、`/admin/logs`
+- 风险说明：
+  - 预览页需有效 `fileId` 才能加载内容，若直接访问 `/preview` 需手动输入文件 ID
+- 下一个任务：
+  - 提交E：更新 UI 选型文档并固化“后续改动必须适配方案 D”的开发约束
+
+---
+
+## 2026-03-11 09:26:32 CST
+
+- 任务：第十六轮开发-提交E：固化方案D定版文档与后续开发约束
+- 时间：2026-03-11 09:26:32 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `83b8317`
+- 本次修改：
+  - 重写 `docs/UI_OPTIONS.md` 为“方案 D 已定版”说明与开发约束
+  - 更新 `frontend/README.md`，同步独立上传页与预览页路由说明
+  - 验证 `docs/ui-prototypes/v5/scheme-d/preview.html` 路径存在
+- 已完成事项：
+  - 方案 D 已成为当前文档层面的唯一 UI 基线
+  - 后续改动需适配方案 D 的约束已写入文档
+- 未完成事项：
+  - 细节级 1:1 视觉还原（按钮/表格间距、局部组件细节）仍可继续迭代
+  - 现有 E2E 用例尚未覆盖新 `/upload`、`/preview/:fileId` 路由
+- 当前可测试内容：
+  - `docs/ui-prototypes/v5/scheme-d/preview.html` 路径可访问
+  - 前端独立页面路由与方案 D 壳层可联调验证
+- 风险说明：
+  - 若后续新增页面未同步本定版文档，可能再次出现 UI 偏离
+- 下一个任务：
+  - 第十六轮规范收尾：补充回归验证并推送分支等待合并
+
+---
+
+## 2026-03-11 09:27:31 CST
+
+- 任务：第十六轮开发规范收尾与远端同步
+- 时间：2026-03-11 09:27:31 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；收尾前最新 Commit `2ec8bc9`
+- 本次修改：
+  - 执行第十六轮完成度核查（设计->实现->验证->文档）
+  - 复跑前端构建验证并确认 `scheme-d` 原型路径可访问
+  - 推送分支到远端 `origin/feature/round16-ui-scheme-d-alignment`
+- 已完成事项：
+  - 第十六轮最小任务 A-E 全部完成且均已独立提交
+  - 提交信息均为具体中文自然语言
+  - `docs/ui-prototypes/v5/scheme-d/preview.html` 已恢复并可用
+  - 前端壳层与 7 页面路由已对齐方案 D
+- 未完成事项：
+  - 可选优化：对照方案 D 做 1:1 细节还原（控件间距/表格行高/按钮样式）
+  - 可选优化：补充 `/upload`、`/preview/:fileId` 的 E2E 用例
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - 登录后访问：`/files`、`/upload`、`/preview/:fileId`、`/recycle`、`/admin/files`、`/admin/logs`
+  - 原型路径：`docs/ui-prototypes/v5/scheme-d/preview.html`
+- 风险说明：
+  - 预览页依赖文件 ID 输入，若缺少可用文件会影响预览演示
+  - 前端当前仍以 MVP 为主，未做像素级还原
+- 下一个任务：
+  - 从本分支发起 PR 合并到 `develop`，随后进入下一轮“方案 D 细节还原 + E2E 补齐”
+
+---
+
+## 2026-03-11 09:43:52 CST
+
+- 任务：第十七轮开发-提交A：UI跳动与下载失败根因分析 + 页面交互说明设计
+- 时间：2026-03-11 09:43:52 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `10da46b`
+- 本次修改：
+  - 新增 `docs/ROUND17_UI_BUG_RCA.md`，按固定格式完成两个问题的根因分析
+  - 新增 `docs/UI_INTERACTION_MAP_SCHEME_D.md`，逐页说明每个按钮的动作与反馈
+- 已完成事项：
+  - 已确认下载失败的可复现根因（中文文件名触发响应头编码异常）
+  - 已产出可执行的页面测试清单与按钮行为说明
+- 未完成事项：
+  - 标题区域高度稳定性修复
+  - 下载失败代码修复与自动化回归
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND17_UI_BUG_RCA.md`、`docs/UI_INTERACTION_MAP_SCHEME_D.md`
+- 风险说明：
+  - 若不修复响应头编码，中文文件名下载仍可能失败
+- 下一个任务：
+  - 提交B：修复标题高度跳动与中文文件名下载失败
+
+---
+
+## 2026-03-11 09:46:31 CST
+
+- 任务：第十七轮开发-提交B：修复标题跳动与中文文件名下载失败
+- 时间：2026-03-11 09:46:31 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `515f433`
+- 本次修改：
+  - 后端下载/预览接口使用 RFC 5987 编码 `Content-Disposition`，修复中文文件名下载失败
+  - 新增后端测试覆盖中文文件名下载场景
+  - 前端下载失败提示补充 HTTP 状态信息，便于定位
+  - 调整方案 D 头部与卡片标题区样式，固定标题区域高度，降低页面切换跳动
+- 已完成事项：
+  - 已确认并修复中文文件名下载失败根因
+  - 标题区域高度约束已落地
+  - 后端下载回归测试通过（4 passed）
+  - 前端构建验证通过
+- 未完成事项：
+  - Playwright E2E 仍存在一处选择器冲突，需要更新用例
+  - 头部高度稳定性缺少自动化断言
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q tests/test_range_download_api.py`
+  - `cd frontend && npm run build`
+  - 中文文件名下载与页面切换标题稳定性可在浏览器手工验证
+- 风险说明：
+  - 若后续继续修改标题文案长度但不遵守单行规则，仍可能出现局部截断
+- 下一个任务：
+  - 提交C：更新 Playwright E2E 用例并新增标题高度稳定性自动检查
+
+---
+
+## 2026-03-11 09:49:32 CST
+
+- 任务：第十七轮开发-提交C：更新E2E并新增标题稳定性自动化校验
+- 时间：2026-03-11 09:49:32 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `a7ce92b`
+- 本次修改：
+  - 更新 `frontend/e2e/core-flow.spec.js`，适配方案 D 独立上传页与侧栏导航结构
+  - 新增 `frontend/e2e/layout-stability.spec.js`，自动校验 `/files` `/upload` `/preview` `/recycle` 标题区高度稳定
+  - 复跑 `npm run e2e`，验证 3 条前端 E2E 全部通过
+- 已完成事项：
+  - 自动化测试已覆盖关键主链路（注册/登录/上传/下载/删除/恢复）
+  - 自动化测试已覆盖标题区高度稳定性（防止页面切换跳动回归）
+  - 当前 E2E 无失败用例
+- 未完成事项：
+  - 暂未覆盖管理员页交互的 E2E 用例（`/admin/files`、`/admin/logs`）
+- 当前可测试内容：
+  - `cd frontend && npm run e2e`（3 passed）
+  - `cd backend && source .venv/bin/activate && pytest -q tests/test_range_download_api.py`（4 passed）
+- 风险说明：
+  - E2E 用例依赖本地自动起服务，运行时长约 25-30 秒
+- 下一个任务：
+  - 第十七轮规范收尾：汇总问题修复、可测清单与MCP自动测试能力范围
+
+---
+
+## 2026-03-11 09:57:57 CST
+
+- 任务：第十七轮开发-提交D：产出方案D可视化交互标注图
+- 时间：2026-03-11 09:57:57 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `d7fee1e`
+- 本次修改：
+  - 新增 `docs/ui-annotations/scheme-d-interaction-map.html`，覆盖 7 个页面的可点击项视觉标注
+  - 导出 `docs/ui-annotations/scheme-d-interaction-map.png` 作为整页预览图
+- 已完成事项：
+  - 已提供“可视化标注图 + 编号说明”交付物
+  - 可直接按编号进行功能验收与问题定位
+- 未完成事项：
+  - 暂无（本次标注图任务已完成）
+- 当前可测试内容：
+  - 打开 `docs/ui-annotations/scheme-d-interaction-map.html` 查看交互标注
+  - 查看 `docs/ui-annotations/scheme-d-interaction-map.png` 快速预览
+- 风险说明：
+  - 标注图基于方案 D 页面结构，若后续布局改动需同步更新标注坐标
+- 下一个任务：
+  - 根据你的验收反馈继续细化页面交互或补充管理员场景标注
+
+---
+
+## 2026-03-11 10:02:43 CST
+
+- 任务：第十八轮开发-提交A：后端托管前端静态资源方案设计
+- 时间：2026-03-11 10:02:43 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `7edb1c2`
+- 本次修改：
+  - 新增 `docs/ROUND18_BACKEND_STATIC_HOSTING_DESIGN.md`
+  - 明确“前端 build 后由后端托管”的路由策略、配置项与最小提交计划
+- 已完成事项：
+  - 完成先设计阶段，确认将以开关方式启用单后端托管模式
+- 未完成事项：
+  - 后端托管代码实现
+  - 启动文档更新与验证
+- 当前可测试内容：
+  - 设计文档可评审
+- 风险说明：
+  - 若前端未 build 或 dist 缺失，托管模式无法提供页面
+- 下一个任务：
+  - 提交B：实现后端静态托管与 SPA 回退路由
+
+---
+
+## 2026-03-11 10:05:13 CST
+
+- 任务：第十八轮开发-提交B：实现前端build后后端静态托管与SPA回退
+- 时间：2026-03-11 10:05:13 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `a100d10`
+- 本次修改：
+  - 新增后端配置项：`APP_SERVE_FRONTEND`、`FRONTEND_DIST_DIR`
+  - `APP_SERVE_FRONTEND=true` 时，API 路由改为 `/api/*`
+  - 增加前端 `dist` 静态文件托管与 SPA fallback（非 `/api/*` 路径回退 `index.html`）
+- 已完成事项：
+  - 已实现单后端托管模式核心能力
+  - 已验证托管模式下 `/`、`/files`、静态文件与 `/api/healthz` 可访问
+- 未完成事项：
+  - README 与 SETUP 文档尚未补充“单后端托管模式”操作说明
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q tests/test_range_download_api.py`（通过）
+  - 临时脚本验证：托管模式下 `/` 与 `/files` 返回 `index.html`，`/api/healthz` 返回 200
+- 风险说明：
+  - 托管模式依赖前端 `dist` 存在，未构建时仅提供 API
+- 下一个任务：
+  - 提交C：更新 `.env.example`、README、SETUP，补充单后端启动说明
+
+---
+
+## 2026-03-11 10:06:17 CST
+
+- 任务：第十八轮开发-提交C：补充单后端托管启动文档与环境样板
+- 时间：2026-03-11 10:06:17 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `5784b73`
+- 本次修改：
+  - 更新 `backend/.env.example`，新增 `APP_SERVE_FRONTEND`、`FRONTEND_DIST_DIR`
+  - 更新 `README.md`，补充“前端 build + 后端托管”单进程启动步骤
+  - 更新 `docs/SETUP.md`，补充单后端托管模式完整命令与验证方式
+- 已完成事项：
+  - 已提供可执行的单后端启动说明
+  - 已明确托管模式下页面与 API 访问入口
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `APP_SERVE_FRONTEND=true` 后启动后端并访问 `http://127.0.0.1:8000/files`
+  - `GET http://127.0.0.1:8000/api/healthz`
+- 风险说明：
+  - 若未先执行前端 build，后端托管模式不会返回页面文件
+- 下一个任务：
+  - 第十八轮规范收尾与远端同步
+
+---
+
+## 2026-03-11 10:17:28 CST
+
+- 任务：第十八轮开发-提交D：修复单后端托管模式首页404问题
+- 时间：2026-03-11 10:17:28 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `49c8cc1`
+- 本次修改：
+  - 修复后端默认前端构建目录解析错误（`frontend/dist` 路径多退了一层目录）
+  - 新增托管模式缺少构建产物时的启动告警日志
+- 已完成事项：
+  - `APP_SERVE_FRONTEND=true` 且存在 `frontend/dist` 时，`/` 与 `/files` 均可返回前端页面
+  - `/api/healthz` 在托管模式下保持可用
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `APP_SERVE_FRONTEND=true` 启动后端，访问 `GET /`、`GET /files` 应返回 `text/html`
+  - `GET /api/healthz` 返回 200
+  - `APP_SERVE_FRONTEND=false pytest -q tests/test_range_download_api.py`（4 passed）
+- 风险说明：
+  - 当 `APP_SERVE_FRONTEND=true` 时，历史不带 `/api` 前缀的后端接口路径不再可用（属设计预期）
+- 下一个任务：
+  - 如需兼容旧路径，可增加可选的 API 双前缀兼容开关
+
+---
+
+## 2026-03-11 10:25:56 CST
+
+- 任务：第十九轮开发-提交A：标题跳动与导航页数问题根因分析
+- 时间：2026-03-11 10:25:56 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `dfb0d27`
+- 本次修改：
+  - 新增 `docs/ROUND19_UI_HEIGHT_AND_NAV_RCA.md`
+  - 输出“问题现象 -> 可能原因 -> 验证步骤 -> 验证结果 -> 最终根因 -> 修复方案”
+- 已完成事项：
+  - 确认页面未删除，属于导航按权限隐藏导致可见页数减少
+  - 确认标题区仍存在临界视口重排风险
+- 未完成事项：
+  - 代码修复（固定高度 + 导航可见性策略调整）
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND19_UI_HEIGHT_AND_NAV_RCA.md`
+- 风险说明：
+  - 若不调整导航策略，普通用户仍会误解为页面缺失
+- 下一个任务：
+  - 提交B：修复标题跳动与导航显示策略
+
+---
+
+## 2026-03-11 10:29:36 CST
+
+- 任务：第十九轮开发-提交B：修复标题跳动并恢复核心页面导航可见性
+- 时间：2026-03-11 10:29:36 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `e916981`
+- 本次修改：
+  - 调整 `frontend/src/App.vue` 导航策略：登录后显示全部核心页面入口（含后台/日志）
+  - 非管理员点击后台/日志时给出“仅管理员可访问”提示，不再误解为页面被删除
+  - 强化 `frontend/src/styles/main.css` 标题区与卡片标题区固定高度约束，降低页面切换跳动
+  - 更新 `frontend/playwright.config.js`，E2E 固定 `APP_SERVE_FRONTEND=false`，避免受本地 `.env` 干扰
+- 已完成事项：
+  - 页面并未删除的问题已在 UI 层明确（入口可见）
+  - 标题跳动风险进一步收敛（固定高度 + 单行截断）
+  - 前端 E2E（3 项）全部通过
+  - 后端下载回归测试（4 项）通过
+- 未完成事项：
+  - 若仍存在个别设备跳动，需要补充该设备分辨率下的专门断言
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`（3 passed）
+  - 登录后观察导航应包含：文件列表、上传、预览、回收站、后台、日志
+- 风险说明：
+  - 非管理员看到后台/日志入口但无访问权限，点击会提示并停留当前页（属预期）
+- 下一个任务：
+  - 根据你的实机反馈继续做像素级微调
+
+---
+
+## 2026-03-11 11:11:22 CST
+
+- 任务：第二十轮开发-提交A：5项问题根因分析与最小修复方案冻结
+- 时间：2026-03-11 11:11:22 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `8472a8a`
+- 本次修改：
+  - 新增 `docs/ROUND20_UI_DOWNLOAD_TREE_PREVIEW_RCA.md`
+  - 按“问题现象 -> 可能原因 -> 验证步骤 -> 验证结果 -> 最终根因 -> 修复方案”分析以下 5 项：标题跳动、下载500、右上角伪按钮、文件树能力缺失、预览依赖 fileId 与 TXT 预览失败
+  - 冻结后续最小提交顺序（后端错误修复 -> 前端交互修复 -> 文件树与预览改造）
+- 已完成事项：
+  - 5 个问题均完成根因确认，满足“先分析后改代码”
+  - 已明确不做过度设计：文件树采用路径前缀虚拟目录方案（MVP）
+- 未完成事项：
+  - 后端下载/预览异常处理修复与测试落地
+  - 前端标题区稳定与右上角交互修复
+  - 文件树与预览交互改造实现
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND20_UI_DOWNLOAD_TREE_PREVIEW_RCA.md`
+- 风险说明：
+  - 若现网已有历史“对象缺失但元数据存在”数据，修复后会从 500 变为 404（属于正确行为但会暴露存储一致性问题）
+- 下一个任务：
+  - 提交B：修复后端下载500与TXT预览失败，并补充回归测试
+
+---
+
+## 2026-03-11 11:15:40 CST
+
+- 任务：第二十轮开发-提交B：修复下载500与TXT预览失败（含回归测试）
+- 时间：2026-03-11 11:15:40 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `55affd1`
+- 本次修改：
+  - 更新 `backend/app/api/files.py`：
+    - 下载/预览接口统一捕获对象缺失 `FileNotFoundError`，返回 404 `文件内容不存在`
+    - 预览规则新增文本扩展名兜底（`.txt/.md/.log/.json/.csv/.yaml/.yml`）
+    - `application/octet-stream` 且文本扩展名时按 `text/plain` 预览
+  - 更新 `backend/tests/conftest.py`：测试环境强制 `APP_SERVE_FRONTEND=false`，避免静态托管模式污染 API 用例
+  - 新增回归测试：
+    - `tests/test_range_download_api.py::test_download_returns_404_when_object_missing`
+    - `tests/test_file_preview_api.py::test_preview_text_extension_with_octet_stream_supported`
+    - `tests/test_file_preview_api.py::test_preview_returns_404_when_object_missing`
+- 已完成事项：
+  - 下载 500 根因修复，异常已转为可理解的 404
+  - TXT/LOG 等文本文件在 MIME 不准确时可正常预览
+  - 相关测试全部通过（`10 passed`）
+- 未完成事项：
+  - 前端标题栏稳定性和右上角伪按钮交互修复
+  - 文件树展示与“按路径预览”交互改造
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_range_download_api.py tests/test_file_preview_api.py`
+- 风险说明：
+  - 旧数据若对象内容已丢失，会稳定返回 404（不再 500），需要后续补一致性巡检策略
+- 下一个任务：
+  - 提交C：修复前端标题区抖动并替换右上角误导性按钮
+
+---
+
+## 2026-03-11 11:16:44 CST
+
+- 任务：第二十轮开发-提交C：固定标题栏高度并消除右上角伪按钮误导
+- 时间：2026-03-11 11:16:44 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `f1ffb0c`
+- 本次修改：
+  - 更新 `frontend/src/App.vue`：将右上角“全局搜索/管理员”由无行为按钮改为状态标签（`Tag`）
+  - 更新 `frontend/src/styles/main.css`：
+    - 顶栏改为刚性 `height: 80px`
+    - 标题容器固定为 `44px` 并限制溢出
+    - 顶栏右侧动作区固定高度与最小宽度，减少切换重排
+    - 主体区高度计算同步使用 `80px` 顶栏高度
+  - 运行前端构建验证通过
+- 已完成事项：
+  - 页面切换时顶部标题区域高度稳定性进一步增强
+  - 右上角不再出现“看起来能点但实际无功能”的伪按钮
+- 未完成事项：
+  - 文件列表文件树（多级目录）交互改造
+  - 预览页去 fileId 手输并改为路径/文件选择驱动
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - 登录后切换 `/files` `/upload` `/preview` `/recycle` `/admin/logs`，观察顶栏高度应保持一致
+- 风险说明：
+  - 若后续增加极长标题文案，仍会被单行截断（属于预期）
+- 下一个任务：
+  - 提交D：实现文件树视图、上传目标目录和预览页按文件选择
+
+---
+
+## 2026-03-11 11:24:28 CST
+
+- 任务：第二十轮开发-提交D：文件树目录视图、路径上传与预览交互改造
+- 时间：2026-03-11 11:24:28 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `581d409`
+- 本次修改：
+  - 后端目录过滤能力：
+    - `GET /files` 新增 `directory` 查询参数（目录前缀过滤）
+    - `backend/app/services/file_service.py` 增加目录过滤逻辑
+    - 新增测试 `tests/test_file_list_api.py::test_files_api_directory_filter`
+  - 前端文件树与目录工作流：
+    - `frontend/src/views/FileCenterView.vue` 增加“文件树（基于路径）+ 目录切换 + 手动目录输入 + 上传到当前目录”
+    - 文件表格字段由“文件名”升级为“文件路径”
+  - 上传支持目标目录：
+    - `frontend/src/views/UploadView.vue` 新增“目标文件夹”输入
+    - 上传请求 `file_name` 按 `folder/filename` 组装
+  - 预览页去 fileId 手输：
+    - `frontend/src/views/PreviewView.vue` 改为“最近文件列表选择后预览”
+    - 导航直接进预览页时无需知道 fileId，可先选文件路径
+  - API 与样式配套：
+    - `frontend/src/api/files.js` 支持传递 `directory`
+    - `frontend/src/styles/main.css` 新增文件树布局样式
+- 已完成事项：
+  - 文件列表具备树形目录视角（MVP 虚拟目录）
+  - 上传可指定目录路径
+  - 预览流程从“输入ID”改为“按文件路径选择”
+- 未完成事项：
+  - 目录为空时的“纯文件夹（无文件）”持久化暂未实现（当前采用路径虚拟目录）
+  - 页面交互标注文档需按新交互刷新
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py tests/test_range_download_api.py tests/test_file_preview_api.py`（13 passed）
+  - `cd frontend && npm run build`
+  - 登录后在文件列表页验证：目录树切换、上传到当前目录、预览页按路径选择
+- 风险说明：
+  - 文件树由已有文件路径推导，不包含“空目录”实体；若后续需要空目录管理，需引入独立目录模型
+- 下一个任务：
+  - 提交E：更新页面交互说明文档，逐按钮标注行为与预期反馈
+
+---
+
+## 2026-03-11 11:25:38 CST
+
+- 任务：第二十轮开发-提交E：补充页面逐按钮交互说明文档
+- 时间：2026-03-11 11:25:38 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `c3a497a`
+- 本次修改：
+  - 新增 `docs/PAGE_ACTIONS.md`
+  - 覆盖登录、注册、文件列表、上传、预览、回收站、后台管理、操作日志与顶栏全局元素
+  - 逐项说明“是否可点击、点击后行为、成功反馈、失败反馈、对应接口”
+- 已完成事项：
+  - 页面可点击项与行为边界已文档化，可直接作为测试清单
+  - 右上角非功能项（全局搜索/管理员）已明确为状态展示，避免误测
+- 未完成事项：
+  - 可视化标注图（PNG/HTML）尚未按最新布局重绘
+- 当前可测试内容：
+  - 打开 `docs/PAGE_ACTIONS.md`，逐项对照页面进行手工验收
+- 风险说明：
+  - 若后续新增按钮或调整文案，需同步更新该文档避免测试口径漂移
+- 下一个任务：
+  - 提交F：用 Playwright 自动回归核心链路并输出问题清单（如有）
+
+---
+
+## 2026-03-11 11:29:07 CST
+
+- 任务：第二十轮开发-提交F：自动化回归测试适配新UI并复跑通过
+- 时间：2026-03-11 11:29:07 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `b8279fc`
+- 本次修改：
+  - 更新 `frontend/e2e/core-flow.spec.js`，将旧按钮选择器“前往上传页”调整为“上传到当前目录”
+  - 先执行一轮自动化验证定位失败点，再修复后复跑 `npm run e2e` 全通过
+- 已完成事项：
+  - E2E 已适配当前方案 D UI 改造
+  - 前端自动化用例 3/3 通过：核心流程、登录页可达、标题区稳定性
+- 未完成事项：
+  - 暂无
+- 当前可测试内容：
+  - `cd frontend && npm run e2e`（3 passed）
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py tests/test_range_download_api.py tests/test_file_preview_api.py`（13 passed）
+- 风险说明：
+  - E2E 选择器依赖按钮文案，后续若改文案需同步更新测试
+- 下一个任务：
+  - 本轮规范收尾：汇总分支状态、提交记录、可测试清单与下一步
+
+---
+
+## 2026-03-11 11:44:11 CST
+
+- 任务：第二十一轮开发-提交A：布局、过滤与404问题根因分析
+- 时间：2026-03-11 11:44:11 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `e792a21`
+- 本次修改：
+  - 新增 `docs/ROUND21_LAYOUT_FILTER_DOWNLOAD_RCA.md`
+  - 按固定格式分析 5 项问题：标题跳动、页面过窄、手动目录输入不需要、根目录/logs过滤语义不符、下载预览404
+  - 冻结最小提交执行顺序（A~E）
+- 已完成事项：
+  - 新一轮 bug 修复前的根因分析完成，满足“先分析后改代码”
+- 未完成事项：
+  - 前端布局与文件树交互修复
+  - 目录过滤语义修复
+  - 历史路径对象读取兼容修复（下载/预览404）
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND21_LAYOUT_FILTER_DOWNLOAD_RCA.md`
+- 风险说明：
+  - 若历史对象在所有候选目录均不存在，仍会返回404，需要重新上传补齐对象内容
+- 下一个任务：
+  - 提交B：前端布局全宽化、稳定化，并移除手动目录输入
+
+---
+
+## 2026-03-11 11:47:20 CST
+
+- 任务：第二十一轮开发-提交B：页面全宽化与标题/导航稳定化，移除手动目录输入
+- 时间：2026-03-11 11:47:20 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `13a7ccd`
+- 本次修改：
+  - 更新 `frontend/src/styles/main.css`：
+    - 页面容器改为全宽，不再限制中间窄列
+    - 保留滚动槽位，减少页面切换重排
+    - 导航普通态/激活态统一字体权重，降低切换抖动
+    - 文件列表两列布局调优，操作列显示空间增大
+  - 更新 `frontend/src/views/FileCenterView.vue`：
+    - 删除“手动输入目录”模块
+    - 保留纯树节点点击切换目录
+    - 文件树头部增加“根目录/刷新”快捷按钮
+    - 清理历史遗留语法问题，保证页面稳定构建
+  - 运行 `cd frontend && npm run build` 验证通过
+- 已完成事项：
+  - 页面已由中间窄列改为全宽利用
+  - 手动目录输入已移除
+  - 顶部与导航切换稳定性进一步增强
+- 未完成事项：
+  - 根目录/logs 过滤语义修正（当前仍为前缀递归）
+  - 历史对象路径兼容修复，解决旧文件下载/预览404
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - 登录后切换页面观察标题/导航稳定性
+  - 文件列表页检查操作列无需横向滚动即可看到
+- 风险说明：
+  - 在极窄分辨率下表格仍可能触发横向滚动（移动端预期行为）
+- 下一个任务：
+  - 提交C：目录过滤改为“当前目录直系文件”语义
+
+---
+
+## 2026-03-11 11:48:49 CST
+
+- 任务：第二十一轮开发-提交C：目录过滤改为当前层级直系文件语义
+- 时间：2026-03-11 11:48:49 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `357c0e7`
+- 本次修改：
+  - 更新 `backend/app/services/file_service.py`：
+    - `directory="__root__"` 时仅返回根目录直系文件（不含 `/`）
+    - `directory="logs"` 时仅返回 `logs/*` 的直系文件（排除更深层）
+  - 更新 `backend/app/api/files.py`：补充 `directory` 参数语义说明
+  - 更新 `backend/tests/test_file_list_api.py`：新增根目录/目录直系过滤断言
+  - 更新 `frontend/src/views/FileCenterView.vue`：
+    - 根目录节点改为 `__root__` 标记
+    - 树节点选择时稳定解析目录值
+    - 顶部“当前目录”与“上传到当前目录”适配根目录标记
+- 已完成事项：
+  - 根目录和 logs 目录现在采用文件浏览器语义，不再递归混合显示
+- 未完成事项：
+  - 历史对象路径兼容修复（下载/预览404）
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py`（3 passed）
+  - `cd frontend && npm run build`
+  - 页面手工测试：点击“根目录 / logs”应看到不同层级结果
+- 风险说明：
+  - 若目录下仅有子目录无直系文件，则列表会为空（符合直系语义）
+- 下一个任务：
+  - 提交D：对象存储 fallback 兼容历史路径，修复下载/预览404
+
+---
+
+## 2026-03-11 11:53:23 CST
+
+- 任务：第二十一轮开发-提交D：对象存储兼容历史路径，修复下载/预览404
+- 时间：2026-03-11 11:53:23 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `0cf5a97`
+- 本次修改：
+  - 更新 `backend/app/services/object_storage.py`：
+    - fallback 从单路径改为多候选路径（当前目录、`backend/tmp/object_store`、`repo/tmp/object_store`）
+    - 下载/预览读取时自动扫描历史路径，兼容旧上传文件
+    - 删除对象时同步清理多路径副本
+  - 更新 `backend/tests/test_range_download_api.py`：
+    - 新增 `test_download_reads_legacy_fallback_path`，覆盖“主路径缺失但历史路径存在”场景
+  - 清理本轮测试产物目录 `tmp/`
+- 已完成事项：
+  - 历史 fallback 路径导致的下载/预览 404 问题已修复
+  - 回归测试覆盖并通过
+- 未完成事项：
+  - 本轮最终收尾与E2E复跑汇总
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_range_download_api.py tests/test_file_preview_api.py tests/test_file_list_api.py`（14 passed）
+- 风险说明：
+  - 若对象在所有候选路径及 MinIO 中都不存在，仍会返回 404（真实缺失）
+- 下一个任务：
+  - 提交E：前后端自动化回归全量复跑并规范收尾
+
+---
+
+## 2026-03-11 12:03:45 CST
+
+- 任务：第二十一轮开发-提交E：自动化回归复跑与规范收尾记录
+- 时间：2026-03-11 12:03:45 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `31ec201`
+- 本次修改：
+  - 执行后端全量测试：`cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`（28 passed）
+  - 执行前端 E2E：`cd frontend && npm run e2e`（3 passed）
+  - 记录一次并行测试干扰结论：`pytest` 清理 `tmp/uploads` 会影响并行 E2E 上传，后续改为串行执行
+  - 清理回归过程生成的临时目录 `tmp/`
+- 已完成事项：
+  - 本轮修复项均有自动化验证通过
+  - 已形成可复现的回归命令集
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - 后端全量：`cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`
+  - 前端 E2E：`cd frontend && npm run e2e`
+  - 前端构建：`cd frontend && npm run build`
+- 风险说明：
+  - 回归阶段需避免并行执行“会清理上传临时目录”的测试命令与E2E
+- 下一个任务：
+  - 推送本轮提交到远端并等待你复测页面交互与下载预览链路
+
+---
+
+## 2026-03-11 12:12:42 CST
+
+- 任务：第二十二轮开发-提交A：导航栏高度跳动根因分析
+- 时间：2026-03-11 12:12:42 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `e62256a`
+- 本次修改：
+  - 新增 `docs/ROUND22_NAV_BAR_HEIGHT_RCA.md`
+  - 使用真实浏览器逐页测量 `.topbar`、`.page-info`、`.sidebar`
+  - 确认问题不在标题高度，而在 `.shell` 的 Grid 自动行拉伸与 `.sidebar` 的 `align-items: flex-end`
+- 已完成事项：
+  - 已确认唯一根因，不再盲改标题样式
+- 未完成事项：
+  - `.shell` 与 `.sidebar` 的样式修复
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND22_NAV_BAR_HEIGHT_RCA.md`
+- 风险说明：
+  - 若后续重新引入 Grid 自动行拉伸，导航栏跳动会复发
+- 下一个任务：
+  - 提交B：将 `.shell` 改为纵向 Flex 并固定导航栏垂直对齐
+
+---
+
+## 2026-03-11 12:14:41 CST
+
+- 任务：第二十二轮开发-提交B：修复导航栏高度跳动根因并补稳定性断言
+- 时间：2026-03-11 12:14:41 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `6f729b8`
+- 本次修改：
+  - 更新 `frontend/src/styles/main.css`
+  - 将 `.shell` 从 Grid 改为纵向 Flex，避免自动行在 `min-height` 下被拉伸
+  - 将 `.sidebar` 改为固定 `42px` 高度，并设置 `align-items: center`
+  - 更新 `frontend/e2e/layout-stability.spec.js`，新增导航栏高度稳定断言
+  - 真实浏览器复测四页：`.sidebar` 统一为 `42px`，导航按钮顶部坐标统一为 `107px`
+- 已完成事项：
+  - 文件列表、上传、预览、后台日志切换时，导航栏高度已固定
+  - 根因修复已转化为自动化断言，避免回归
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/layout-stability.spec.js`（1 passed）
+- 风险说明：
+  - 若后续再次把 `.shell` 改回 Grid 并保留 `min-height`，问题会复发
+- 下一个任务：
+  - 推送本次修复到远端，等待你复测这一个导航栏高度问题
+
+---
+
+## 2026-03-11 12:27:07 CST
+
+- 任务：第二十三轮开发-提交A：文件列表页树形区与查询区调整设计
+- 时间：2026-03-11 12:27:07 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `cccf141`
+- 本次修改：
+  - 新增 `docs/ROUND23_FILECENTER_TREE_AND_SORT_DESIGN.md`
+  - 固化三项调整：左侧文件树加宽并压缩字体、查询区改为关键字+排序、当前目录显示与所选目录保持一致
+- 已完成事项：
+  - 本轮修改范围与交互方案已冻结
+- 未完成事项：
+  - 后端排序参数实现
+  - 前端文件列表页表单与树形区样式实现
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND23_FILECENTER_TREE_AND_SORT_DESIGN.md`
+- 风险说明：
+  - 排序能力若只加在 `/files`，其他页面查询区不会自动获得同样选项（本轮属预期）
+- 下一个任务：
+  - 提交B：实现 `/files` 排序参数与测试
+
+---
+
+## 2026-03-11 12:28:34 CST
+
+- 任务：第二十三轮开发-提交B：实现文件列表排序参数与测试
+- 时间：2026-03-11 12:28:34 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `67d23f0`
+- 本次修改：
+  - 更新 `backend/app/api/files.py`：新增 `sort_by` 查询参数
+  - 更新 `backend/app/services/file_service.py`：新增 6 种排序映射与排序应用逻辑
+  - 更新 `backend/tests/test_file_list_api.py`：新增按文件名和文件大小排序断言
+- 已完成事项：
+  - `/files` 已支持前端需要的排序能力
+  - 后端排序测试通过
+- 未完成事项：
+  - 前端文件列表页改成“关键字 + 排序”表单
+  - 左侧文件树加宽并压缩字体
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py`（4 passed）
+- 风险说明：
+  - 当前排序只作用于 `/files`，不影响回收站与后台管理页
+- 下一个任务：
+  - 提交C：实现文件列表页树形区与查询区前端改造
+
+---
+
+## 2026-03-11 12:29:52 CST
+
+- 任务：第二十三轮开发-提交C：文件列表页树形区与查询区前端改造
+- 时间：2026-03-11 12:29:52 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `4a2dd0e`
+- 本次修改：
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 删除最小/最大字节过滤项，改为“文件名关键字 + 排序方式”
+  - 当前目录标签改为直接依赖当前选中目录
+  - 更新 `frontend/src/api/files.js`，请求 `/files` 时传递 `sort_by`
+  - 更新 `frontend/src/styles/main.css`
+  - 左侧文件树加宽到 `320px`
+  - 文件树节点字号压到 `12px`、行高压缩，提升同屏显示密度
+  - 新增排序下拉框样式
+- 已完成事项：
+  - 文件列表页查询区已按需求改为排序
+  - 左侧文件树更接近 VS Code 风格的紧凑层级显示
+  - 当前目录显示与选中目录保持一致
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - 文件列表页验证：左侧树更宽更密、查询区已无大小过滤、排序可切换
+- 风险说明：
+  - 当前排序控件使用原生 `select`，后续若全站统一 PrimeVue 表单风格，可再收口为统一组件
+- 下一个任务：
+  - 推送本轮提交并等待你复测文件列表页
+
+---
+
+## 2026-03-11 12:50:11 CST
+
+- 任务：第二十四轮开发-提交A：文件列表目录选择与排序问题根因分析
+- 时间：2026-03-11 12:50:11 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `bd7d4b6`
+- 本次修改：
+  - 新增 `docs/ROUND24_FILECENTER_SELECTION_AND_SORT_RCA.md`
+  - 确认 PrimeVue `Tree` 的 `selectionKeys` / `expandedKeys` 需要对象映射
+  - 确认当前实现使用了错误的字符串绑定，且排序切换没有自动触发加载
+- 已完成事项：
+  - 目录点击不同步与排序不重排的根因已确认
+- 未完成事项：
+  - 修复树形选择状态与展开状态
+  - 修复排序切换自动刷新
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND24_FILECENTER_SELECTION_AND_SORT_RCA.md`
+- 风险说明：
+  - 若继续把 `Tree` 当作非受控组件使用，目录状态问题会反复出现
+- 下一个任务：
+  - 提交B：修复目录选择状态、当前目录同步和排序自动重排
+
+---
+
+## 2026-03-11 12:57:53 CST
+
+- 任务：第二十四轮开发-提交B：修复文件列表目录切换与排序即时生效
+- 时间：2026-03-11 12:57:53 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `7b1eb15`
+- 本次修改：
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 修正 PrimeVue `Tree` 的 `node-select` 事件处理签名，目录点击后同步更新当前目录与文件列表
+  - 保留排序切换即时触发加载逻辑
+  - 更新 `frontend/e2e/file-center-tree-sort.spec.js`
+  - 将目录点击定位收紧到左侧文件树节点，补齐“切目录 + 当前目录同步 + 排序即时生效”回归断言
+- 已完成事项：
+  - 点击 `logs` 目录后，当前目录会切换到 `logs`
+  - 根目录与子目录文件列表按当前层级正确过滤
+  - 排序方式切换后，文件列表会立即重排
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-tree-sort.spec.js`
+- 风险说明：
+  - 当前目录树仍依赖全量文件列表构建，目录量非常大时需要再考虑独立目录索引接口
+- 下一个任务：
+  - 推送本次修复并等待你复测根目录、logs 目录和排序切换
+
+---
+
+## 2026-03-11 13:04:35 CST
+
+- 任务：第二十五轮开发-提交A：冻结目录路径语义与文件夹能力设计
+- 时间：2026-03-11 13:04:35 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `5f78c8a`
+- 本次修改：
+  - 新增 `docs/ROUND25_DIRECTORY_PATH_AND_FOLDER_DESIGN.md`
+  - 明确当前目录显示统一采用绝对路径格式：根目录 `/`、子目录 `/logs/`
+  - 明确文件夹能力采用独立 `folders` 元数据表，不再仅依赖文件路径反推
+  - 冻结本轮最小提交拆分：显示语义修复、后端文件夹能力、前端交互
+- 已完成事项：
+  - 问题一已完成根因分析
+  - 问题二已完成 MVP 级实施设计
+- 未完成事项：
+  - 当前目录展示还未改为绝对路径
+  - 文件夹创建/删除能力尚未实现
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND25_DIRECTORY_PATH_AND_FOLDER_DESIGN.md`
+- 风险说明：
+  - 若继续只用文件路径反推目录，将无法支持空文件夹与目录级删除
+- 下一个任务：
+  - 提交B：修复当前目录绝对路径显示并补充测试
+
+---
+
+## 2026-03-11 13:07:10 CST
+
+- 任务：第二十五轮开发-提交B：修复当前目录绝对路径显示
+- 时间：2026-03-11 13:07:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `e2b2d3c`
+- 本次修改：
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 当前目录标签改为绝对路径显示：根目录 `/`、子目录 `/<path>/`
+  - 更新 `frontend/e2e/file-center-tree-sort.spec.js`
+  - 回归断言同步改为 `/logs/` 和 `/`
+- 已完成事项：
+  - 根目录与子目录的当前目录显示语义已统一
+  - 目录切换回归测试通过
+- 未完成事项：
+  - 文件夹创建/删除能力尚未实现
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-tree-sort.spec.js`
+- 风险说明：
+  - 当前仅修复显示语义，不影响目录筛选参数本身
+- 下一个任务：
+  - 提交C：实现后端文件夹创建/删除与目录树接口
+
+---
+
+## 2026-03-11 13:11:10 CST
+
+- 任务：第二十五轮开发-提交C：实现后端文件夹创建删除与目录树接口
+- 时间：2026-03-11 13:11:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `948e907`
+- 本次修改：
+  - 新增 `backend/app/models/folder.py`，引入文件夹元数据表
+  - 新增 `backend/app/services/folder_service.py`，实现目录路径标准化、目录树聚合、新建文件夹、删除空文件夹
+  - 新增 `backend/app/api/folders.py`，提供 `/folders/tree`、`POST /folders`、`DELETE /folders`
+  - 更新 `backend/app/api/router.py`、`backend/app/db/init_db.py`、`backend/app/models/__init__.py`、`backend/app/schemas/__init__.py`
+  - 新增 `backend/app/schemas/folder.py`
+  - 新增 `backend/tests/test_folder_api.py`
+  - 更新 `backend/tests/conftest.py` 以纳入 `Folder` 模型建表/清理
+- 已完成事项：
+  - 已支持真实文件夹元数据
+  - 已支持目录树接口返回“显式文件夹 + 文件路径派生目录”的合并结果
+  - 已支持在任意已存在目录下创建文件夹
+  - 已支持删除空文件夹，并阻止删除含文件或子目录的文件夹
+- 未完成事项：
+  - 前端文件树尚未接入新接口
+  - 文件列表页尚未提供新建/删除文件夹按钮
+- 当前可测试内容：
+  - `rm -f backend/test_suite.db && cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_folder_api.py && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py`
+- 风险说明：
+  - 当前后端测试共用同一个 SQLite 文件，回归时必须串行执行，不能并行跑
+- 下一个任务：
+  - 提交D：实现前端文件树的新建/删除文件夹交互并补充 E2E
+
+---
+
+## 2026-03-11 13:13:53 CST
+
+- 任务：第二十五轮开发-提交D：实现文件树文件夹创建删除交互
+- 时间：2026-03-11 13:13:53 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `35299a8`
+- 本次修改：
+  - 更新 `frontend/src/api/files.js`，新增目录树、新建文件夹、删除文件夹请求封装
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 文件树改为读取 `/folders/tree`
+  - 新增 `新建文件夹`、`删除当前文件夹` 按钮
+  - 创建后自动选中新目录，删除后自动回退到上级目录
+  - 新增 `frontend/e2e/file-center-folder-management.spec.js`
+  - 覆盖创建根目录子文件夹、创建二级文件夹、删除空文件夹、阻止删除含文件目录
+- 已完成事项：
+  - 文件列表页已支持任意已存在目录下创建新文件夹
+  - 文件列表页已支持删除空文件夹
+  - 删除含文件目录会给出明确错误提示
+  - 原有目录切换和排序回归测试保持通过
+- 未完成事项：
+  - 暂未提供文件夹重命名能力
+  - 暂未提供批量目录操作
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-tree-sort.spec.js e2e/file-center-folder-management.spec.js`
+- 风险说明：
+  - 当前新建文件夹交互使用浏览器原生 `prompt`，后续如果要统一方案 D 的视觉语言，应替换为 PrimeVue 对话框
+- 下一个任务：
+  - 规范收尾并推送本轮全部提交
+
+---
+
+## 2026-03-11 13:17:20 CST
+
+- 任务：第二十六轮开发-提交A：新增仓库级 AGENTS 规则文件
+- 时间：2026-03-11 13:17:20 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `43240b2`
+- 本次修改：
+  - 新增根目录 `AGENTS.md`
+  - 写入 7 条项目执行规则，包括语言、GitFlow、虚拟环境、bug 根因分析、进度文档、直接执行命令范围、中文代码注释
+- 已完成事项：
+  - 仓库级代理执行规则已落地
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - 打开 `AGENTS.md` 检查规则内容是否与要求一致
+- 风险说明：
+  - 当前规则文件使用标准大写命名 `AGENTS.md`；若后续你明确要求同时保留小写 `agents.md`，需要再补一个镜像文件
+- 下一个任务：
+  - 推送本次规则文件提交
+
+---
+
+## 2026-03-11 13:23:06 CST
+
+- 任务：第二十七轮开发-提交A：分析目录回收断层并冻结文件夹生命周期设计
+- 时间：2026-03-11 13:23:06 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `d995ef9`
+- 本次修改：
+  - 新增 `docs/ROUND27_FOLDER_LIFECYCLE_AND_TREE_LAYOUT.md`
+  - 明确非空目录“像被删掉”的根因不是删除判定放行，而是目录树只显示活跃目录、回收站缺少文件夹生命周期承接
+  - 冻结本轮最小实施范围：文件夹重命名、递归删除、文件夹回收站、文件树布局改造
+- 已完成事项：
+  - 非空目录删除表现异常的根因已确认
+  - 文件夹完整生命周期方案已确定
+- 未完成事项：
+  - 后端文件夹重命名、递归删除、回收站接口尚未实现
+  - 前端目录交互和回收站界面尚未接入
+  - 文件树虚线与横向布局尚未调整
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND27_FOLDER_LIFECYCLE_AND_TREE_LAYOUT.md`
+- 风险说明：
+  - 文件夹重命名需要级联更新文件路径，必须补测试避免预览、下载、回收站路径失配
+- 下一个任务：
+  - 提交B：实现后端文件夹重命名、递归删除与回收站接口
+
+---
+
+## 2026-03-11 13:28:27 CST
+
+- 任务：第二十七轮开发-提交B：实现后端文件夹重命名递归删除与回收站接口
+- 时间：2026-03-11 13:28:27 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `6a59d62`
+- 本次修改：
+  - 更新 `backend/app/services/folder_service.py`
+  - 新增文件夹重命名、递归删除、文件夹回收站列表、恢复、彻底删除能力
+  - 更新 `backend/app/api/folders.py`
+  - 新增 `PATCH /folders/rename`
+  - 扩展 `DELETE /folders` 支持 `recursive=true`
+  - 更新 `backend/app/api/recycle.py`
+  - 新增 `GET /recycle/folders`
+  - 新增 `POST /recycle/folders/restore`
+  - 新增 `DELETE /recycle/folders/purge`
+  - 更新 `backend/app/schemas/folder.py` 与 `backend/app/schemas/__init__.py`
+  - 更新 `backend/tests/test_folder_api.py`，补齐重命名、递归删除、文件夹回收站恢复与彻底删除测试
+- 已完成事项：
+  - 已支持文件夹重命名并级联更新子文件与子目录路径
+  - 已支持递归删除非空文件夹到回收站
+  - 已支持文件夹回收站列表、恢复、彻底删除
+  - 已消除“目录消失但没有恢复入口”的目录生命周期断层
+- 未完成事项：
+  - 前端尚未接入文件夹重命名、递归删除、文件夹回收站
+  - 文件树横向排版与虚线层级尚未调整
+- 当前可测试内容：
+  - `rm -f backend/test_suite.db && cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_folder_api.py tests/test_recycle_api.py`
+- 风险说明：
+  - 文件夹重命名会直接更新文件元数据路径，后续需补前端流程回归，确认预览、下载入口仍正常
+- 下一个任务：
+  - 提交C：实现前端文件夹重命名、递归删除和文件夹回收站交互
+
+---
+
+## 2026-03-11 13:31:15 CST
+
+- 任务：第二十七轮开发-提交C：实现前端文件夹生命周期交互与回收站操作
+- 时间：2026-03-11 13:31:15 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `d196624`
+- 本次修改：
+  - 更新 `frontend/src/api/files.js`
+  - 新增文件夹重命名、递归删除、文件夹回收站列表、恢复、彻底删除请求封装
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 新增文件夹重命名按钮
+  - 删除当前文件夹改为递归移入回收站
+  - 更新 `frontend/src/views/RecycleBinView.vue`
+  - 新增文件夹回收站表格与恢复/彻底删除交互
+  - 新增 `frontend/e2e/folder-lifecycle.spec.js`
+  - 更新 `frontend/e2e/file-center-folder-management.spec.js`
+- 已完成事项：
+  - 前端已支持文件夹重命名
+  - 前端已支持递归删除非空文件夹到回收站
+  - 回收站页已支持文件夹恢复与文件夹彻底删除
+  - 相关 E2E 回归全部通过
+- 未完成事项：
+  - 文件树横向排版与虚线层级尚未调整
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-folder-management.spec.js e2e/folder-lifecycle.spec.js e2e/file-center-tree-sort.spec.js`
+- 风险说明：
+  - 当前文件夹重命名交互仍使用浏览器原生 `prompt`，后续若要完全贴合方案 D，需要替换为统一弹窗
+- 下一个任务：
+  - 提交D：修复文件树与文件列表排版，并增加目录层级虚线
+
+---
+
+## 2026-03-11 13:33:33 CST
+
+- 任务：第二十七轮开发-提交D：修复文件树与文件列表排版并增加目录层级虚线
+- 时间：2026-03-11 13:33:33 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `1a201e6`
+- 本次修改：
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 为文件树头部操作区增加独立样式类
+  - 更新 `frontend/src/styles/main.css`
+  - 加宽左侧文件树面板
+  - 按钮与表格标题统一强制横向显示，避免中文被挤成竖排
+  - 操作按钮改为可横向换行而非逐字竖排
+  - 为目录树增加父子/同层级虚线连接
+  - 为表格增加横向滚动兜底
+- 已完成事项：
+  - 文件树按钮与表格标题已恢复为横向可读布局
+  - 左侧文件树层级关系已用虚线补强
+  - 布局调整后核心流程与稳定性回归全部通过
+- 未完成事项：
+  - 文件夹重命名与删除交互仍是原生弹窗，未统一为方案 D 风格弹窗
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/layout-stability.spec.js e2e/file-center-tree-sort.spec.js e2e/folder-lifecycle.spec.js`
+- 风险说明：
+  - 目录虚线当前基于 PrimeVue Tree DOM 结构样式实现，后续若升级 PrimeVue 主版本，需要复核选择器兼容性
+- 下一个任务：
+  - 推送本轮目录生命周期与文件树排版改造提交
+
+---
+
+## 2026-03-11 14:07:31 CST
+
+- 任务：第二十八轮开发-提交A：分析文件显示与下载异常根因
+- 时间：2026-03-11 14:07:31 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `382b855`
+- 本次修改：
+  - 新增 `docs/ROUND28_FILE_VISIBILITY_AND_DOWNLOAD_RCA.md`
+  - 记录 5 个问题的根因分析与修复方案
+  - 确认当前后端在干净数据下链路正常，下载异常主要是历史对象路径兼容问题
+  - 确认其余问题主要属于前端显示与交互表达不足
+- 已完成事项：
+  - 5 个问题已完成根因分析
+- 未完成事项：
+  - 下载 / 预览历史对象路径兼容尚未实现
+  - 文件名显示、回收站文件可见性、文件树选中态尚未修复
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND28_FILE_VISIBILITY_AND_DOWNLOAD_RCA.md`
+- 风险说明：
+  - 历史脏数据兼容需要在不破坏现有对象定位逻辑的前提下增加兜底查找
+- 下一个任务：
+  - 提交B：实现下载预览的历史对象路径兼容与回归测试
+
+---
+
+## 2026-03-11 14:12:44 CST
+
+- 任务：第二十八轮开发-提交B：实现下载预览历史对象路径兼容
+- 时间：2026-03-11 14:12:44 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `f05e1ad`
+- 本次修改：
+  - 更新 `backend/app/services/object_storage.py`
+  - 新增历史对象路径兼容查找能力，在同一上传会话目录下按文件名兜底定位对象
+  - 更新 `backend/app/api/files.py`
+  - 下载 / 预览在读取前会尝试修复旧 `object_key`
+  - 更新 `backend/tests/test_range_download_api.py`
+  - 新增下载兼容历史对象路径错位的回归测试
+  - 更新 `backend/tests/test_file_preview_api.py`
+  - 新增预览兼容历史对象路径错位的回归测试
+- 已完成事项：
+  - 历史对象路径不一致时，下载和预览可自动兜底定位
+  - 成功定位后会自愈更新数据库中的 `object_key`
+  - 下载与预览相关回归测试通过
+- 未完成事项：
+  - 前端文件名显示、回收站文件展示、文件树选中态尚未修复
+- 当前可测试内容：
+  - `rm -f backend/test_suite.db && cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_range_download_api.py tests/test_file_preview_api.py`
+- 风险说明：
+  - 兼容查找基于同一上传会话目录与文件名匹配，若未来允许同一上传会话内存多文件，需要重新约束对象定位策略
+- 下一个任务：
+  - 提交C：修复前端文件名显示、回收站文件可见性与文件树选中态
+
+---
+
+## 2026-03-11 14:17:00 CST
+
+- 任务：第二十八轮开发-提交C：修复前端文件名显示回收站可见性与树选中态
+- 时间：2026-03-11 14:17:00 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `c89de14`
+- 本次修改：
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 文件列表改为“文件名 + 所在目录”展示
+  - 下载与预览路由默认使用 basename
+  - 更新 `frontend/src/views/PreviewView.vue`
+  - 最近文件列表改为“文件名 + 所在目录”
+  - 更新 `frontend/src/views/RecycleBinView.vue`
+  - 回收站文件表改为“文件名 + 所在目录”，提升被删除文件可见性
+  - 更新 `frontend/src/styles/main.css`
+  - 强化文件树选中态与 hover 态
+  - 更新 `frontend/e2e/file-center-tree-sort.spec.js`
+  - 更新 `frontend/e2e/folder-lifecycle.spec.js`
+- 已完成事项：
+  - 文件名不再显示成完整路径
+  - 回收站里被删除文件与文件夹都能更直观地看到
+  - 文件树当前选中目录的视觉状态已明显增强
+  - 前端相关 E2E 回归通过
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-tree-sort.spec.js e2e/folder-lifecycle.spec.js e2e/file-center-folder-management.spec.js e2e/layout-stability.spec.js`
+- 风险说明：
+  - 当前 basename / 目录拆分逻辑在多个页面局部实现，后续可下沉为共享工具函数避免重复
+- 下一个任务：
+  - 推送本轮文件显示与下载异常修复提交
+
+---
+
+## 2026-03-11 14:56:46 CST
+
+- 任务：第二十九轮开发-提交A：分析重命名显示上传交互与预览异常根因
+- 时间：2026-03-11 14:56:46 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `6882c33`
+- 本次修改：
+  - 新增 `docs/ROUND29_UPLOAD_PREVIEW_RENAME_RCA.md`
+  - 按“问题现象 -> 可能原因 -> 验证步骤 -> 验证结果 -> 最终根因 -> 修复方案”记录 4 个问题的根因
+  - 确认重命名后列表异常属于前端刷新竞态
+  - 确认上传页交互与上传进度问题属于前端实现偏差
+  - 确认预览异常根因在对象存储读取链路优先探测 MinIO
+- 已完成事项：
+  - 4 个问题的根因已确认并文档化
+- 未完成事项：
+  - 上传页目标目录输入栏仍待移除
+  - 上传进度仍待修正为完成合并后再显示 100%
+  - 目录重命名后的刷新稳定性仍待修复
+  - 预览读取链路仍待修复并补回归测试
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND29_UPLOAD_PREVIEW_RENAME_RCA.md`
+- 风险说明：
+  - 预览链路涉及 MinIO 与本地对象回落双路径，修复时必须避免破坏现有下载链路
+- 下一个任务：
+  - 提交B：修复上传页交互与目录重命名后的列表刷新时序
+
+---
+
+## 2026-03-11 14:57:42 CST
+
+- 任务：第二十九轮开发-提交B：修复上传页交互与目录重命名后的列表刷新
+- 时间：2026-03-11 14:57:42 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `b0318f3`
+- 本次修改：
+  - 更新 `frontend/src/views/UploadView.vue`
+  - 移除目标文件夹手动输入栏，改为只读目标目录标签
+  - 上传区改为支持点击选择和拖拽文件
+  - 上传进度调整为分片阶段最高 95%，合并完成后再到 100%
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 文件夹创建、删除、重命名后的目录树与文件列表刷新改为串行执行
+- 已完成事项：
+  - 上传页不再要求手动输入目录地址
+  - 上传进度语义与后端完成时机已对齐
+  - 目录重命名后的列表刷新稳定性已修复
+- 未完成事项：
+  - 预览链路仍待补齐最终修复与专项回归测试
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/folder-lifecycle.spec.js`
+- 风险说明：
+  - 上传页当前仍是单文件串行上传，后续若引入并发分片，需要重新定义进度聚合方式
+- 下一个任务：
+  - 提交C：修复预览读取链路并补充上传预览回归测试
+
+---
+
+## 2026-03-11 15:09:21 CST
+
+- 任务：第二十九轮开发-提交C：修复预览读取链路并补充上传预览回归测试
+- 时间：2026-03-11 15:09:21 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `f716b37`
+- 本次修改：
+  - 更新 `backend/app/services/object_storage.py`
+  - 上传时始终保留本地 fallback 对象副本
+  - 读取大小、读取范围、对象存在判断优先检查本地 fallback
+  - MinIO 客户端增加短超时，避免本地无 MinIO 时阻塞
+  - 更新 `backend/tests/test_file_preview_api.py`
+  - 新增上传后必须保留本地 fallback 副本的回归测试
+  - 更新 `backend/tests/test_range_download_api.py`
+  - 新增本地 fallback 优先于 MinIO 探测的下载回归测试
+  - 更新 `frontend/src/views/PreviewView.vue`
+  - 增加预览候选文件加载范围，空路由进入预览页时自动选中第一项
+  - 新增 `frontend/e2e/upload-preview-flow.spec.js`
+  - 覆盖“上传完成后预览文本内容”链路
+- 已完成事项：
+  - 上传完成后，文件内容可稳定落到本地 fallback 对象目录
+  - 本地无 MinIO 时，预览和下载不再依赖远端对象探测
+  - 上传后立即预览文本文件已恢复正常
+  - 后端与前端关键回归均已通过
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_preview_api.py tests/test_range_download_api.py`
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/upload-preview-flow.spec.js e2e/folder-lifecycle.spec.js`
+- 风险说明：
+  - 当前策略会在本地保留一份对象副本，开发环境稳定性更好，但正式环境若完全依赖 MinIO，后续需再明确本地 fallback 的保留策略
+- 下一个任务：
+  - 继续收敛文件仓库剩余交互细节，优先处理目录树与文件操作体验问题
+
+---
+
+## 2026-03-11 15:23:56 CST
+
+- 任务：第三十轮开发-提交A：分析重命名异常与历史孤儿文件并补充清理工具
+- 时间：2026-03-11 15:23:56 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `0842281`
+- 本次修改：
+  - 新增 `docs/ROUND30_RENAME_ORPHAN_RECYCLE_RCA.md`
+  - 新增 `backend/scripts/cleanup_orphan_files.py`
+  - 新增 `frontend/e2e/folder-rename-log.spec.js`
+  - 确认 `logs -> log` 在干净环境下链路正常
+  - 增加开发期孤儿文件元数据清理脚本，用于清理当前库中仅剩元数据、对象内容已丢失的历史记录
+- 已完成事项：
+  - 第 30 轮 3 个问题的 RCA 已完成
+  - `logs -> log` 专项回归已补齐并通过
+  - 当前开发库孤儿文件问题已具备可执行清理工具
+- 未完成事项：
+  - 尚未执行当前开发库的孤儿文件元数据清理
+  - 回收站筛选尚未改为排序模式
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python scripts/cleanup_orphan_files.py --dry-run`
+  - `cd frontend && npx playwright test e2e/folder-rename-log.spec.js`
+- 风险说明：
+  - 孤儿文件清理属于数据清理操作，仅适用于当前本地开发库；执行后会删除无法预览、无法下载且对象内容已丢失的历史元数据
+- 下一个任务：
+  - 提交B：执行当前开发库孤儿文件清理并改造回收站为关键字加排序
+
+---
+
+## 2026-03-11 15:26:28 CST
+
+- 任务：第三十轮开发-提交B：清理当前开发库孤儿文件并改造回收站排序
+- 时间：2026-03-11 15:26:28 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `4e9297e`
+- 本次修改：
+  - 执行 `cd backend && source .venv/bin/activate && python scripts/cleanup_orphan_files.py`
+  - 当前本地开发库活跃文件由历史脏数据收敛到仅剩 1 条真实存在记录
+  - 更新 `backend/app/api/recycle.py`
+  - 回收站文件接口新增 `sort_by` 参数并透传排序
+  - 更新 `frontend/src/api/files.js`
+  - 回收站文件列表请求改为传递排序方式
+  - 更新 `frontend/src/views/RecycleBinView.vue`
+  - 移除最小/最大字节筛选，改为关键字 + 排序方式
+  - 更新 `backend/tests/test_recycle_api.py`
+  - 补充回收站排序接口回归测试
+- 已完成事项：
+  - 当前开发库中旧 txt 无法预览的问题已通过清理孤儿元数据处理
+  - 回收站页面已改为与文件列表一致的排序模型
+  - 回收站接口排序回归测试通过
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd backend && sqlite3 filehub.db "select count(*) from file_objects where is_deleted=0;"`
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_recycle_api.py`
+  - `cd frontend && npm run build`
+- 风险说明：
+  - 本次孤儿文件清理会删除对象内容已经丢失的历史元数据；若其中有需要保留的演示记录，需要重新上传生成真实对象
+- 下一个任务：
+  - 继续收敛文件树、预览与回收站的交互细节，并保持现有 UI 方案 D 一致性
+
+---
+
+## 2026-03-11 15:49:29 CST
+
+- 任务：第三十一轮开发-提交A：分析目录树选中态闪白与多文件上传问题根因
+- 时间：2026-03-11 15:49:29 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `267d490`
+- 本次修改：
+  - 新增 `docs/ROUND31_TREE_REFRESH_MULTIUPLOAD_RCA.md`
+  - 记录目录树 hover 选中态、删除恢复闪白、多文件上传 3 个问题的根因分析与修复方案
+- 已完成事项：
+  - 3 个问题的根因已确认
+- 未完成事项：
+  - 尚未修复目录树 hover 选中态
+  - 尚未修复删除/恢复后的静默刷新
+  - 尚未实现批量多文件上传
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND31_TREE_REFRESH_MULTIUPLOAD_RCA.md`
+- 风险说明：
+  - 多文件上传会把当前单文件状态机改为队列模型，需要补最小回归验证，避免影响现有单文件上传
+- 下一个任务：
+  - 提交B：修复目录树 hover 可读性与列表静默刷新体验
+
+---
+
+## 2026-03-11 15:51:08 CST
+
+- 任务：第三十一轮开发-提交B：修复目录树选中态可读性并减少动作后闪白
+- 时间：2026-03-11 15:51:08 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `bff0784`
+- 本次修改：
+  - 更新 `frontend/src/styles/main.css`
+  - 为目录树选中节点增加独立 hover 样式，避免深色选中态被普通 hover 覆盖
+  - 弱化 DataTable loading mask 的白色覆盖
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 文件删除后的列表刷新改为静默模式，不再触发表格整块 loading 遮罩
+  - 更新 `frontend/src/views/RecycleBinView.vue`
+  - 文件恢复、彻底删除、文件夹恢复、文件夹彻底删除后的刷新改为静默模式
+- 已完成事项：
+  - 目录树选中项在 hover 状态下保持可读
+  - 删除/恢复类动作后的整表闪白现象已明显收敛
+- 未完成事项：
+  - 上传页仍未支持多文件选择与拖拽批量上传
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/folder-lifecycle.spec.js e2e/folder-rename-log.spec.js`
+- 风险说明：
+  - 静默刷新不会显示整表 loading，但行级按钮仍保留 loading 态；若后续动作接口明显变慢，可再补更细粒度的行内提示
+- 下一个任务：
+  - 提交C：实现上传页多文件选择与拖拽批量上传
+
+---
+
+## 2026-03-11 15:54:10 CST
+
+- 任务：第三十一轮开发-提交C：实现上传页多文件批量上传
+- 时间：2026-03-11 15:54:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `518651c`
+- 本次修改：
+  - 更新 `frontend/src/views/UploadView.vue`
+  - 上传状态机由单文件改为队列模型
+  - 文件选择器开启 `multiple`
+  - 拖拽支持多文件
+  - 按队列顺序逐个上传文件，展示总进度与逐文件状态
+  - 单文件上传保持原有完成提示，多文件上传显示汇总结果
+  - 更新 `frontend/src/styles/main.css`
+  - 新增上传队列项样式
+  - 新增 `frontend/e2e/upload-multiple-files.spec.js`
+  - 覆盖多文件选择与批量上传回归
+- 已完成事项：
+  - 上传页支持多文件选择
+  - 上传页支持多文件拖拽
+  - 批量上传可顺序完成，并保留单文件上传兼容文案
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/upload-preview-flow.spec.js e2e/upload-multiple-files.spec.js`
+- 风险说明：
+  - 当前批量上传采用串行策略，稳定性优先；若后续改为并发上传，需要重新设计总进度聚合与失败重试策略
+- 下一个任务：
+  - 继续收敛文件仓库剩余交互细节，并保持方案 D 视觉一致性
+
+---
+
+## 2026-03-11 16:05:03 CST
+
+- 任务：第三十二轮开发-提交A：重构预览页右侧信息与最近文件布局
+- 时间：2026-03-11 16:05:03 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `3404103`
+- 本次修改：
+  - 更新 `frontend/src/views/PreviewView.vue`
+  - 压缩右侧文件信息区
+  - 新增右侧文件数统计
+  - 将“最近文件”从底部独立表格改为右侧列表，便于直接选中切换预览
+  - 更新 `frontend/src/styles/main.css`
+  - 调整预览页网格布局和右侧候选文件列表样式
+  - 更新 `frontend/e2e/upload-preview-flow.spec.js`
+  - 适配预览页新布局文案断言
+- 已完成事项：
+  - 预览页右侧信息区已更紧凑
+  - 最近文件已移动到右侧，和文件数、文件信息一起形成选择区
+  - 预览主流程回归通过
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/upload-preview-flow.spec.js`
+- 风险说明：
+  - 右侧最近文件目前使用 100 条候选的简单列表，若后续文件量更大，可再补搜索或分页
+- 下一个任务：
+  - 继续收敛页面交互细节，并保持方案 D 视觉一致性
+
+---
+
+## 2026-03-11 16:12:40 CST
+
+- 任务：第三十三轮开发-提交A：补阶段验收清单与后三阶段实施设计
+- 时间：2026-03-11 16:12:40 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `34120ca`
+- 本次修改：
+  - 新增 `docs/STAGE_ACCEPTANCE_CHECKLIST.md`
+  - 输出当前版本的阶段通过项、收口项与剩余必做项
+  - 新增 `docs/ROUND33_STAGE_ACCEPTANCE_AND_NEXT_PHASE_DESIGN.md`
+  - 明确后三阶段执行顺序：测试与发布准备、管理端体验收口、上传与预览稳定性增强
+- 已完成事项：
+  - 当前版本阶段验收口径已冻结
+  - 后续三阶段的设计边界、实施内容与验收标准已明确
+- 未完成事项：
+  - 尚未执行测试与发布准备补齐
+  - 尚未收口管理端体验
+  - 尚未增强上传与预览稳定性
+- 当前可测试内容：
+  - 文档评审：`docs/STAGE_ACCEPTANCE_CHECKLIST.md`
+  - 文档评审：`docs/ROUND33_STAGE_ACCEPTANCE_AND_NEXT_PHASE_DESIGN.md`
+- 风险说明：
+  - 若在收口阶段继续插入新的功能需求，会直接打断当前发布准备节奏
+- 下一个任务：
+  - 提交B：执行测试与发布准备补齐，收敛启动、验证与发布文档
+
+---
+
+## 2026-03-11 16:32:45 CST
+
+- 任务：第三十三轮开发-提交B：补测试链路并新增后端托管前端验证
+- 时间：2026-03-11 16:32:45 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `2cadc19`
+- 本次修改：
+  - 新增 `docs/ROUND34_TEST_RELEASE_PREP_RCA.md`
+  - 修正 `frontend/e2e/core-flow.spec.js` 上传成功断言，避免模糊文本匹配
+  - 修正 `frontend/e2e/upload-preview-flow.spec.js`，按 UI 路径验证上传后预览，不再混入不稳定的浏览器内 API 探针
+  - 更新 `frontend/playwright.config.js`，默认 E2E 排除托管模式 smoke
+  - 新增 `frontend/playwright.hosted.config.js`
+  - 新增 `frontend/e2e/hosted-smoke.spec.js`
+  - 新增 `frontend/scripts/run_hosted_e2e.sh`
+  - 更新 `frontend/package.json`，增加 `npm run e2e:hosted`
+- 已完成事项：
+  - 后端全量测试通过（`43 passed`）
+  - 前端常规 E2E 通过（`9 passed`）
+  - 后端托管前端 smoke 通过（`1 passed`）
+  - 发布前已具备前后端分离与后端托管两种验证模式
+- 未完成事项：
+  - 尚未收敛发布文档到当前验证口径
+  - 尚未进入管理端体验收口
+  - 尚未进入上传与预览稳定性增强
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:hosted`
+- 风险说明：
+  - 后端托管前端验证依赖本地可绑定 `127.0.0.1:8000`；在受限沙箱中需显式放开端口权限
+- 下一个任务：
+  - 提交C：更新启动、发布、回滚文档到当前可执行口径
+
+---
+
+## 2026-03-11 16:33:22 CST
+
+- 任务：第三十三轮开发-提交C：收敛启动、发布与回滚文档
+- 时间：2026-03-11 16:33:22 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `125906b`
+- 本次修改：
+  - 更新 `docs/SETUP.md`
+  - 补充发布前最小验证命令，覆盖后端 pytest、前端 E2E、后端托管前端 E2E
+  - 更新 `docs/RELEASE_CHECKLIST.md`
+  - 增加推荐执行顺序、托管模式验证项与当前基线口径
+  - 更新 `docs/ROLLBACK_PLAN.md`
+  - 增加回滚后的托管模式 smoke 验证与最小回滚执行模板
+- 已完成事项：
+  - 启动说明、发布清单、回滚预案已与当前仓库能力对齐
+  - 发布前验证命令已文档化，可直接执行
+- 未完成事项：
+  - 尚未进入管理端体验收口
+  - 尚未进入上传与预览稳定性增强
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:hosted`
+- 风险说明：
+  - 当前文档仍以本地单机部署为主，若切换到 MySQL/Redis/MinIO 的完整生产拓扑，还需补部署侧操作手册
+- 下一个任务：
+  - 进入管理端体验收口设计与实现
+
+---
+
+## 2026-03-11 16:37:50 CST
+
+- 任务：第三十三轮开发-提交D：输出管理端体验收口设计
+- 时间：2026-03-11 16:37:50 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `c7e01bd`
+- 本次修改：
+  - 新增 `docs/ROUND35_ADMIN_SURFACES_REFINEMENT_DESIGN.md`
+  - 明确后台文件管理页与操作日志页的收口目标、实施方案、验收标准与提交拆分
+- 已完成事项：
+  - 管理端体验收口范围和边界已冻结
+  - 已确定先补后端排序，再做前端页面与 E2E
+- 未完成事项：
+  - 尚未实现管理员文件页排序能力
+  - 尚未收口管理端前端页面
+  - 尚未补管理员页面 E2E
+  - 尚未进入上传与预览稳定性增强
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND35_ADMIN_SURFACES_REFINEMENT_DESIGN.md`
+- 风险说明：
+  - 管理端如果再扩字段或新页面，会直接打乱当前收口节奏
+- 下一个任务：
+  - 提交E：实现管理员文件页排序能力并补后端测试
+
+---
+
+## 2026-03-11 16:43:42 CST
+
+- 任务：第三十三轮开发-提交E：实现管理员文件页排序能力并补后端测试
+- 时间：2026-03-11 16:43:42 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `f03f7c9`
+- 本次修改：
+  - 更新 `backend/app/api/admin_files.py`
+  - `GET /admin/files` 新增 `sort_by` 参数
+  - 更新 `backend/app/services/file_service.py`
+  - 管理员文件查询复用现有排序规则
+  - 更新 `backend/tests/test_admin_files_api.py`
+  - 补充管理员文件页排序回归测试
+- 已完成事项：
+  - 管理员文件页后端已具备排序能力
+  - 管理员文件接口专项测试通过（`3 passed`）
+- 未完成事项：
+  - 尚未收口管理端前端页面
+  - 尚未补管理员页面 E2E
+  - 尚未进入上传与预览稳定性增强
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_admin_files_api.py`
+- 风险说明：
+  - 当前仅为管理员文件页补排序，日志页仍保持按时间倒序
+- 下一个任务：
+  - 提交F：收口管理端前端页面并补管理员 E2E
+
+---
+
+## 2026-03-11 16:52:54 CST
+
+- 任务：第三十三轮开发-提交G：输出上传与预览稳定性增强设计
+- 时间：2026-03-11 16:52:54 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `b880cf4`
+- 本次修改：
+  - 新增 `docs/ROUND36_UPLOAD_PREVIEW_STABILITY_DESIGN.md`
+  - 明确上传队列停止、未完成重试、预览错误提示分流的实施方案与验收标准
+- 已完成事项：
+  - 上传与预览稳定性增强范围已冻结
+  - 已确定先做上传队列控制，再做预览错误分流与回归
+- 未完成事项：
+  - 尚未实现上传队列停止与重试
+  - 尚未实现预览错误提示分流
+  - 尚未补上传稳定性回归测试
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND36_UPLOAD_PREVIEW_STABILITY_DESIGN.md`
+- 风险说明：
+  - 上传队列控制会引入前端中断状态，需要谨慎处理当前文件与剩余文件的状态一致性
+- 下一个任务：
+  - 提交H：实现上传队列停止与未完成重试
+
+---
+
+## 2026-03-11 16:59:10 CST
+
+- 任务：第三十三轮开发-提交H：实现上传队列停止与未完成重试
+- 时间：2026-03-11 16:59:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `58da60a`
+- 本次修改：
+  - 更新 `frontend/src/api/upload.js`
+  - 上传请求支持 `AbortController` 中断
+  - 更新 `frontend/src/views/UploadView.vue`
+  - 增加停止队列、未完成重试、取消状态与上传总进度重算
+  - 新增 `frontend/e2e/upload-queue-control.spec.js`
+  - 覆盖停止队列后重试未完成文件的回归测试
+- 已完成事项：
+  - 上传页支持停止剩余队列
+  - 已取消或失败文件可直接重试
+  - 上传队列专项 E2E 通过（`1 passed`）
+  - 常规前端全量 E2E 通过（`12 passed`）
+- 未完成事项：
+  - 尚未提交预览错误提示分流改动
+- 当前可测试内容：
+  - `cd frontend && npx playwright test e2e/upload-queue-control.spec.js`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - 当前停止队列会中断正在上传的文件并将其标记为已取消，后续若引入并发上传，需要重新设计取消语义
+- 下一个任务：
+  - 提交I：实现预览错误提示分流并补错误状态回归
+
+---
+
+## 2026-03-11 16:59:37 CST
+
+- 任务：第三十三轮开发-提交I：实现预览错误提示分流并补错误状态回归
+- 时间：2026-03-11 16:59:37 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `6c5a984`
+- 本次修改：
+  - 更新 `frontend/src/api/files.js`
+  - 预览接口抛出带状态码的错误对象
+  - 更新 `frontend/src/views/PreviewView.vue`
+  - 按状态码区分不支持预览、无权限、文件不存在、文件内容不存在等提示
+  - 新增 `frontend/e2e/preview-error-states.spec.js`
+  - 覆盖不支持预览与文件不存在的错误状态回归测试
+- 已完成事项：
+  - 预览页错误提示已具备基础分流能力
+  - 预览错误专项 E2E 通过（`1 passed`）
+  - 常规前端全量 E2E 通过（`12 passed`）
+  - 后端托管前端 smoke 通过（`1 passed`）
+- 未完成事项：
+  - 当前阶段任务已完成
+- 当前可测试内容：
+  - `cd frontend && npx playwright test e2e/preview-error-states.spec.js`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:hosted`
+- 风险说明：
+  - 当前前端错误分流依赖后端返回的状态码与 detail 文案，若后端后续改文案，需要同步校验前端映射
+- 下一个任务：
+  - 进行本轮规范收尾与阶段结果汇总
+
+---
+
+## 2026-03-11 17:06:18 CST
+
+- 任务：第三十四轮开发-发布候选：合并 develop 到 release 并完成候选验证
+- 时间：2026-03-11 17:06:18 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`release/v0.1.0`；提交前基线 `97b984a`
+- 本次修改：
+  - 将 `feature/round16-ui-scheme-d-alignment` 合并到 `develop`
+  - 将 `develop` 合并到 `release/v0.1.0`
+  - 更新 `docs/RELEASE_NOTES_v0.1.0.md`
+  - 更新 `docs/RELEASE_CHECKLIST.md`
+  - 更新 `docs/ROLLBACK_PLAN.md`
+  - 修正发布验证命令口径，统一要求对后端脚本显式设置 `APP_SERVE_FRONTEND=false`
+  - 记录本次发布候选的真实验证结果与顺序执行要求
+- 已完成事项：
+  - `develop` 已纳入第十六轮全部收口结果
+  - `release/v0.1.0` 已更新到当前候选版本
+  - 后端测试通过（`44 passed`）
+  - 主链路烟雾通过
+  - 性能基线已采集
+  - 前端构建通过
+  - 常规前端 E2E 通过（`12 passed`）
+  - 后端托管前端 smoke 通过（`1 passed`）
+- 未完成事项：
+  - 尚未打发布标签
+  - 尚未将 `release/v0.1.0` 合并回 `main`
+  - 尚未执行最终人工验收
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false python scripts/smoke_core_flow.py`
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false python scripts/perf_baseline.py`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:hosted`
+- 风险说明：
+  - 常规 E2E 与托管模式 E2E 必须顺序执行，不能并行占用 `127.0.0.1:8000`
+  - 当前候选仍以本地单机验证为主，正式发布前仍需按环境替换 `JWT_SECRET` 与管理员密码
+- 下一个任务：
+  - 完成最终人工验收并决定是否打 `v0.1.0` 标签与合并到 `main`
+
+---
+
+## 2026-03-11 17:15:32 CST
+
+- 任务：第三十四轮开发-发布闭环：合并到 main、打标签并回合并到 develop
+- 时间：2026-03-11 17:15:32 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`release/v0.1.0`；提交前基线 `540a00a`
+- 本次修改：
+  - 记录本次发布闭环动作
+  - 准备将 `release/v0.1.0` 合并到 `main`
+  - 准备打 `v0.1.0` 标签
+  - 准备将 `release/v0.1.0` 回合并到 `develop`
+- 已完成事项：
+  - 发布候选验证全部通过
+  - 发布分支文档已收敛到当前验证口径
+- 未完成事项：
+  - 尚未完成 `main` 合并
+  - 尚未打 `v0.1.0` 标签
+  - 尚未完成回合并到 `develop`
+  - 最终人工验收仍需线下执行
+- 当前可测试内容：
+  - `release/v0.1.0` 已具备发布候选完整验证口径
+- 风险说明：
+  - GitFlow 闭环可由版本控制完成，但最终人工验收仍需在目标环境按页面主链路走一遍
+- 下一个任务：
+  - 执行 `main` 合并、打标签并回合并到 `develop`

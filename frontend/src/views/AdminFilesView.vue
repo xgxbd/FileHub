@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import Button from "primevue/button";
 import Card from "primevue/card";
@@ -28,6 +28,7 @@ const pageSize = ref(10);
 const keyword = ref("");
 const ownerId = ref(null);
 const statusFilter = ref("active");
+const sortBy = ref("created_at_desc");
 
 const operatingFileId = ref(null);
 
@@ -36,6 +37,46 @@ const statusOptions = [
   { label: "已删除文件", value: "deleted" },
   { label: "全部", value: "all" }
 ];
+
+const sortOptions = [
+  { label: "最新上传", value: "created_at_desc" },
+  { label: "最早上传", value: "created_at_asc" },
+  { label: "文件名 A-Z", value: "file_name_asc" },
+  { label: "文件名 Z-A", value: "file_name_desc" },
+  { label: "文件大小从大到小", value: "size_desc" },
+  { label: "文件大小从小到大", value: "size_asc" }
+];
+
+const statusSummaryLabel = computed(() => {
+  const matched = statusOptions.find((item) => item.value === statusFilter.value);
+  return matched ? matched.label : "全部";
+});
+
+function normalizeFilePath(raw) {
+  return String(raw || "")
+    .replace(/\\/g, "/")
+    .split("/")
+    .map((part) => part.trim())
+    .filter((part) => part && part !== "." && part !== "..")
+    .join("/");
+}
+
+function fileBaseName(fileName) {
+  const normalized = normalizeFilePath(fileName);
+  const parts = normalized.split("/");
+  return parts[parts.length - 1] || normalized;
+}
+
+function fileDirectoryLabel(fileName) {
+  const normalized = normalizeFilePath(fileName);
+  const parts = normalized.split("/");
+  if (parts.length <= 1) return "/";
+  return `/${parts.slice(0, -1).join("/")}/`;
+}
+
+function ownerLabel(ownerIdValue) {
+  return `用户 #${ownerIdValue}`;
+}
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -48,10 +89,12 @@ function formatTime(iso) {
   return new Date(iso).toLocaleString("zh-CN");
 }
 
-async function loadAdminFiles() {
+async function loadAdminFilesWithMode({ silent = false } = {}) {
   if (!authStore.accessToken) return;
 
-  loading.value = true;
+  if (!silent) {
+    loading.value = true;
+  }
   error.value = "";
   try {
     const payload = await fetchAdminFiles({
@@ -59,6 +102,7 @@ async function loadAdminFiles() {
       keyword: keyword.value.trim(),
       ownerId: ownerId.value,
       status: statusFilter.value,
+      sortBy: sortBy.value,
       page: page.value,
       pageSize: pageSize.value
     });
@@ -67,8 +111,14 @@ async function loadAdminFiles() {
   } catch (err) {
     error.value = err instanceof Error ? err.message : "加载管理员文件列表失败";
   } finally {
-    loading.value = false;
+    if (!silent) {
+      loading.value = false;
+    }
   }
+}
+
+async function loadAdminFiles() {
+  return loadAdminFilesWithMode({ silent: false });
 }
 
 async function search() {
@@ -80,6 +130,7 @@ async function resetFilters() {
   keyword.value = "";
   ownerId.value = null;
   statusFilter.value = "active";
+  sortBy.value = "created_at_desc";
   page.value = 1;
   await loadAdminFiles();
 }
@@ -103,8 +154,8 @@ async function triggerDelete(fileItem) {
       accessToken: authStore.accessToken,
       fileId: fileItem.id
     });
-    successMessage.value = `已删除：${fileItem.file_name}`;
-    await loadAdminFiles();
+    successMessage.value = `已删除：${fileBaseName(fileItem.file_name)}`;
+    await loadAdminFilesWithMode({ silent: true });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "删除失败";
   } finally {
@@ -122,8 +173,8 @@ async function triggerRestore(fileItem) {
       accessToken: authStore.accessToken,
       fileId: fileItem.id
     });
-    successMessage.value = `已恢复：${fileItem.file_name}`;
-    await loadAdminFiles();
+    successMessage.value = `已恢复：${fileBaseName(fileItem.file_name)}`;
+    await loadAdminFilesWithMode({ silent: true });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "恢复失败";
   } finally {
@@ -144,8 +195,8 @@ async function triggerPurge(fileItem) {
       accessToken: authStore.accessToken,
       fileId: fileItem.id
     });
-    successMessage.value = `已彻底删除：${fileItem.file_name}`;
-    await loadAdminFiles();
+    successMessage.value = `已彻底删除：${fileBaseName(fileItem.file_name)}`;
+    await loadAdminFilesWithMode({ silent: true });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "彻底删除失败";
   } finally {
@@ -169,12 +220,23 @@ onMounted(() => {
           <InputText v-model="keyword" placeholder="例如：report、photo" />
         </div>
         <div class="file-filter-item">
-          <label class="auth-label">Owner ID</label>
+          <label class="auth-label">用户 ID（可选）</label>
           <InputNumber v-model="ownerId" :useGrouping="false" />
         </div>
         <div class="file-filter-item">
           <label class="auth-label">状态</label>
           <SelectButton v-model="statusFilter" :options="statusOptions" optionLabel="label" optionValue="value" />
+        </div>
+      </div>
+
+      <div class="file-filter-row">
+        <div class="file-filter-item">
+          <label class="auth-label">排序方式</label>
+          <select v-model="sortBy" class="sort-select">
+            <option v-for="option in sortOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
         </div>
       </div>
 
@@ -188,8 +250,13 @@ onMounted(() => {
 
       <div class="health-row">
         <Tag severity="info" value="管理员文件管理" />
-        <span class="health-message">共 {{ total }} 个文件</span>
+        <Tag severity="secondary" :value="statusSummaryLabel" />
+        <span class="health-message">当前结果 {{ total }} 个文件</span>
       </div>
+
+      <Message v-if="!loading && items.length === 0" severity="secondary" :closable="false">
+        当前筛选条件下没有文件记录。
+      </Message>
 
       <DataTable
         :value="items"
@@ -202,8 +269,15 @@ onMounted(() => {
         @page="onPageChange"
       >
         <Column field="id" header="文件ID"></Column>
-        <Column field="owner_id" header="Owner ID"></Column>
-        <Column field="file_name" header="文件名"></Column>
+        <Column header="用户">
+          <template #body="{ data }">{{ ownerLabel(data.owner_id) }}</template>
+        </Column>
+        <Column header="文件名">
+          <template #body="{ data }">{{ fileBaseName(data.file_name) }}</template>
+        </Column>
+        <Column header="所在目录">
+          <template #body="{ data }">{{ fileDirectoryLabel(data.file_name) }}</template>
+        </Column>
         <Column header="大小">
           <template #body="{ data }">{{ formatBytes(data.size_bytes) }}</template>
         </Column>

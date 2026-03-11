@@ -1,4 +1,6 @@
 import re
+from pathlib import Path
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
@@ -15,8 +17,47 @@ from app.services.operation_log_service import record_operation
 router = APIRouter(prefix="/files", tags=["files"])
 
 
-def _is_previewable(mime_type: str) -> bool:
-    return mime_type.startswith("image/") or mime_type == "application/pdf" or mime_type.startswith("text/")
+TEXT_PREVIEW_EXTENSIONS = {".txt", ".md", ".log", ".json", ".csv", ".yaml", ".yml"}
+
+
+def _file_ext(file_name: str) -> str:
+    return Path(file_name).suffix.lower()
+
+
+def _is_previewable(mime_type: str, file_name: str) -> bool:
+    if mime_type.startswith("image/") or mime_type == "application/pdf" or mime_type.startswith("text/"):
+        return True
+    return _file_ext(file_name) in TEXT_PREVIEW_EXTENSIONS
+
+
+def _preview_media_type(mime_type: str, file_name: str) -> str:
+    if mime_type != "application/octet-stream":
+        return mime_type
+    if _file_ext(file_name) in TEXT_PREVIEW_EXTENSIONS:
+        return "text/plain; charset=utf-8"
+    return mime_type
+
+
+def _build_content_disposition(*, disposition: str, file_name: str) -> str:
+    ascii_fallback = file_name.encode("ascii", "ignore").decode("ascii").strip()
+    if not ascii_fallback:
+        ascii_fallback = "download"
+    ascii_fallback = ascii_fallback.replace("\\", "_").replace('"', "_")
+    utf8_name = quote(file_name)
+    return f"{disposition}; filename=\"{ascii_fallback}\"; filename*=UTF-8''{utf8_name}"
+
+
+def _resolve_file_object_key(*, db: Session, file_record: FileObject) -> str:
+    resolved_key = object_storage_service.resolve_object_key(
+        object_key=file_record.object_key,
+        file_name=file_record.file_name,
+    )
+    if resolved_key != file_record.object_key:
+        file_record.object_key = resolved_key
+        db.add(file_record)
+        db.commit()
+        db.refresh(file_record)
+    return resolved_key
 
 
 @router.get("", response_model=FileListResponse)
@@ -24,6 +65,14 @@ def get_files(
     keyword: str | None = Query(default=None),
     min_size: int | None = Query(default=None, ge=0),
     max_size: int | None = Query(default=None, ge=0),
+    directory: str | None = Query(
+        default=None,
+        description="目录筛选，'__root__' 表示根目录直系文件，其他值表示该目录直系文件",
+    ),
+    sort_by: str = Query(
+        default="created_at_desc",
+        description="排序方式：created_at_desc/created_at_asc/file_name_asc/file_name_desc/size_desc/size_asc",
+    ),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -36,6 +85,8 @@ def get_files(
         keyword=keyword,
         min_size=min_size,
         max_size=max_size,
+        directory=directory,
+        sort_by=sort_by,
         page=page,
         page_size=page_size,
     )
@@ -85,7 +136,12 @@ def download_file(
     if current_user.role != "admin" and file_record.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权下载该文件")
 
-    total_size = object_storage_service.get_file_size(object_key=file_record.object_key)
+    try:
+        object_key = _resolve_file_object_key(db=db, file_record=file_record)
+        total_size = object_storage_service.get_file_size(object_key=object_key)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件内容不存在") from exc
+
     start = 0
     end = total_size - 1
     status_code = status.HTTP_200_OK
@@ -116,11 +172,17 @@ def download_file(
         end = min(end, total_size - 1)
         status_code = status.HTTP_206_PARTIAL_CONTENT
 
-    data = object_storage_service.read_range(object_key=file_record.object_key, start=start, end=end)
+    try:
+        data = object_storage_service.read_range(object_key=object_key, start=start, end=end)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件内容不存在") from exc
     headers = {
         "Accept-Ranges": "bytes",
         "Content-Length": str(len(data)),
-        "Content-Disposition": f'attachment; filename=\"{file_record.file_name}\"',
+        "Content-Disposition": _build_content_disposition(
+            disposition="attachment",
+            file_name=file_record.file_name,
+        ),
     }
     if status_code == status.HTTP_206_PARTIAL_CONTENT:
         headers["Content-Range"] = f"bytes {start}-{end}/{total_size}"
@@ -153,18 +215,30 @@ def preview_file(
     if current_user.role != "admin" and file_record.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权预览该文件")
 
-    if not _is_previewable(file_record.mime_type):
+    if not _is_previewable(file_record.mime_type, file_record.file_name):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="当前文件类型不支持在线预览")
 
-    total_size = object_storage_service.get_file_size(object_key=file_record.object_key)
-    data = object_storage_service.read_range(
-        object_key=file_record.object_key,
-        start=0,
-        end=max(total_size - 1, 0),
-    )
+    try:
+        object_key = _resolve_file_object_key(db=db, file_record=file_record)
+        total_size = object_storage_service.get_file_size(object_key=object_key)
+        data = object_storage_service.read_range(
+            object_key=object_key,
+            start=0,
+            end=max(total_size - 1, 0),
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件内容不存在") from exc
 
     headers = {
-        "Content-Disposition": f'inline; filename=\"{file_record.file_name}\"',
+        "Content-Disposition": _build_content_disposition(
+            disposition="inline",
+            file_name=file_record.file_name,
+        ),
         "Content-Length": str(len(data)),
     }
-    return Response(content=data, media_type=file_record.mime_type, headers=headers, status_code=status.HTTP_200_OK)
+    return Response(
+        content=data,
+        media_type=_preview_media_type(file_record.mime_type, file_record.file_name),
+        headers=headers,
+        status_code=status.HTTP_200_OK,
+    )

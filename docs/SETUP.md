@@ -32,3 +32,71 @@ python -m pip install -r requirements.txt
 
 禁止使用系统 Python 安装依赖，禁止全局安装第三方包。
 
+## 4. 单后端托管前端（可选）
+
+如果希望只启动后端，同时直接访问前端页面，可使用以下模式：
+
+1. 构建前端
+
+```bash
+cd frontend
+npm install
+npm run build
+```
+
+2. 启用后端托管
+
+```bash
+cd backend
+cp -n .env.example .env
+```
+
+在 `.env` 中设置：
+
+```env
+APP_SERVE_FRONTEND=true
+# 可选：自定义前端 dist 目录，不填则默认定位 ../frontend/dist
+FRONTEND_DIST_DIR=
+```
+
+3. 启动后端
+
+```bash
+cd backend
+source .venv/bin/activate
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+4. 验证
+
+- 页面入口：`http://127.0.0.1:8000/files`
+- API 入口：`http://127.0.0.1:8000/api/healthz`
+
+## 5. 发布前最小验证命令
+
+### 后端全量测试
+
+```bash
+cd backend
+source .venv/bin/activate
+APP_SERVE_FRONTEND=false pytest -q
+```
+
+### 前端常规 E2E
+
+```bash
+cd frontend
+npm run e2e
+```
+
+### 后端托管前端 E2E
+
+```bash
+cd frontend
+npm run e2e:hosted
+```
+
+说明：
+
+- `npm run e2e`：验证前后端分离开发模式。
+- `npm run e2e:hosted`：先构建前端，再由后端托管静态资源，验证最终交付形态。

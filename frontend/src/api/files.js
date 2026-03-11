@@ -1,10 +1,18 @@
 const API_PREFIX = import.meta.env.VITE_API_PREFIX || "/api";
 
+class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 export async function fetchFileList({
   accessToken,
   keyword,
-  minSize,
-  maxSize,
+  directory,
+  sortBy,
   page = 1,
   pageSize = 20
 }) {
@@ -13,8 +21,8 @@ export async function fetchFileList({
   params.set("page_size", String(pageSize));
 
   if (keyword) params.set("keyword", keyword);
-  if (minSize !== null && minSize !== undefined && minSize !== "") params.set("min_size", String(minSize));
-  if (maxSize !== null && maxSize !== undefined && maxSize !== "") params.set("max_size", String(maxSize));
+  if (directory) params.set("directory", directory);
+  if (sortBy) params.set("sort_by", sortBy);
 
   const response = await fetch(`${API_PREFIX}/files?${params.toString()}`, {
     method: "GET",
@@ -27,6 +35,96 @@ export async function fetchFileList({
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(payload.detail || "获取文件列表失败");
+  }
+  return payload;
+}
+
+export async function fetchFolderTree({ accessToken }) {
+  const response = await fetch(`${API_PREFIX}/folders/tree`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  const payload = await response.json().catch(() => []);
+  if (!response.ok) {
+    throw new Error(payload.detail || "获取目录树失败");
+  }
+  return Array.isArray(payload) ? payload : [];
+}
+
+export async function createFolder({
+  accessToken,
+  parentDirectory,
+  folderName
+}) {
+  const response = await fetch(`${API_PREFIX}/folders`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      parent_directory: parentDirectory,
+      folder_name: folderName
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "创建文件夹失败");
+  }
+  return payload;
+}
+
+export async function renameFolder({
+  accessToken,
+  path,
+  newName
+}) {
+  const response = await fetch(`${API_PREFIX}/folders/rename`, {
+    method: "PATCH",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      path,
+      new_name: newName
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "重命名文件夹失败");
+  }
+  return payload;
+}
+
+export async function deleteFolder({
+  accessToken,
+  path,
+  recursive = false
+}) {
+  const params = new URLSearchParams();
+  params.set("path", path);
+  params.set("recursive", String(Boolean(recursive)));
+
+  const response = await fetch(`${API_PREFIX}/folders?${params.toString()}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "删除文件夹失败");
   }
   return payload;
 }
@@ -50,8 +148,11 @@ export async function downloadFile({
   });
 
   if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    throw new Error(payload.detail || "下载失败");
+    const payload = await response.json().catch(async () => {
+      const text = await response.text().catch(() => "");
+      return { detail: text };
+    });
+    throw new Error(payload.detail || `下载失败（HTTP ${response.status}）`);
   }
 
   return response.blob();
@@ -71,7 +172,7 @@ export async function previewFile({
 
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
-    throw new Error(payload.detail || "预览失败");
+    throw new ApiError(payload.detail || "预览失败", response.status);
   }
 
   return {
@@ -101,8 +202,7 @@ export async function softDeleteFile({
 export async function fetchRecycleFileList({
   accessToken,
   keyword,
-  minSize,
-  maxSize,
+  sortBy,
   page = 1,
   pageSize = 20
 }) {
@@ -111,8 +211,7 @@ export async function fetchRecycleFileList({
   params.set("page_size", String(pageSize));
 
   if (keyword) params.set("keyword", keyword);
-  if (minSize !== null && minSize !== undefined && minSize !== "") params.set("min_size", String(minSize));
-  if (maxSize !== null && maxSize !== undefined && maxSize !== "") params.set("max_size", String(maxSize));
+  if (sortBy) params.set("sort_by", sortBy);
 
   const response = await fetch(`${API_PREFIX}/recycle/files?${params.toString()}`, {
     method: "GET",
@@ -125,6 +224,64 @@ export async function fetchRecycleFileList({
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(payload.detail || "获取回收站列表失败");
+  }
+  return payload;
+}
+
+export async function fetchRecycleFolderList({ accessToken }) {
+  const response = await fetch(`${API_PREFIX}/recycle/folders`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  const payload = await response.json().catch(() => []);
+  if (!response.ok) {
+    throw new Error(payload.detail || "获取文件夹回收站失败");
+  }
+  return Array.isArray(payload) ? payload : [];
+}
+
+export async function restoreRecycleFolder({
+  accessToken,
+  path
+}) {
+  const params = new URLSearchParams();
+  params.set("path", path);
+
+  const response = await fetch(`${API_PREFIX}/recycle/folders/restore?${params.toString()}`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "恢复文件夹失败");
+  }
+  return payload;
+}
+
+export async function purgeRecycleFolder({
+  accessToken,
+  path
+}) {
+  const params = new URLSearchParams();
+  params.set("path", path);
+
+  const response = await fetch(`${API_PREFIX}/recycle/folders/purge?${params.toString()}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "彻底删除文件夹失败");
   }
   return payload;
 }

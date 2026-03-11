@@ -5,8 +5,14 @@ from app.models.file_object import FileObject
 from app.main import app
 
 
-def _prepare_uploaded_file(client: TestClient, *, email: str, username: str) -> tuple[str, int]:
-    content = b"recycle-flow-content"
+def _prepare_uploaded_file(
+    client: TestClient,
+    *,
+    email: str,
+    username: str,
+    file_name: str = "recycle.txt",
+    content: bytes = b"recycle-flow-content",
+) -> tuple[str, int]:
     chunk_size = 6
     chunks = [content[i : i + chunk_size] for i in range(0, len(content), chunk_size)]
 
@@ -22,7 +28,7 @@ def _prepare_uploaded_file(client: TestClient, *, email: str, username: str) -> 
         "/upload/sessions",
         headers=headers,
         json={
-            "file_name": "recycle.txt",
+            "file_name": file_name,
             "total_size": len(content),
             "chunk_size": chunk_size,
             "total_chunks": len(chunks),
@@ -104,3 +110,45 @@ def test_recycle_forbidden_for_other_user() -> None:
 
         purge_resp = client.delete(f"/recycle/files/{file_id}/purge", headers=other_headers)
         assert purge_resp.status_code == 403
+
+
+def test_recycle_files_support_sorting() -> None:
+    with TestClient(app) as client:
+        token, file_a = _prepare_uploaded_file(
+            client,
+            email="recyclesort@test.com",
+            username="recyclesort001",
+            file_name="logs/zeta.txt",
+            content=b"1234567890",
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+        create = client.post(
+            "/upload/sessions",
+            headers=headers,
+            json={
+                "file_name": "logs/alpha.txt",
+                "total_size": 2,
+                "chunk_size": 6,
+                "total_chunks": 1,
+                "mime_type": "text/plain",
+            },
+        )
+        upload_id = create.json()["upload_id"]
+        client.put(
+            f"/upload/sessions/{upload_id}/chunks/0",
+            headers=headers,
+            files={"chunk": ("chunk.part", b"12", "application/octet-stream")},
+        )
+        done = client.post(f"/upload/sessions/{upload_id}/complete", headers=headers)
+        file_b = done.json()["file_id"]
+
+        client.delete(f"/files/{file_a}", headers=headers)
+        client.delete(f"/files/{file_b}", headers=headers)
+
+        name_sorted = client.get("/recycle/files", headers=headers, params={"sort_by": "file_name_asc"})
+        assert name_sorted.status_code == 200
+        assert [item["file_name"] for item in name_sorted.json()["items"]] == ["logs/alpha.txt", "logs/zeta.txt"]
+
+        size_sorted = client.get("/recycle/files", headers=headers, params={"sort_by": "size_desc"})
+        assert size_sorted.status_code == 200
+        assert [item["size_bytes"] for item in size_sorted.json()["items"]] == [10, 2]

@@ -14,8 +14,10 @@ test('关键流程：注册登录上传下载删除恢复', async ({ page }) => 
   await page.getByRole('button', { name: '注册并登录' }).click();
 
   await page.waitForURL('**/files');
-  await expect(page.getByText('文件仓库首页')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '文件仓库首页 / 文件列表' })).toBeVisible();
 
+  await page.getByRole('button', { name: '上传到当前目录' }).click();
+  await page.waitForURL('**/upload');
   await page.locator('input[type="file"]').setInputFiles({
     name: fileName,
     mimeType: 'text/plain',
@@ -23,7 +25,9 @@ test('关键流程：注册登录上传下载删除恢复', async ({ page }) => 
   });
   await page.getByRole('button', { name: '开始上传' }).click();
 
-  await expect(page.getByText('上传完成')).toBeVisible({ timeout: 120000 });
+  await expect(page.getByText(`上传完成：${fileName}`)).toBeVisible({ timeout: 120000 });
+  await page.getByRole('complementary').getByRole('button', { name: '文件列表', exact: true }).click();
+  await page.waitForURL('**/files');
 
   const row = page.locator('tr', { hasText: fileName }).first();
   await expect(row).toBeVisible({ timeout: 30000 });
@@ -37,7 +41,7 @@ test('关键流程：注册登录上传下载删除恢复', async ({ page }) => 
   await row.getByRole('button', { name: '删除' }).click();
   await expect(page.locator('tr', { hasText: fileName })).toHaveCount(0, { timeout: 30000 });
 
-  await page.getByRole('button', { name: '回收站' }).click();
+  await page.getByRole('complementary').getByRole('button', { name: '回收站', exact: true }).click();
   await page.waitForURL('**/recycle');
 
   const recycleRow = page.locator('tr', { hasText: fileName }).first();
@@ -45,7 +49,7 @@ test('关键流程：注册登录上传下载删除恢复', async ({ page }) => 
   await recycleRow.getByRole('button', { name: '恢复' }).click();
   await expect(page.getByText(`已恢复文件：${fileName}`)).toBeVisible({ timeout: 30000 });
 
-  await page.getByRole('button', { name: '文件中心' }).click();
+  await page.getByRole('complementary').getByRole('button', { name: '文件列表', exact: true }).click();
   await page.waitForURL('**/files');
   await expect(page.locator('tr', { hasText: fileName }).first()).toBeVisible({ timeout: 30000 });
 });

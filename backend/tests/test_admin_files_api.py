@@ -105,3 +105,34 @@ def test_admin_files_filter_and_pagination() -> None:
 
         invalid_status = client.get("/admin/files", params={"status": "archived"}, headers=admin_headers)
         assert invalid_status.status_code == 400
+
+
+def test_admin_files_sorting() -> None:
+    with TestClient(app) as client:
+        client.post(
+            "/auth/register",
+            json={"email": "admin.sort@test.com", "username": "admin_sort", "password": "Passw0rd!"},
+        )
+        _set_admin("admin_sort")
+        admin_login = client.post("/auth/login", json={"account": "admin_sort", "password": "Passw0rd!"})
+        admin_headers = {"Authorization": f"Bearer {admin_login.json()['access_token']}"}
+
+        client.post(
+            "/auth/register",
+            json={"email": "user.sort@test.com", "username": "user_sort", "password": "Passw0rd!"},
+        )
+        user_login = client.post("/auth/login", json={"account": "user_sort", "password": "Passw0rd!"})
+        user_token = user_login.json()["access_token"]
+
+        _upload_demo_file(client, token=user_token, file_name="zeta.txt", content=b"1")
+        _upload_demo_file(client, token=user_token, file_name="alpha.txt", content=b"123456")
+
+        name_sort = client.get("/admin/files", params={"sort_by": "file_name_asc"}, headers=admin_headers)
+        assert name_sort.status_code == 200
+        names = [item["file_name"] for item in name_sort.json()["items"]]
+        assert names == sorted(names)
+
+        size_sort = client.get("/admin/files", params={"sort_by": "size_desc"}, headers=admin_headers)
+        assert size_sort.status_code == 200
+        sizes = [item["size_bytes"] for item in size_sort.json()["items"]]
+        assert sizes == sorted(sizes, reverse=True)

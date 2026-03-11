@@ -5,6 +5,7 @@ export async function fetchAdminFiles({
   keyword,
   ownerId,
   status = "active",
+  sortBy,
   page = 1,
   pageSize = 20
 }) {
@@ -15,6 +16,7 @@ export async function fetchAdminFiles({
 
   if (keyword) params.set("keyword", keyword);
   if (ownerId !== null && ownerId !== undefined && ownerId !== "") params.set("owner_id", String(ownerId));
+  if (sortBy) params.set("sort_by", sortBy);
 
   const response = await fetch(`${API_PREFIX}/admin/files?${params.toString()}`, {
     method: "GET",

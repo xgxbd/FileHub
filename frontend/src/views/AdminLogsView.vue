@@ -27,6 +27,28 @@ const userId = ref(null);
 const startAt = ref("");
 const endAt = ref("");
 
+function buildApiDateTime(localValue) {
+  if (!localValue) return "";
+  return new Date(localValue).toISOString();
+}
+
+function formatDetail(detailJson) {
+  if (!detailJson) return "-";
+  try {
+    const payload = JSON.parse(detailJson);
+    const summaryKeys = ["file_name", "range", "size_bytes", "path"];
+    const summary = summaryKeys
+      .filter((key) => payload[key] !== undefined && payload[key] !== null && payload[key] !== "")
+      .map((key) => `${key}: ${payload[key]}`);
+    if (summary.length > 0) {
+      return summary.join(" | ");
+    }
+    return JSON.stringify(payload);
+  } catch {
+    return detailJson;
+  }
+}
+
 function formatTime(iso) {
   return new Date(iso).toLocaleString("zh-CN");
 }
@@ -41,8 +63,8 @@ async function loadLogs() {
       accessToken: authStore.accessToken,
       action: action.value.trim(),
       userId: userId.value,
-      startAt: startAt.value.trim(),
-      endAt: endAt.value.trim(),
+      startAt: buildApiDateTime(startAt.value),
+      endAt: buildApiDateTime(endAt.value),
       page: page.value,
       pageSize: pageSize.value
     });
@@ -95,15 +117,15 @@ onMounted(() => {
           <InputNumber v-model="userId" :useGrouping="false" />
         </div>
         <div class="file-filter-item">
-          <label class="auth-label">开始时间（ISO）</label>
-          <InputText v-model="startAt" placeholder="2026-03-10T00:00:00+08:00" />
+          <label class="auth-label">开始时间</label>
+          <input v-model="startAt" class="native-input" type="datetime-local" />
         </div>
       </div>
 
       <div class="file-filter-row">
         <div class="file-filter-item">
-          <label class="auth-label">结束时间（ISO）</label>
-          <InputText v-model="endAt" placeholder="2026-03-10T23:59:59+08:00" />
+          <label class="auth-label">结束时间</label>
+          <input v-model="endAt" class="native-input" type="datetime-local" />
         </div>
       </div>
 
@@ -115,8 +137,13 @@ onMounted(() => {
       <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
       <div class="health-row">
         <Tag severity="info" value="管理员视图" />
-        <span class="health-message">共 {{ total }} 条日志</span>
+        <Tag v-if="action" severity="secondary" :value="`动作：${action}`" />
+        <span class="health-message">当前结果 {{ total }} 条日志</span>
       </div>
+
+      <Message v-if="!loading && items.length === 0" severity="secondary" :closable="false">
+        当前筛选条件下没有日志记录。
+      </Message>
 
       <DataTable
         :value="items"
@@ -136,7 +163,7 @@ onMounted(() => {
         <Column field="target_id" header="目标ID"></Column>
         <Column header="详情">
           <template #body="{ data }">
-            <span class="log-detail-text">{{ data.detail_json || "-" }}</span>
+            <span class="log-detail-text">{{ formatDetail(data.detail_json) }}</span>
           </template>
         </Column>
         <Column header="时间">

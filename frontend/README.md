@@ -77,6 +77,12 @@ npm run dev
   npm run e2e:repeat
   ```
 
+## 前端性能治理（第十四轮）
+
+- 路由已改为懒加载，页面脚本按需加载
+- Vite 已拆分 `vue/pinia/vue-router` 公共包
+- 构建阶段已消除 >500k 的 JS chunk 告警
+
 ## 联调验证
 
 1. 启动后端：

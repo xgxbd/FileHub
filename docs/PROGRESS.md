@@ -2321,3 +2321,30 @@
   - 仍存在第三方依赖 `passlib` 的 `crypt` 弃用告警
 - 下一个任务：
   - 提交E：更新文档并完成第十四轮收口
+
+---
+
+## 2026-03-11 08:44:57 CST
+
+- 任务：第十四轮开发-提交E：性能与告警治理文档收口
+- 时间：2026-03-11 08:44:57 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新 `backend/README.md`：补充后端告警治理说明
+  - 更新 `frontend/README.md`：补充前端懒加载与分包优化说明
+  - 更新根文档 `README.md`：同步第十四轮治理状态
+  - 收口前复跑前端构建
+- 已完成事项：
+  - 第十四轮“性能与告警治理MVP（设计+实现）”完成
+  - 前端构建通过：`npm run build`
+- 未完成事项：
+  - 第十四轮规范收尾
+  - 下一轮任务（v0.1.1 优化项）
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - `passlib` 依赖告警仍需在后续版本处理
+- 下一个任务：
+  - 执行第十四轮规范收尾检查并归档结果

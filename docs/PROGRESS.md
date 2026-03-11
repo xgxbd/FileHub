@@ -2170,3 +2170,31 @@
   - E2E 运行依赖本机网络与端口，沙箱环境需提权执行
 - 下一个任务：
   - 提交E：更新 README 与执行指南，完成第十三轮收口
+
+---
+
+## 2026-03-11 08:34:26 CST
+
+- 任务：第十三轮开发-提交E：前端E2E文档收口
+- 时间：2026-03-11 08:34:26 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新 `frontend/README.md`：补充 E2E 命令与执行说明
+  - 更新 `docs/RELEASE_CHECKLIST.md`：加入前端 E2E 发布前检查项
+  - 更新根文档 `README.md`：同步关键流程 E2E 能力
+  - 收口前执行 `e2e:list` 与前端构建
+- 已完成事项：
+  - 第十三轮“前端关键流程E2E（设计+实现）”完成
+  - `npm run e2e:list` 通过（2 tests）
+  - 前端构建通过：`npm run build`
+- 未完成事项：
+  - 第十三轮规范收尾
+  - 下一轮任务（性能与弃用告警治理）
+- 当前可测试内容：
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:repeat`
+  - `cd frontend && npm run build`
+- 风险说明：
+  - E2E 在当前环境需要提权启动本地服务端口
+- 下一个任务：
+  - 执行第十三轮规范收尾检查并归档结果

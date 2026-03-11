@@ -17,6 +17,7 @@
 ## 3. 前端验证
 
 - [ ] 构建通过：`cd frontend && npm run build`
+- [ ] 前端 E2E 通过：`cd frontend && npm run e2e`
 - [ ] 管理员页面可访问：`/admin/files`、`/admin/logs`
 - [ ] 用户页面可访问：`/files`、`/recycle`
 

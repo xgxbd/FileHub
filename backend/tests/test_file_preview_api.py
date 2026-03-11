@@ -158,3 +158,42 @@ def test_preview_returns_404_when_object_missing() -> None:
         preview = client.get(f"/files/{file_id}/preview", headers=headers)
         assert preview.status_code == 404
         assert preview.json()["detail"] == "文件内容不存在"
+
+
+def test_preview_recovers_from_legacy_object_key_path_mismatch() -> None:
+    with TestClient(app) as client:
+        client.post(
+            "/auth/register",
+            json={"email": "previewlegacy@test.com", "username": "previewlegacy001", "password": "Passw0rd!"},
+        )
+        login = client.post("/auth/login", json={"account": "previewlegacy001", "password": "Passw0rd!"})
+        token = login.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        file_id = _upload_file(
+            client,
+            token=token,
+            file_name="logs/readme.txt",
+            mime_type="text/plain",
+            content=b"preview me",
+        )
+
+        with SessionLocal() as db:
+            file_record = db.get(FileObject, file_id)
+            assert file_record is not None
+            original_key = file_record.object_key
+            renamed_key = f"{original_key.rsplit('/', 2)[0]}/log/readme.txt"
+
+            source = object_storage_service._find_existing_fallback_path(original_key)
+            target = object_storage_service._primary_fallback_path(renamed_key)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source.read_bytes())
+            source.unlink()
+
+            file_record.file_name = "log/readme.txt"
+            db.add(file_record)
+            db.commit()
+
+        preview = client.get(f"/files/{file_id}/preview", headers=headers)
+        assert preview.status_code == 200
+        assert preview.text == "preview me"

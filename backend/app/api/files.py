@@ -47,6 +47,19 @@ def _build_content_disposition(*, disposition: str, file_name: str) -> str:
     return f"{disposition}; filename=\"{ascii_fallback}\"; filename*=UTF-8''{utf8_name}"
 
 
+def _resolve_file_object_key(*, db: Session, file_record: FileObject) -> str:
+    resolved_key = object_storage_service.resolve_object_key(
+        object_key=file_record.object_key,
+        file_name=file_record.file_name,
+    )
+    if resolved_key != file_record.object_key:
+        file_record.object_key = resolved_key
+        db.add(file_record)
+        db.commit()
+        db.refresh(file_record)
+    return resolved_key
+
+
 @router.get("", response_model=FileListResponse)
 def get_files(
     keyword: str | None = Query(default=None),
@@ -124,7 +137,8 @@ def download_file(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权下载该文件")
 
     try:
-        total_size = object_storage_service.get_file_size(object_key=file_record.object_key)
+        object_key = _resolve_file_object_key(db=db, file_record=file_record)
+        total_size = object_storage_service.get_file_size(object_key=object_key)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件内容不存在") from exc
 
@@ -159,7 +173,7 @@ def download_file(
         status_code = status.HTTP_206_PARTIAL_CONTENT
 
     try:
-        data = object_storage_service.read_range(object_key=file_record.object_key, start=start, end=end)
+        data = object_storage_service.read_range(object_key=object_key, start=start, end=end)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件内容不存在") from exc
     headers = {
@@ -205,9 +219,10 @@ def preview_file(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="当前文件类型不支持在线预览")
 
     try:
-        total_size = object_storage_service.get_file_size(object_key=file_record.object_key)
+        object_key = _resolve_file_object_key(db=db, file_record=file_record)
+        total_size = object_storage_service.get_file_size(object_key=object_key)
         data = object_storage_service.read_range(
-            object_key=file_record.object_key,
+            object_key=object_key,
             start=0,
             end=max(total_size - 1, 0),
         )

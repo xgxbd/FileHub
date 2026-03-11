@@ -156,3 +156,39 @@ def test_download_reads_legacy_fallback_path() -> None:
         response = client.get(f"/files/{file_id}/download", headers=headers)
         assert response.status_code == 200
         assert response.content == content
+
+
+def test_download_recovers_from_legacy_object_key_path_mismatch() -> None:
+    with TestClient(app) as client:
+        token, file_id, content = _prepare_uploaded_file(
+            client,
+            email="legacyrename@test.com",
+            username="legacyrename001",
+            file_name="logs/readme.txt",
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+
+        with SessionLocal() as db:
+            file_record = db.get(FileObject, file_id)
+            assert file_record is not None
+            original_key = file_record.object_key
+            renamed_key = f"{original_key.rsplit('/', 2)[0]}/log/readme.txt"
+
+            source = object_storage_service._find_existing_fallback_path(original_key)
+            target = object_storage_service._primary_fallback_path(renamed_key)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source.read_bytes())
+            source.unlink()
+
+            file_record.file_name = "log/readme.txt"
+            db.add(file_record)
+            db.commit()
+
+        response = client.get(f"/files/{file_id}/download", headers=headers)
+        assert response.status_code == 200
+        assert response.content == content
+
+        with SessionLocal() as db:
+            file_record = db.get(FileObject, file_id)
+            assert file_record is not None
+            assert file_record.object_key.endswith("/log/readme.txt")

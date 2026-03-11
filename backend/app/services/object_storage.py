@@ -1,4 +1,5 @@
 from pathlib import Path
+from pathlib import PurePosixPath
 
 from minio import Minio
 
@@ -79,9 +80,72 @@ class ObjectStorageService:
                 if fallback.exists():
                     fallback.unlink()
 
+    def resolve_object_key(self, *, object_key: str, file_name: str) -> str:
+        if self._object_exists(object_key):
+            return object_key
+
+        upload_prefix = self._upload_prefix(object_key)
+        basename = PurePosixPath(file_name).name
+        if not upload_prefix or not basename:
+            raise FileNotFoundError(f"对象不存在: {object_key}")
+
+        for candidate in self._search_candidate_keys(upload_prefix=upload_prefix, basename=basename):
+            if candidate != object_key and self._object_exists(candidate):
+                return candidate
+
+        raise FileNotFoundError(f"对象不存在: {object_key}")
+
     def _ensure_bucket(self) -> None:
         if not self._client.bucket_exists(settings.minio_bucket):
             self._client.make_bucket(settings.minio_bucket)
+
+    def _object_exists(self, object_key: str) -> bool:
+        try:
+            self._ensure_bucket()
+            self._client.stat_object(settings.minio_bucket, object_key)
+            return True
+        except Exception:
+            return any(candidate.exists() for candidate in self._fallback_candidates(object_key))
+
+    @staticmethod
+    def _upload_prefix(object_key: str) -> str:
+        parts = list(PurePosixPath(object_key).parts)
+        if len(parts) >= 2:
+            return "/".join(parts[:2])
+        if len(parts) == 1:
+            return parts[0]
+        return ""
+
+    def _search_candidate_keys(self, *, upload_prefix: str, basename: str) -> list[str]:
+        candidates: list[str] = []
+        seen = set()
+
+        try:
+            self._ensure_bucket()
+            for item in self._client.list_objects(settings.minio_bucket, prefix=f"{upload_prefix}/", recursive=True):
+                if PurePosixPath(item.object_name).name != basename:
+                    continue
+                if item.object_name in seen:
+                    continue
+                seen.add(item.object_name)
+                candidates.append(item.object_name)
+        except Exception:
+            pass
+
+        for root in self._fallback_roots:
+            base_dir = root / upload_prefix
+            if not base_dir.exists():
+                continue
+            for path in base_dir.rglob(basename):
+                if not path.is_file():
+                    continue
+                object_name = path.relative_to(root).as_posix()
+                if object_name in seen:
+                    continue
+                seen.add(object_name)
+                candidates.append(object_name)
+
+        return candidates
 
     @staticmethod
     def _build_fallback_roots() -> list[Path]:

@@ -3699,3 +3699,33 @@
   - 历史脏数据兼容需要在不破坏现有对象定位逻辑的前提下增加兜底查找
 - 下一个任务：
   - 提交B：实现下载预览的历史对象路径兼容与回归测试
+
+---
+
+## 2026-03-11 14:12:44 CST
+
+- 任务：第二十八轮开发-提交B：实现下载预览历史对象路径兼容
+- 时间：2026-03-11 14:12:44 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `f05e1ad`
+- 本次修改：
+  - 更新 `backend/app/services/object_storage.py`
+  - 新增历史对象路径兼容查找能力，在同一上传会话目录下按文件名兜底定位对象
+  - 更新 `backend/app/api/files.py`
+  - 下载 / 预览在读取前会尝试修复旧 `object_key`
+  - 更新 `backend/tests/test_range_download_api.py`
+  - 新增下载兼容历史对象路径错位的回归测试
+  - 更新 `backend/tests/test_file_preview_api.py`
+  - 新增预览兼容历史对象路径错位的回归测试
+- 已完成事项：
+  - 历史对象路径不一致时，下载和预览可自动兜底定位
+  - 成功定位后会自愈更新数据库中的 `object_key`
+  - 下载与预览相关回归测试通过
+- 未完成事项：
+  - 前端文件名显示、回收站文件展示、文件树选中态尚未修复
+- 当前可测试内容：
+  - `rm -f backend/test_suite.db && cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_range_download_api.py tests/test_file_preview_api.py`
+- 风险说明：
+  - 兼容查找基于同一上传会话目录与文件名匹配，若未来允许同一上传会话内存多文件，需要重新约束对象定位策略
+- 下一个任务：
+  - 提交C：修复前端文件名显示、回收站文件可见性与文件树选中态

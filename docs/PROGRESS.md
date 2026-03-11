@@ -4424,3 +4424,28 @@
   - 当前环境下 `docker compose build api` 因 Docker daemon 未启动而无法完成真实构建验证，不属于代码错误
 - 下一个任务：
   - 在 Docker daemon 启动后完成 `docker compose up -d --build` 实机验收
+
+
+---
+
+## 2026-03-12 00:02:41 CST
+
+- 任务：第 39 轮 Docker 一键启动报错根因分析
+- 时间：2026-03-12 00:02:41 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 新增 `docs/ROUND39_DOCKER_BOOT_ISSUES_RCA.md`
+  - 明确旧 `infra/.env` 缺少默认值导致 Compose 警告
+  - 明确 Docker Hub / 默认 npm、pip 源导致构建 403 风险
+- 已完成事项：
+  - Docker 一键启动报错根因已确认
+- 未完成事项：
+  - Compose 默认值兼容修复
+  - 镜像源与包源默认值修复
+- 当前可测试内容：
+  - 评审 `docs/ROUND39_DOCKER_BOOT_ISSUES_RCA.md`
+- 风险说明：
+  - 当前仓库仍可能在旧 `.env` 和受限网络下启动失败
+- 下一个任务：
+  - 修复 Compose 默认值兼容并调整 Docker 镜像源与包源默认配置

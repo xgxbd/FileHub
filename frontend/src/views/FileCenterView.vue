@@ -57,9 +57,9 @@ const sortOptions = [
 
 const currentDirectoryLabel = computed(() => {
   if (selectedDirectory.value === ROOT_DIRECTORY_MARKER) {
-    return "根目录 /";
+    return "/";
   }
-  return selectedDirectory.value;
+  return `/${selectedDirectory.value}/`;
 });
 
 function normalizeFolder(raw) {

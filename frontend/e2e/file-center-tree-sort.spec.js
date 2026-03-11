@@ -67,7 +67,7 @@ test('文件列表页目录切换与排序切换即时生效', async ({ page }) 
   await expect(logsTreeNode).toBeVisible();
 
   await logsTreeNode.click();
-  await expect(page.getByText('当前目录：logs')).toBeVisible();
+  await expect(page.getByText('当前目录：/logs/')).toBeVisible();
   await expect(page.locator('tbody tr')).toHaveCount(3);
 
   await page.selectOption('.sort-select', 'file_name_asc');
@@ -77,7 +77,7 @@ test('文件列表页目录切换与排序切换即时生效', async ({ page }) 
   await expect(page.locator('tbody tr').first()).toContainText('logs/big-log.txt');
 
   await page.getByRole('button', { name: '根目录' }).click();
-  await expect(page.getByText('当前目录：根目录 /')).toBeVisible();
+  await expect(page.getByText('当前目录：/')).toBeVisible();
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await expect(page.locator('tbody tr').first()).toContainText('alpha-root.txt');
 });

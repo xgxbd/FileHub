@@ -3438,3 +3438,29 @@
   - 若继续只用文件路径反推目录，将无法支持空文件夹与目录级删除
 - 下一个任务：
   - 提交B：修复当前目录绝对路径显示并补充测试
+
+---
+
+## 2026-03-11 13:07:10 CST
+
+- 任务：第二十五轮开发-提交B：修复当前目录绝对路径显示
+- 时间：2026-03-11 13:07:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `e2b2d3c`
+- 本次修改：
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 当前目录标签改为绝对路径显示：根目录 `/`、子目录 `/<path>/`
+  - 更新 `frontend/e2e/file-center-tree-sort.spec.js`
+  - 回归断言同步改为 `/logs/` 和 `/`
+- 已完成事项：
+  - 根目录与子目录的当前目录显示语义已统一
+  - 目录切换回归测试通过
+- 未完成事项：
+  - 文件夹创建/删除能力尚未实现
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-tree-sort.spec.js`
+- 风险说明：
+  - 当前仅修复显示语义，不影响目录筛选参数本身
+- 下一个任务：
+  - 提交C：实现后端文件夹创建/删除与目录树接口

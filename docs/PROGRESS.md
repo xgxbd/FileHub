@@ -4396,3 +4396,31 @@
   - 尚未接入 Compose `api` 服务，当前仍不能直接一键启动完整系统
 - 下一个任务：
   - 将应用镜像接入 `infra/docker-compose.yml` 并补齐一键启动文档
+
+
+---
+
+## 2026-03-11 23:47:12 CST
+
+- 任务：第 38 轮 Docker 一键启动-接入 Compose 应用服务并补齐文档
+- 时间：2026-03-11 23:47:12 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 更新 `infra/docker-compose.yml`，新增 `api` 服务并接入 MySQL、Redis、MinIO
+  - 更新 `infra/.env.example`，补齐 Docker 一键启动所需环境变量
+  - 更新 `docs/SETUP.md`，补充完整系统 Docker 一键启动说明
+  - 新增 `docs/DOCKER_QUICK_START.md`
+- 已完成事项：
+  - Compose 已具备完整系统的一键编排能力
+  - `docker compose --env-file .env.example config` 校验通过
+  - Docker 前置条件已写入文档
+- 未完成事项：
+  - 在 Docker daemon 启动状态下完成真实镜像构建和整机启动验收
+- 当前可测试内容：
+  - `cd /Users/xloser/Owner/Code/VibeCoding/FileHub/infra && docker compose --env-file .env.example config`
+  - `cd /Users/xloser/Owner/Code/VibeCoding/FileHub/infra && cp -n .env.example .env && docker compose up -d --build`
+- 风险说明：
+  - 当前环境下 `docker compose build api` 因 Docker daemon 未启动而无法完成真实构建验证，不属于代码错误
+- 下一个任务：
+  - 在 Docker daemon 启动后完成 `docker compose up -d --build` 实机验收

@@ -1,4 +1,50 @@
 services:
+  api:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    container_name: filehub-api
+    restart: unless-stopped
+    environment:
+      APP_ENV: docker
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      APP_DEBUG: "false"
+      APP_SERVE_FRONTEND: "true"
+      FRONTEND_DIST_DIR: /app/frontend/dist
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB}
+      UPLOAD_SESSION_TTL_SECONDS: 86400
+      UPLOAD_TMP_DIR: /app/backend/tmp/uploads
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_SECURE: "false"
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_BOOTSTRAP_ENABLED: ${ADMIN_BOOTSTRAP_ENABLED}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    ports:
+      - "${APP_PORT}:8000"
+    volumes:
+      - backend_tmp_data:/app/backend/tmp
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/healthz', timeout=2).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
   mysql:
     image: mysql:8.4
     container_name: filehub-mysql
@@ -54,7 +100,7 @@ services:
       retries: 10
 
 volumes:
+  backend_tmp_data:
   mysql_data:
   redis_data:
   minio_data:
-

@@ -3858,3 +3858,32 @@
   - 当前策略会在本地保留一份对象副本，开发环境稳定性更好，但正式环境若完全依赖 MinIO，后续需再明确本地 fallback 的保留策略
 - 下一个任务：
   - 继续收敛文件仓库剩余交互细节，优先处理目录树与文件操作体验问题
+
+---
+
+## 2026-03-11 15:23:56 CST
+
+- 任务：第三十轮开发-提交A：分析重命名异常与历史孤儿文件并补充清理工具
+- 时间：2026-03-11 15:23:56 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `0842281`
+- 本次修改：
+  - 新增 `docs/ROUND30_RENAME_ORPHAN_RECYCLE_RCA.md`
+  - 新增 `backend/scripts/cleanup_orphan_files.py`
+  - 新增 `frontend/e2e/folder-rename-log.spec.js`
+  - 确认 `logs -> log` 在干净环境下链路正常
+  - 增加开发期孤儿文件元数据清理脚本，用于清理当前库中仅剩元数据、对象内容已丢失的历史记录
+- 已完成事项：
+  - 第 30 轮 3 个问题的 RCA 已完成
+  - `logs -> log` 专项回归已补齐并通过
+  - 当前开发库孤儿文件问题已具备可执行清理工具
+- 未完成事项：
+  - 尚未执行当前开发库的孤儿文件元数据清理
+  - 回收站筛选尚未改为排序模式
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && python scripts/cleanup_orphan_files.py --dry-run`
+  - `cd frontend && npx playwright test e2e/folder-rename-log.spec.js`
+- 风险说明：
+  - 孤儿文件清理属于数据清理操作，仅适用于当前本地开发库；执行后会删除无法预览、无法下载且对象内容已丢失的历史元数据
+- 下一个任务：
+  - 提交B：执行当前开发库孤儿文件清理并改造回收站为关键字加排序

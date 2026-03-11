@@ -59,6 +59,6 @@ test('上传页使用只读目标目录并可在预览页查看文本内容', as
   await page.getByRole('button', { name: '预览' }).first().click();
 
   await expect(page.getByText('preview flow text')).toBeVisible();
-  await expect(page.getByText('已选文件')).toBeVisible();
+  await expect(page.getByText('文件数')).toBeVisible();
   await expect(page.locator('.preview-layout .meta .row b').filter({ hasText: 'readme.txt' })).toBeVisible();
 });

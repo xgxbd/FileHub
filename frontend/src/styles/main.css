@@ -454,8 +454,15 @@ body {
 
 .preview-layout {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: minmax(0, 1.7fr) 320px;
   gap: 16px;
+}
+
+.preview-side {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
 }
 
 .preview-box {
@@ -466,13 +473,54 @@ body {
   color: var(--muted);
 }
 
+.meta-compact {
+  padding: 12px;
+}
+
+.meta-stat {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meta-stat-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.meta-stat-value {
+  font-size: 28px;
+  line-height: 28px;
+  font-family: "Iowan Old Style", "Songti SC", serif;
+}
+
+.meta-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 10px 0 4px;
+}
+
 .meta .row {
   display: flex;
   justify-content: space-between;
-  padding: 9px 0;
+  padding: 7px 0;
   border-bottom: 1px solid var(--line);
-  font-size: 13px;
+  font-size: 12px;
   gap: 12px;
+}
+
+.meta .row span {
+  color: var(--muted);
+  flex: 0 0 64px;
+}
+
+.meta .row b {
+  min-width: 0;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .preview-image {
@@ -497,6 +545,60 @@ body {
   word-break: break-word;
   max-height: 65vh;
   overflow: auto;
+}
+
+.preview-candidates-panel {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.preview-candidate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  max-height: 520px;
+  overflow: auto;
+}
+
+.preview-candidate-item {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.preview-candidate-item:hover {
+  background: #f7f7f7;
+}
+
+.preview-candidate-item.active {
+  border-color: #111111;
+  background: #f3f4f6;
+}
+
+.preview-candidate-name {
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-candidate-meta {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .log-detail-text {

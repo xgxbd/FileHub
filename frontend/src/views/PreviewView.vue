@@ -4,8 +4,6 @@ import { useRoute, useRouter } from "vue-router";
 
 import Button from "primevue/button";
 import Card from "primevue/card";
-import Column from "primevue/column";
-import DataTable from "primevue/datatable";
 import Message from "primevue/message";
 import ProgressBar from "primevue/progressbar";
 
@@ -42,6 +40,13 @@ const selectedLabel = computed(() => {
   return "未选择文件";
 });
 
+const totalFileCount = computed(() => fileCandidates.value.length);
+
+const selectedDirectoryLabel = computed(() => {
+  if (!currentFileName.value) return "/";
+  return fileDirectoryLabel(currentFileName.value);
+});
+
 function normalizeFilePath(raw) {
   return String(raw || "")
     .replace(/\\/g, "/")
@@ -62,10 +67,6 @@ function fileDirectoryLabel(fileName) {
   const parts = normalized.split("/");
   if (parts.length <= 1) return "/";
   return `/${parts.slice(0, -1).join("/")}/`;
-}
-
-function formatTime(iso) {
-  return new Date(iso).toLocaleString("zh-CN");
 }
 
 function resetPreviewState() {
@@ -213,37 +214,42 @@ onBeforeUnmount(() => {
           <pre v-if="!previewLoading && previewType === 'text'" class="preview-text">{{ previewText }}</pre>
         </section>
 
-        <section class="panel meta">
-          <div class="row"><span>已选文件</span><b>{{ selectedLabel }}</b></div>
-          <div class="row"><span>预览类型</span><b>{{ previewType || "未知" }}</b></div>
-          <div class="row"><span>上传用户</span><b>{{ authStore.user?.username || "未知" }}</b></div>
+        <section class="preview-side">
+          <section class="panel meta meta-compact">
+            <div class="meta-stat">
+              <span class="meta-stat-label">文件数</span>
+              <strong class="meta-stat-value">{{ totalFileCount }}</strong>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="row"><span>文件名</span><b>{{ selectedLabel }}</b></div>
+            <div class="row"><span>所在目录</span><b>{{ selectedDirectoryLabel }}</b></div>
+            <div class="row"><span>预览类型</span><b>{{ previewType || "未知" }}</b></div>
+          </section>
+
+          <section class="panel preview-candidates-panel">
+            <div class="file-filter-actions" style="justify-content: space-between">
+              <strong>最近文件</strong>
+              <Button size="small" text severity="secondary" label="刷新列表" icon="pi pi-refresh" @click="loadCandidates" />
+            </div>
+            <Message v-if="fileCandidatesError" severity="error" :closable="false">{{ fileCandidatesError }}</Message>
+
+            <div class="preview-candidate-list" v-if="!fileCandidatesLoading">
+              <button
+                v-for="item in fileCandidates"
+                :key="item.id"
+                type="button"
+                class="preview-candidate-item"
+                :class="{ active: String(item.id) === currentFileId }"
+                @click="pickFile(item)"
+              >
+                <span class="preview-candidate-name">{{ fileBaseName(item.file_name) }}</span>
+                <span class="preview-candidate-meta">{{ fileDirectoryLabel(item.file_name) }}</span>
+              </button>
+            </div>
+            <ProgressBar v-else mode="indeterminate" style="height: 6px" />
+          </section>
         </section>
       </div>
-
-      <section class="panel" style="margin-top: 12px">
-        <div class="file-filter-actions" style="justify-content: space-between">
-          <strong>最近文件</strong>
-          <Button size="small" text severity="secondary" label="刷新列表" icon="pi pi-refresh" @click="loadCandidates" />
-        </div>
-        <Message v-if="fileCandidatesError" severity="error" :closable="false">{{ fileCandidatesError }}</Message>
-        <DataTable :value="fileCandidates" :loading="fileCandidatesLoading">
-          <Column header="文件名">
-            <template #body="{ data }">{{ fileBaseName(data.file_name) }}</template>
-          </Column>
-          <Column header="所在目录">
-            <template #body="{ data }">{{ fileDirectoryLabel(data.file_name) }}</template>
-          </Column>
-          <Column field="mime_type" header="类型"></Column>
-          <Column header="创建时间">
-            <template #body="{ data }">{{ formatTime(data.created_at) }}</template>
-          </Column>
-          <Column header="操作">
-            <template #body="{ data }">
-              <Button size="small" label="预览" icon="pi pi-eye" @click="pickFile(data)" />
-            </template>
-          </Column>
-        </DataTable>
-      </section>
     </template>
   </Card>
 </template>

@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import Button from "primevue/button";
+import Tag from "primevue/tag";
 
 import { useAuthStore } from "./stores/auth";
 
@@ -73,8 +74,8 @@ function logout() {
       <div class="top-actions">
         <template v-if="authStore.isAuthenticated">
           <span class="user-chip">{{ userLabel }}</span>
-          <Button size="small" severity="secondary" label="全局搜索" text />
-          <Button v-if="authStore.user?.role === 'admin'" size="small" severity="secondary" text label="管理员" />
+          <Tag value="全局搜索规划中" severity="secondary" />
+          <Tag v-if="authStore.user?.role === 'admin'" value="管理员账号" severity="info" />
           <Button size="small" label="退出" icon="pi pi-sign-out" @click="logout" />
         </template>
         <template v-else>

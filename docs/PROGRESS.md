@@ -3360,3 +3360,27 @@
   - 当前排序控件使用原生 `select`，后续若全站统一 PrimeVue 表单风格，可再收口为统一组件
 - 下一个任务：
   - 推送本轮提交并等待你复测文件列表页
+
+---
+
+## 2026-03-11 12:50:11 CST
+
+- 任务：第二十四轮开发-提交A：文件列表目录选择与排序问题根因分析
+- 时间：2026-03-11 12:50:11 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `bd7d4b6`
+- 本次修改：
+  - 新增 `docs/ROUND24_FILECENTER_SELECTION_AND_SORT_RCA.md`
+  - 确认 PrimeVue `Tree` 的 `selectionKeys` / `expandedKeys` 需要对象映射
+  - 确认当前实现使用了错误的字符串绑定，且排序切换没有自动触发加载
+- 已完成事项：
+  - 目录点击不同步与排序不重排的根因已确认
+- 未完成事项：
+  - 修复树形选择状态与展开状态
+  - 修复排序切换自动刷新
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND24_FILECENTER_SELECTION_AND_SORT_RCA.md`
+- 风险说明：
+  - 若继续把 `Tree` 当作非受控组件使用，目录状态问题会反复出现
+- 下一个任务：
+  - 提交B：修复目录选择状态、当前目录同步和排序自动重排

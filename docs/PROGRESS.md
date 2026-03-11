@@ -3231,3 +3231,26 @@
   - 回归阶段需避免并行执行“会清理上传临时目录”的测试命令与E2E
 - 下一个任务：
   - 推送本轮提交到远端并等待你复测页面交互与下载预览链路
+
+---
+
+## 2026-03-11 12:12:42 CST
+
+- 任务：第二十二轮开发-提交A：导航栏高度跳动根因分析
+- 时间：2026-03-11 12:12:42 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `e62256a`
+- 本次修改：
+  - 新增 `docs/ROUND22_NAV_BAR_HEIGHT_RCA.md`
+  - 使用真实浏览器逐页测量 `.topbar`、`.page-info`、`.sidebar`
+  - 确认问题不在标题高度，而在 `.shell` 的 Grid 自动行拉伸与 `.sidebar` 的 `align-items: flex-end`
+- 已完成事项：
+  - 已确认唯一根因，不再盲改标题样式
+- 未完成事项：
+  - `.shell` 与 `.sidebar` 的样式修复
+- 当前可测试内容：
+  - 文档评审：`docs/ROUND22_NAV_BAR_HEIGHT_RCA.md`
+- 风险说明：
+  - 若后续重新引入 Grid 自动行拉伸，导航栏跳动会复发
+- 下一个任务：
+  - 提交B：将 `.shell` 改为纵向 Flex 并固定导航栏垂直对齐

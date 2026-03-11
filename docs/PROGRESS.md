@@ -4342,3 +4342,30 @@
   - GitFlow 闭环可由版本控制完成，但最终人工验收仍需在目标环境按页面主链路走一遍
 - 下一个任务：
   - 执行 `main` 合并、打标签并回合并到 `develop`
+
+
+---
+
+## 2026-03-11 23:35:42 CST
+
+- 任务：第 38 轮 Docker 一键启动设计冻结
+- 时间：2026-03-11 23:35:42 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 新增 `docs/ROUND38_DOCKER_ONE_CLICK_DESIGN.md`
+  - 明确单 `api` 镜像托管前端静态资源的 Docker 化方案
+  - 明确 Compose 服务、卷持久化、环境变量与验收口径
+- 已完成事项：
+  - Docker 一键启动目标形态已冻结
+  - 最小提交拆分已明确
+- 未完成事项：
+  - 应用 Dockerfile
+  - Compose `api` 服务
+  - Docker 一键启动文档与验证
+- 当前可测试内容：
+  - 评审 `docs/ROUND38_DOCKER_ONE_CLICK_DESIGN.md`
+- 风险说明：
+  - 当前仓库仍未具备应用镜像能力，尚不能直接执行 `docker compose up -d --build`
+- 下一个任务：
+  - 实现应用镜像构建能力并补齐 Compose `api` 服务

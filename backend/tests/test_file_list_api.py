@@ -87,3 +87,82 @@ def test_files_api_filter_and_pagination() -> None:
         assert page_resp.status_code == 200
         assert page_resp.json()["total"] == 2
         assert len(page_resp.json()["items"]) == 1
+
+
+def test_files_api_directory_filter() -> None:
+    with TestClient(app) as client:
+        client.post(
+            "/auth/register",
+            json={"email": "dir@example.com", "username": "dir001", "password": "Passw0rd!"},
+        )
+        login = client.post("/auth/login", json={"account": "dir001", "password": "Passw0rd!"})
+        token = login.json()["access_token"]
+
+        user_id = _resolve_user_id("dir001")
+        _seed_file(user_id, "root.txt", 80)
+        _seed_file(user_id, "docs/readme.md", 90)
+        _seed_file(user_id, "docs/specs/a.txt", 100)
+        _seed_file(user_id, "docs/design/b.txt", 120)
+        _seed_file(user_id, "images/c.png", 140)
+
+        root_only = client.get(
+            "/files",
+            params={"directory": "__root__"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert root_only.status_code == 200
+        assert root_only.json()["total"] == 1
+        assert root_only.json()["items"][0]["file_name"] == "root.txt"
+
+        docs_only = client.get(
+            "/files",
+            params={"directory": "docs"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert docs_only.status_code == 200
+        assert docs_only.json()["total"] == 1
+        assert docs_only.json()["items"][0]["file_name"] == "docs/readme.md"
+
+        specs_only = client.get(
+            "/files",
+            params={"directory": "docs/specs"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert specs_only.status_code == 200
+        assert specs_only.json()["total"] == 1
+        assert specs_only.json()["items"][0]["file_name"] == "docs/specs/a.txt"
+
+
+def test_files_api_sorting() -> None:
+    with TestClient(app) as client:
+        client.post(
+            "/auth/register",
+            json={"email": "sort@example.com", "username": "sort001", "password": "Passw0rd!"},
+        )
+        login = client.post("/auth/login", json={"account": "sort001", "password": "Passw0rd!"})
+        token = login.json()["access_token"]
+
+        user_id = _resolve_user_id("sort001")
+        _seed_file(user_id, "z-last.txt", 500)
+        _seed_file(user_id, "a-first.txt", 100)
+        _seed_file(user_id, "m-middle.txt", 300)
+
+        name_asc = client.get(
+            "/files",
+            params={"sort_by": "file_name_asc"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert name_asc.status_code == 200
+        assert [item["file_name"] for item in name_asc.json()["items"]] == [
+            "a-first.txt",
+            "m-middle.txt",
+            "z-last.txt",
+        ]
+
+        size_desc = client.get(
+            "/files",
+            params={"sort_by": "size_desc"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert size_desc.status_code == 200
+        assert [item["size_bytes"] for item in size_desc.json()["items"]] == [500, 300, 100]

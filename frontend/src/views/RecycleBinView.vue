@@ -5,12 +5,18 @@ import Button from "primevue/button";
 import Card from "primevue/card";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
-import InputNumber from "primevue/inputnumber";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import Tag from "primevue/tag";
 
-import { fetchRecycleFileList, purgeRecycleFile, restoreRecycleFile } from "../api/files";
+import {
+  fetchRecycleFileList,
+  fetchRecycleFolderList,
+  purgeRecycleFile,
+  purgeRecycleFolder,
+  restoreRecycleFile,
+  restoreRecycleFolder
+} from "../api/files";
 import { useAuthStore } from "../stores/auth";
 
 const authStore = useAuthStore();
@@ -19,15 +25,48 @@ const loading = ref(false);
 const error = ref("");
 const successMessage = ref("");
 const items = ref([]);
+const folderItems = ref([]);
 const total = ref(0);
 const page = ref(1);
 const pageSize = ref(10);
 
 const keyword = ref("");
-const minSize = ref(null);
-const maxSize = ref(null);
+const sortBy = ref("created_at_desc");
 const restoringFileId = ref(null);
 const purgingFileId = ref(null);
+const restoringFolderPath = ref("");
+const purgingFolderPath = ref("");
+
+const sortOptions = [
+  { label: "最新删除", value: "created_at_desc" },
+  { label: "最早删除", value: "created_at_asc" },
+  { label: "文件名 A-Z", value: "file_name_asc" },
+  { label: "文件名 Z-A", value: "file_name_desc" },
+  { label: "文件大小从大到小", value: "size_desc" },
+  { label: "文件大小从小到大", value: "size_asc" }
+];
+
+function normalizeFilePath(raw) {
+  return String(raw || "")
+    .replace(/\\/g, "/")
+    .split("/")
+    .map((part) => part.trim())
+    .filter((part) => part && part !== "." && part !== "..")
+    .join("/");
+}
+
+function fileBaseName(fileName) {
+  const normalized = normalizeFilePath(fileName);
+  const parts = normalized.split("/");
+  return parts[parts.length - 1] || normalized;
+}
+
+function fileDirectoryLabel(fileName) {
+  const normalized = normalizeFilePath(fileName);
+  const parts = normalized.split("/");
+  if (parts.length <= 1) return "/";
+  return `/${parts.slice(0, -1).join("/")}/`;
+}
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -41,25 +80,35 @@ function formatTime(iso) {
 }
 
 async function loadRecycleFiles() {
+  return loadRecycleFilesWithMode({ silent: false });
+}
+
+async function loadRecycleFilesWithMode({ silent = false } = {}) {
   if (!authStore.accessToken) return;
 
-  loading.value = true;
+  if (!silent) {
+    loading.value = true;
+  }
   error.value = "";
   try {
     const payload = await fetchRecycleFileList({
       accessToken: authStore.accessToken,
       keyword: keyword.value.trim(),
-      minSize: minSize.value,
-      maxSize: maxSize.value,
+      sortBy: sortBy.value,
       page: page.value,
       pageSize: pageSize.value
     });
     items.value = payload.items || [];
     total.value = payload.total || 0;
+    folderItems.value = await fetchRecycleFolderList({
+      accessToken: authStore.accessToken
+    });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "加载回收站失败";
   } finally {
-    loading.value = false;
+    if (!silent) {
+      loading.value = false;
+    }
   }
 }
 
@@ -70,8 +119,7 @@ async function search() {
 
 async function resetFilters() {
   keyword.value = "";
-  minSize.value = null;
-  maxSize.value = null;
+  sortBy.value = "created_at_desc";
   page.value = 1;
   await loadRecycleFiles();
 }
@@ -94,7 +142,7 @@ async function triggerRestore(fileItem) {
       fileId: fileItem.id
     });
     successMessage.value = `已恢复文件：${fileItem.file_name}`;
-    await loadRecycleFiles();
+    await loadRecycleFilesWithMode({ silent: true });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "恢复失败";
   } finally {
@@ -117,11 +165,54 @@ async function triggerPurge(fileItem) {
       fileId: fileItem.id
     });
     successMessage.value = `已彻底删除文件：${fileItem.file_name}`;
-    await loadRecycleFiles();
+    await loadRecycleFilesWithMode({ silent: true });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "彻底删除失败";
   } finally {
     purgingFileId.value = null;
+  }
+}
+
+async function triggerRestoreFolder(folderItem) {
+  if (!authStore.accessToken) return;
+
+  restoringFolderPath.value = folderItem.path;
+  error.value = "";
+  successMessage.value = "";
+  try {
+    await restoreRecycleFolder({
+      accessToken: authStore.accessToken,
+      path: folderItem.path
+    });
+    successMessage.value = `已恢复文件夹：/${folderItem.path}/`;
+    await loadRecycleFilesWithMode({ silent: true });
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : "恢复文件夹失败";
+  } finally {
+    restoringFolderPath.value = "";
+  }
+}
+
+async function triggerPurgeFolder(folderItem) {
+  if (!authStore.accessToken) return;
+  if (!window.confirm(`确认彻底删除文件夹“/${folderItem.path}/”？该操作会同时删除其中已删除文件。`)) {
+    return;
+  }
+
+  purgingFolderPath.value = folderItem.path;
+  error.value = "";
+  successMessage.value = "";
+  try {
+    await purgeRecycleFolder({
+      accessToken: authStore.accessToken,
+      path: folderItem.path
+    });
+    successMessage.value = `已彻底删除文件夹：/${folderItem.path}/`;
+    await loadRecycleFilesWithMode({ silent: true });
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : "彻底删除文件夹失败";
+  } finally {
+    purgingFolderPath.value = "";
   }
 }
 
@@ -141,12 +232,12 @@ onMounted(() => {
           <InputText v-model="keyword" placeholder="例如：report、photo" />
         </div>
         <div class="file-filter-item">
-          <label class="auth-label">最小大小（字节）</label>
-          <InputNumber v-model="minSize" :useGrouping="false" />
-        </div>
-        <div class="file-filter-item">
-          <label class="auth-label">最大大小（字节）</label>
-          <InputNumber v-model="maxSize" :useGrouping="false" />
+          <label class="auth-label">排序方式</label>
+          <select v-model="sortBy" class="sort-select">
+            <option v-for="option in sortOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
         </div>
       </div>
 
@@ -173,7 +264,12 @@ onMounted(() => {
         :totalRecords="total"
         @page="onPageChange"
       >
-        <Column field="file_name" header="文件名"></Column>
+        <Column header="文件名">
+          <template #body="{ data }">{{ fileBaseName(data.file_name) }}</template>
+        </Column>
+        <Column header="所在目录">
+          <template #body="{ data }">{{ fileDirectoryLabel(data.file_name) }}</template>
+        </Column>
         <Column header="大小">
           <template #body="{ data }">{{ formatBytes(data.size_bytes) }}</template>
         </Column>
@@ -200,6 +296,42 @@ onMounted(() => {
                 icon="pi pi-times-circle"
                 :loading="purgingFileId === data.id"
                 @click="triggerPurge(data)"
+              />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+
+      <div class="health-row" style="margin-top: 18px">
+        <Tag severity="contrast" value="已删除文件夹" />
+        <span class="health-message">共 {{ folderItems.length }} 个文件夹</span>
+      </div>
+
+      <DataTable :value="folderItems" dataKey="path" responsiveLayout="scroll">
+        <Column field="path" header="文件夹路径">
+          <template #body="{ data }">/{{ data.path }}/</template>
+        </Column>
+        <Column header="最近更新时间">
+          <template #body="{ data }">{{ formatTime(data.updated_at) }}</template>
+        </Column>
+        <Column header="操作">
+          <template #body="{ data }">
+            <div class="file-row-actions">
+              <Button
+                label="恢复文件夹"
+                size="small"
+                icon="pi pi-replay"
+                :loading="restoringFolderPath === data.path"
+                @click="triggerRestoreFolder(data)"
+              />
+              <Button
+                label="彻底删除文件夹"
+                size="small"
+                severity="danger"
+                text
+                icon="pi pi-times-circle"
+                :loading="purgingFolderPath === data.path"
+                @click="triggerPurgeFolder(data)"
               />
             </div>
           </template>

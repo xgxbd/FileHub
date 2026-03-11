@@ -276,7 +276,7 @@ body {
 
 .file-center-layout {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 320px minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -290,6 +290,29 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.folder-tree-panel .p-tree {
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  background: transparent;
+}
+
+.folder-tree-panel .p-tree-node-content {
+  min-height: 24px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.folder-tree-panel .p-tree-node-label {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.folder-tree-panel .p-tree-node-toggle-button {
+  width: 20px;
+  height: 20px;
 }
 
 .folder-manual-box {
@@ -400,6 +423,15 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
+}
+
+.sort-select {
+  height: 36px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 13px;
 }
 
 .p-datatable .p-datatable-thead > tr > th,

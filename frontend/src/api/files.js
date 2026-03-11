@@ -3,9 +3,8 @@ const API_PREFIX = import.meta.env.VITE_API_PREFIX || "/api";
 export async function fetchFileList({
   accessToken,
   keyword,
-  minSize,
-  maxSize,
   directory,
+  sortBy,
   page = 1,
   pageSize = 20
 }) {
@@ -14,9 +13,8 @@ export async function fetchFileList({
   params.set("page_size", String(pageSize));
 
   if (keyword) params.set("keyword", keyword);
-  if (minSize !== null && minSize !== undefined && minSize !== "") params.set("min_size", String(minSize));
-  if (maxSize !== null && maxSize !== undefined && maxSize !== "") params.set("max_size", String(maxSize));
   if (directory) params.set("directory", directory);
+  if (sortBy) params.set("sort_by", sortBy);
 
   const response = await fetch(`${API_PREFIX}/files?${params.toString()}`, {
     method: "GET",

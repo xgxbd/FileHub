@@ -1,12 +1,11 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import Button from "primevue/button";
 import Card from "primevue/card";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
-import InputNumber from "primevue/inputnumber";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import Tag from "primevue/tag";
@@ -27,9 +26,8 @@ const page = ref(1);
 const pageSize = ref(10);
 
 const keyword = ref("");
-const minSize = ref(null);
-const maxSize = ref(null);
 const selectedDirectory = ref(ROOT_DIRECTORY_MARKER);
+const sortBy = ref("created_at_desc");
 
 const downloadError = ref("");
 const deleteError = ref("");
@@ -46,6 +44,22 @@ const treeNodes = ref([
     children: []
   }
 ]);
+
+const sortOptions = [
+  { label: "最新上传", value: "created_at_desc" },
+  { label: "最早上传", value: "created_at_asc" },
+  { label: "文件名 A-Z", value: "file_name_asc" },
+  { label: "文件名 Z-A", value: "file_name_desc" },
+  { label: "文件大小从大到小", value: "size_desc" },
+  { label: "文件大小从小到大", value: "size_asc" }
+];
+
+const currentDirectoryLabel = computed(() => {
+  if (selectedDirectory.value === ROOT_DIRECTORY_MARKER) {
+    return "根目录 /";
+  }
+  return selectedDirectory.value;
+});
 
 function normalizeFolder(raw) {
   return String(raw || "")
@@ -127,9 +141,8 @@ async function loadFiles() {
     const payload = await fetchFileList({
       accessToken: authStore.accessToken,
       keyword: keyword.value.trim(),
-      minSize: minSize.value,
-      maxSize: maxSize.value,
       directory: selectedDirectory.value,
+      sortBy: sortBy.value,
       page: page.value,
       pageSize: pageSize.value
     });
@@ -184,8 +197,7 @@ async function search() {
 
 async function resetFilters() {
   keyword.value = "";
-  minSize.value = null;
-  maxSize.value = null;
+  sortBy.value = "created_at_desc";
   page.value = 1;
   await loadFiles();
 }
@@ -287,10 +299,7 @@ onMounted(async () => {
       <div class="file-filter-actions">
         <Button label="上传到当前目录" icon="pi pi-upload" @click="jumpUploadWithCurrentDirectory" />
         <Button label="回收站" severity="secondary" text @click="router.push('/recycle')" />
-        <Tag
-          severity="info"
-          :value="selectedDirectory === ROOT_DIRECTORY_MARKER ? '当前目录：根目录 /' : `当前目录：${selectedDirectory}`"
-        />
+        <Tag severity="info" :value="`当前目录：${currentDirectoryLabel}`" />
       </div>
 
       <div class="file-center-layout">
@@ -321,12 +330,12 @@ onMounted(async () => {
               <InputText v-model="keyword" placeholder="例如：report、photo" />
             </div>
             <div class="file-filter-item">
-              <label class="auth-label">最小大小（字节）</label>
-              <InputNumber v-model="minSize" :useGrouping="false" />
-            </div>
-            <div class="file-filter-item">
-              <label class="auth-label">最大大小（字节）</label>
-              <InputNumber v-model="maxSize" :useGrouping="false" />
+              <label class="auth-label">排序方式</label>
+              <select v-model="sortBy" class="sort-select">
+                <option v-for="option in sortOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
             </div>
           </div>
 

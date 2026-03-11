@@ -10,7 +10,8 @@
     "e2e": "playwright test",
     "e2e:list": "playwright test --list",
     "e2e:headed": "playwright test --headed",
-    "e2e:repeat": "npm run e2e && npm run e2e"
+    "e2e:repeat": "npm run e2e && npm run e2e",
+    "e2e:hosted": "npm run build && bash ./scripts/run_hosted_e2e.sh"
   },
   "dependencies": {
     "@primeuix/themes": "^1.2.3",

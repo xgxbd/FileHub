@@ -4066,3 +4066,38 @@
   - 若在收口阶段继续插入新的功能需求，会直接打断当前发布准备节奏
 - 下一个任务：
   - 提交B：执行测试与发布准备补齐，收敛启动、验证与发布文档
+
+---
+
+## 2026-03-11 16:32:45 CST
+
+- 任务：第三十三轮开发-提交B：补测试链路并新增后端托管前端验证
+- 时间：2026-03-11 16:32:45 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `2cadc19`
+- 本次修改：
+  - 新增 `docs/ROUND34_TEST_RELEASE_PREP_RCA.md`
+  - 修正 `frontend/e2e/core-flow.spec.js` 上传成功断言，避免模糊文本匹配
+  - 修正 `frontend/e2e/upload-preview-flow.spec.js`，按 UI 路径验证上传后预览，不再混入不稳定的浏览器内 API 探针
+  - 更新 `frontend/playwright.config.js`，默认 E2E 排除托管模式 smoke
+  - 新增 `frontend/playwright.hosted.config.js`
+  - 新增 `frontend/e2e/hosted-smoke.spec.js`
+  - 新增 `frontend/scripts/run_hosted_e2e.sh`
+  - 更新 `frontend/package.json`，增加 `npm run e2e:hosted`
+- 已完成事项：
+  - 后端全量测试通过（`43 passed`）
+  - 前端常规 E2E 通过（`9 passed`）
+  - 后端托管前端 smoke 通过（`1 passed`）
+  - 发布前已具备前后端分离与后端托管两种验证模式
+- 未完成事项：
+  - 尚未收敛发布文档到当前验证口径
+  - 尚未进入管理端体验收口
+  - 尚未进入上传与预览稳定性增强
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:hosted`
+- 风险说明：
+  - 后端托管前端验证依赖本地可绑定 `127.0.0.1:8000`；在受限沙箱中需显式放开端口权限
+- 下一个任务：
+  - 提交C：更新启动、发布、回滚文档到当前可执行口径

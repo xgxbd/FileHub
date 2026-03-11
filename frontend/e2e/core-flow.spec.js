@@ -25,7 +25,7 @@ test('关键流程：注册登录上传下载删除恢复', async ({ page }) => 
   });
   await page.getByRole('button', { name: '开始上传' }).click();
 
-  await expect(page.getByText('上传完成')).toBeVisible({ timeout: 120000 });
+  await expect(page.getByText(`上传完成：${fileName}`)).toBeVisible({ timeout: 120000 });
   await page.getByRole('complementary').getByRole('button', { name: '文件列表', exact: true }).click();
   await page.waitForURL('**/files');
 

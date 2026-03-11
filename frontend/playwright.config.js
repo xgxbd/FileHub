@@ -2,6 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: ['hosted-smoke.spec.js'],
   timeout: 120000,
   expect: {
     timeout: 10000

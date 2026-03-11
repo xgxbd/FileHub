@@ -4211,3 +4211,33 @@
   - 上传队列控制会引入前端中断状态，需要谨慎处理当前文件与剩余文件的状态一致性
 - 下一个任务：
   - 提交H：实现上传队列停止与未完成重试
+
+---
+
+## 2026-03-11 16:59:10 CST
+
+- 任务：第三十三轮开发-提交H：实现上传队列停止与未完成重试
+- 时间：2026-03-11 16:59:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `58da60a`
+- 本次修改：
+  - 更新 `frontend/src/api/upload.js`
+  - 上传请求支持 `AbortController` 中断
+  - 更新 `frontend/src/views/UploadView.vue`
+  - 增加停止队列、未完成重试、取消状态与上传总进度重算
+  - 新增 `frontend/e2e/upload-queue-control.spec.js`
+  - 覆盖停止队列后重试未完成文件的回归测试
+- 已完成事项：
+  - 上传页支持停止剩余队列
+  - 已取消或失败文件可直接重试
+  - 上传队列专项 E2E 通过（`1 passed`）
+  - 常规前端全量 E2E 通过（`12 passed`）
+- 未完成事项：
+  - 尚未提交预览错误提示分流改动
+- 当前可测试内容：
+  - `cd frontend && npx playwright test e2e/upload-queue-control.spec.js`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - 当前停止队列会中断正在上传的文件并将其标记为已取消，后续若引入并发上传，需要重新设计取消语义
+- 下一个任务：
+  - 提交I：实现预览错误提示分流并补错误状态回归

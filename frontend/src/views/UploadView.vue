@@ -24,6 +24,8 @@ const uploadError = ref("");
 const targetFolder = ref("");
 const fileInputRef = ref(null);
 const currentUploadingName = ref("");
+const cancelRequested = ref(false);
+const activeAbortController = ref(null);
 
 function normalizeFolder(raw) {
   const cleaned = String(raw || "")
@@ -51,6 +53,27 @@ function resetUploadState() {
   uploadError.value = "";
 }
 
+function isAbortError(err) {
+  if (!err) return false;
+  return err.name === "AbortError" || String(err.message || "").toLowerCase().includes("abort");
+}
+
+function recalculateUploadProgress() {
+  const totalBytes = selectedFiles.value.reduce((sum, file) => sum + file.size, 0);
+  if (totalBytes <= 0) {
+    uploadProgress.value = 0;
+    return;
+  }
+
+  const finishedBytes = uploadQueue.value.reduce((sum, item, index) => {
+    const fileSize = selectedFiles.value[index]?.size || item.size || 0;
+    const ratio = item.status === "success" ? 1 : Math.min(item.progress, 100) / 100;
+    return sum + fileSize * ratio;
+  }, 0);
+
+  uploadProgress.value = Math.min(100, Math.floor((finishedBytes / totalBytes) * 100));
+}
+
 function syncSelectedFiles(files) {
   selectedFiles.value = files;
   uploadQueue.value = files.map((file, index) => ({
@@ -63,7 +86,9 @@ function syncSelectedFiles(files) {
     message: ""
   }));
   currentUploadingName.value = "";
+  cancelRequested.value = false;
   resetUploadState();
+  recalculateUploadProgress();
 }
 
 function onFileChange(event) {
@@ -88,7 +113,19 @@ function onDragOver(event) {
   event.preventDefault();
 }
 
-async function startUpload() {
+function markRemainingQueueCanceled(startIndex) {
+  for (let index = startIndex; index < uploadQueue.value.length; index += 1) {
+    const queueItem = uploadQueue.value[index];
+    if (!queueItem || queueItem.status === "success") {
+      continue;
+    }
+    queueItem.status = "canceled";
+    queueItem.progress = 0;
+    queueItem.message = "已取消";
+  }
+}
+
+async function startUpload({ retryUnfinished = false } = {}) {
   if (selectedFiles.value.length === 0) {
     uploadError.value = "请先选择至少一个文件";
     return;
@@ -97,17 +134,48 @@ async function startUpload() {
     uploadError.value = "当前未登录";
     return;
   }
+  if (uploadLoading.value) {
+    return;
+  }
+
+  const candidateIndexes = uploadQueue.value
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => {
+      if (retryUnfinished) {
+        return item.status !== "success";
+      }
+      return true;
+    })
+    .map(({ index }) => index);
+
+  if (candidateIndexes.length === 0) {
+    uploadError.value = "没有可上传的文件";
+    return;
+  }
+
+  if (retryUnfinished) {
+    candidateIndexes.forEach((index) => {
+      uploadQueue.value[index].status = "pending";
+      uploadQueue.value[index].progress = 0;
+      uploadQueue.value[index].message = "";
+    });
+  }
 
   uploadLoading.value = true;
+  cancelRequested.value = false;
   resetUploadState();
   const chunkSize = 1024 * 1024;
-  const totalBytes = selectedFiles.value.reduce((sum, file) => sum + file.size, 0);
-  let uploadedBytes = 0;
   let successCount = 0;
   let failedCount = 0;
+  let canceledCount = 0;
 
   try {
-    for (let fileIndex = 0; fileIndex < selectedFiles.value.length; fileIndex += 1) {
+    for (const fileIndex of candidateIndexes) {
+      if (cancelRequested.value) {
+        markRemainingQueueCanceled(fileIndex);
+        break;
+      }
+
       const file = selectedFiles.value[fileIndex];
       const totalChunks = Math.ceil(file.size / chunkSize);
       const queueItem = uploadQueue.value[fileIndex];
@@ -115,6 +183,7 @@ async function startUpload() {
       queueItem.message = "上传中";
       queueItem.progress = 0;
       currentUploadingName.value = queueItem.path;
+      activeAbortController.value = new AbortController();
 
       try {
         const session = await createUploadSession({
@@ -125,10 +194,14 @@ async function startUpload() {
             chunk_size: chunkSize,
             total_chunks: totalChunks,
             mime_type: file.type || "application/octet-stream"
-          }
+          },
+          signal: activeAbortController.value.signal
         });
 
         for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex += 1) {
+          if (cancelRequested.value) {
+            throw new DOMException("upload aborted", "AbortError");
+          }
           const start = chunkIndex * chunkSize;
           const end = Math.min(start + chunkSize, file.size);
           const blob = file.slice(start, end);
@@ -137,39 +210,52 @@ async function startUpload() {
             accessToken: authStore.accessToken,
             uploadId: session.upload_id,
             chunkIndex,
-            chunkBlob: blob
+            chunkBlob: blob,
+            signal: activeAbortController.value.signal
           });
 
           queueItem.progress = Math.min(95, Math.floor(((chunkIndex + 1) / totalChunks) * 95));
-          const uploadedCurrentBytes = end;
-          uploadProgress.value = Math.min(95, Math.floor(((uploadedBytes + uploadedCurrentBytes) / totalBytes) * 95));
+          recalculateUploadProgress();
         }
 
         await completeUploadSession({
           accessToken: authStore.accessToken,
-          uploadId: session.upload_id
+          uploadId: session.upload_id,
+          signal: activeAbortController.value.signal
         });
 
-        uploadedBytes += file.size;
         successCount += 1;
         queueItem.status = "success";
         queueItem.progress = 100;
         queueItem.message = "上传完成";
+        recalculateUploadProgress();
       } catch (err) {
-        failedCount += 1;
-        queueItem.status = "error";
-        queueItem.message = err instanceof Error ? err.message : "上传失败";
+        if (cancelRequested.value || isAbortError(err)) {
+          canceledCount += 1;
+          queueItem.status = "canceled";
+          queueItem.message = "已取消";
+        } else {
+          failedCount += 1;
+          queueItem.status = "error";
+          queueItem.message = err instanceof Error ? err.message : "上传失败";
+        }
+        recalculateUploadProgress();
+      } finally {
+        activeAbortController.value = null;
       }
     }
 
-    uploadProgress.value = 100;
     currentUploadingName.value = "";
-    if (failedCount > 0) {
+    if (cancelRequested.value || canceledCount > 0) {
+      markRemainingQueueCanceled(0);
+      const totalCanceled = uploadQueue.value.filter((item) => item.status === "canceled").length;
+      uploadMessage.value = `已停止剩余上传任务，已取消 ${totalCanceled} 个文件`;
+    } else if (failedCount > 0) {
       uploadError.value = `${failedCount} 个文件上传失败，请查看队列结果`;
     }
-    if (successCount === 1 && failedCount === 0 && selectedFiles.value.length === 1) {
-      uploadMessage.value = `上传完成：${uploadQueue.value[0].path}`;
-    } else if (successCount > 0) {
+    if (successCount === 1 && failedCount === 0 && canceledCount === 0 && candidateIndexes.length === 1) {
+      uploadMessage.value = `上传完成：${uploadQueue.value[candidateIndexes[0]].path}`;
+    } else if (successCount > 0 && failedCount === 0 && canceledCount === 0) {
       uploadMessage.value = `已完成 ${successCount} 个文件上传`;
     }
   } catch (err) {
@@ -177,7 +263,21 @@ async function startUpload() {
   } finally {
     currentUploadingName.value = "";
     uploadLoading.value = false;
+    activeAbortController.value = null;
+    recalculateUploadProgress();
   }
+}
+
+function stopUploadQueue() {
+  if (!uploadLoading.value) {
+    return;
+  }
+  cancelRequested.value = true;
+  activeAbortController.value?.abort();
+}
+
+async function retryUnfinishedUploads() {
+  await startUpload({ retryUnfinished: true });
 }
 
 onMounted(() => {
@@ -203,6 +303,22 @@ onMounted(() => {
             <input ref="fileInputRef" type="file" multiple style="display: none" @change="onFileChange" />
             <Button label="选择文件" severity="secondary" text icon="pi pi-folder-open" @click="openFilePicker" />
             <Button label="开始上传" icon="pi pi-upload" :loading="uploadLoading" @click="startUpload" />
+            <Button
+              label="停止队列"
+              severity="danger"
+              text
+              icon="pi pi-stop"
+              :disabled="!uploadLoading"
+              @click="stopUploadQueue"
+            />
+            <Button
+              label="重试未完成"
+              severity="secondary"
+              text
+              icon="pi pi-refresh"
+              :disabled="uploadLoading || !uploadQueue.some((item) => ['error', 'canceled'].includes(item.status))"
+              @click="retryUnfinishedUploads"
+            />
             <Button label="返回文件列表" severity="secondary" text @click="router.push('/files')" />
           </div>
           <div class="upload-status">
@@ -221,7 +337,17 @@ onMounted(() => {
           <div v-for="item in uploadQueue" :key="item.id" class="item">
             <div class="queue-item-header">
               <strong>{{ item.name }}</strong>
-              <span>{{ item.status === "pending" ? "待上传" : item.status === "uploading" ? "上传中" : item.status === "success" ? "已完成" : "失败" }}</span>
+              <span>{{
+                item.status === "pending"
+                  ? "待上传"
+                  : item.status === "uploading"
+                    ? "上传中"
+                    : item.status === "success"
+                      ? "已完成"
+                      : item.status === "canceled"
+                        ? "已取消"
+                        : "失败"
+              }}</span>
             </div>
             <div class="upload-status">{{ item.path }}</div>
             <div class="bar"><span :style="{ width: `${item.progress}%` }"></span></div>

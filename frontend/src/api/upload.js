@@ -9,7 +9,7 @@ async function request(path, options = {}) {
   return payload;
 }
 
-export function createUploadSession({ accessToken, payload }) {
+export function createUploadSession({ accessToken, payload, signal }) {
   return request("/upload/sessions", {
     method: "POST",
     headers: {
@@ -17,11 +17,12 @@ export function createUploadSession({ accessToken, payload }) {
       Accept: "application/json",
       Authorization: `Bearer ${accessToken}`
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    signal
   });
 }
 
-export function uploadChunk({ accessToken, uploadId, chunkIndex, chunkBlob }) {
+export function uploadChunk({ accessToken, uploadId, chunkIndex, chunkBlob, signal }) {
   const formData = new FormData();
   formData.append("chunk", chunkBlob, `chunk-${chunkIndex}.part`);
   return request(`/upload/sessions/${uploadId}/chunks/${chunkIndex}`, {
@@ -29,16 +30,18 @@ export function uploadChunk({ accessToken, uploadId, chunkIndex, chunkBlob }) {
     headers: {
       Authorization: `Bearer ${accessToken}`
     },
-    body: formData
+    body: formData,
+    signal
   });
 }
 
-export function completeUploadSession({ accessToken, uploadId }) {
+export function completeUploadSession({ accessToken, uploadId, signal }) {
   return request(`/upload/sessions/${uploadId}/complete`, {
     method: "POST",
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${accessToken}`
-    }
+    },
+    signal
   });
 }

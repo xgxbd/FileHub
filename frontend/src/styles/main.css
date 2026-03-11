@@ -135,6 +135,12 @@ body {
   min-width: 0;
 }
 
+.panel {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 14px;
+}
+
 .p-card {
   width: 100%;
   border: 1px solid var(--line);
@@ -215,8 +221,63 @@ body {
   margin-bottom: 14px;
 }
 
+.upload-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.dropzone {
+  min-height: 260px;
+  border: 1px dashed #cfcfcf;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+
+.queue .item {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.bar {
+  height: 6px;
+  background: #f0f0f0;
+  margin-top: 6px;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: #111111;
+}
+
 .preview-body {
   min-height: 340px;
+}
+
+.preview-layout {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 16px;
+}
+
+.preview-box {
+  min-height: 340px;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+
+.meta .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  gap: 12px;
 }
 
 .preview-image {
@@ -275,6 +336,11 @@ body {
 
   .kpi-row,
   .file-filter-row {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-layout,
+  .preview-layout {
     grid-template-columns: 1fr;
   }
 }

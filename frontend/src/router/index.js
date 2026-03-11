@@ -7,7 +7,8 @@ const FileCenterView = () => import("../views/FileCenterView.vue");
 const RecycleBinView = () => import("../views/RecycleBinView.vue");
 const AdminLogsView = () => import("../views/AdminLogsView.vue");
 const AdminFilesView = () => import("../views/AdminFilesView.vue");
-const HomeView = () => import("../views/HomeView.vue");
+const UploadView = () => import("../views/UploadView.vue");
+const PreviewView = () => import("../views/PreviewView.vue");
 
 const router = createRouter({
   history: createWebHistory(),
@@ -52,7 +53,7 @@ const router = createRouter({
     {
       path: "/upload",
       name: "upload",
-      component: HomeView,
+      component: UploadView,
       meta: {
         requiresAuth: true,
         pageTitle: "文件上传页",
@@ -61,9 +62,9 @@ const router = createRouter({
       }
     },
     {
-      path: "/preview",
+      path: "/preview/:fileId?",
       name: "preview",
-      component: HomeView,
+      component: PreviewView,
       meta: {
         requiresAuth: true,
         pageTitle: "文件详情 / 预览页",

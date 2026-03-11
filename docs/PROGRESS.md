@@ -2568,3 +2568,31 @@
   - 壳层切换后路由结构已扩展，下一步拆分页面时需保持既有 API 调用行为一致
 - 下一个任务：
   - 提交D：新增独立上传页与预览页并接入现有上传/预览能力
+
+---
+
+## 2026-03-11 09:25:20 CST
+
+- 任务：第十六轮开发-提交D：上传页与预览页独立化并接入业务能力
+- 时间：2026-03-11 09:25:20 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `5cc4c3d`
+- 本次修改：
+  - 新增 `frontend/src/views/UploadView.vue` 并接入分片上传接口链路
+  - 新增 `frontend/src/views/PreviewView.vue` 并接入文件预览与下载能力
+  - 重构 `frontend/src/views/FileCenterView.vue`，移除内嵌上传/预览，改为独立路由跳转
+  - 更新 `frontend/src/router/index.js` 增加 `/upload`、`/preview/:fileId?` 路由
+  - 扩展 `frontend/src/styles/main.css` 的方案 D 上传/预览布局样式
+- 已完成事项：
+  - 登录、文件列表、上传、预览、回收站、后台管理、操作日志均可独立页面访问
+  - 上传与预览不再是列表页内嵌弹层，已符合独立页面要求
+- 未完成事项：
+  - `docs/UI_OPTIONS.md` 仍保留旧版 V2 文案，尚未切换为“方案 D 已定版”说明
+  - 方案 D 后续开发约束尚未固化到单独规范文档
+- 当前可测试内容：
+  - `cd frontend && npm run build`（通过）
+  - 登录后访问 `/files`、`/upload`、`/preview/:fileId`、`/recycle`、`/admin/files`、`/admin/logs`
+- 风险说明：
+  - 预览页需有效 `fileId` 才能加载内容，若直接访问 `/preview` 需手动输入文件 ID
+- 下一个任务：
+  - 提交E：更新 UI 选型文档并固化“后续改动必须适配方案 D”的开发约束

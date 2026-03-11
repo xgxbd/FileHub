@@ -2830,3 +2830,28 @@
   - 若未先执行前端 build，后端托管模式不会返回页面文件
 - 下一个任务：
   - 第十八轮规范收尾与远端同步
+
+---
+
+## 2026-03-11 10:17:28 CST
+
+- 任务：第十八轮开发-提交D：修复单后端托管模式首页404问题
+- 时间：2026-03-11 10:17:28 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `49c8cc1`
+- 本次修改：
+  - 修复后端默认前端构建目录解析错误（`frontend/dist` 路径多退了一层目录）
+  - 新增托管模式缺少构建产物时的启动告警日志
+- 已完成事项：
+  - `APP_SERVE_FRONTEND=true` 且存在 `frontend/dist` 时，`/` 与 `/files` 均可返回前端页面
+  - `/api/healthz` 在托管模式下保持可用
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `APP_SERVE_FRONTEND=true` 启动后端，访问 `GET /`、`GET /files` 应返回 `text/html`
+  - `GET /api/healthz` 返回 200
+  - `APP_SERVE_FRONTEND=false pytest -q tests/test_range_download_api.py`（4 passed）
+- 风险说明：
+  - 当 `APP_SERVE_FRONTEND=true` 时，历史不带 `/api` 前缀的后端接口路径不再可用（属设计预期）
+- 下一个任务：
+  - 如需兼容旧路径，可增加可选的 API 双前缀兼容开关

@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -9,6 +10,8 @@ from app.api.router import api_router
 from app.core.config import settings
 from app.db import SessionLocal, init_db
 from app.services.admin_bootstrap_service import ensure_admin_user
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -36,8 +39,8 @@ app.add_middleware(
 def _resolve_frontend_dist_dir() -> Path:
     if settings.frontend_dist_dir:
         return Path(settings.frontend_dist_dir).expanduser().resolve()
-    # backend/app/main.py -> backend -> repo -> frontend/dist
-    return Path(__file__).resolve().parents[2].parent / "frontend" / "dist"
+    # backend/app/main.py -> repo -> frontend/dist
+    return Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
 
 if settings.app_serve_frontend:
@@ -58,5 +61,10 @@ if settings.app_serve_frontend:
             if candidate.is_file() and frontend_dist_dir in candidate.parents:
                 return FileResponse(candidate)
             return FileResponse(frontend_index)
+    else:
+        logger.warning(
+            "APP_SERVE_FRONTEND=true 但未找到前端构建产物：%s；当前仅提供 /api 接口",
+            frontend_index,
+        )
 else:
     app.include_router(api_router)

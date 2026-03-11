@@ -99,9 +99,20 @@ def test_files_api_directory_filter() -> None:
         token = login.json()["access_token"]
 
         user_id = _resolve_user_id("dir001")
+        _seed_file(user_id, "root.txt", 80)
+        _seed_file(user_id, "docs/readme.md", 90)
         _seed_file(user_id, "docs/specs/a.txt", 100)
         _seed_file(user_id, "docs/design/b.txt", 120)
         _seed_file(user_id, "images/c.png", 140)
+
+        root_only = client.get(
+            "/files",
+            params={"directory": "__root__"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert root_only.status_code == 200
+        assert root_only.json()["total"] == 1
+        assert root_only.json()["items"][0]["file_name"] == "root.txt"
 
         docs_only = client.get(
             "/files",
@@ -109,7 +120,8 @@ def test_files_api_directory_filter() -> None:
             headers={"Authorization": f"Bearer {token}"},
         )
         assert docs_only.status_code == 200
-        assert docs_only.json()["total"] == 2
+        assert docs_only.json()["total"] == 1
+        assert docs_only.json()["items"][0]["file_name"] == "docs/readme.md"
 
         specs_only = client.get(
             "/files",

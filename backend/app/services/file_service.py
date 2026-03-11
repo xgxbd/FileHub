@@ -20,10 +20,16 @@ def _apply_filters(
         query = query.where(FileObject.size_bytes >= min_size)
     if max_size is not None:
         query = query.where(FileObject.size_bytes <= max_size)
-    if directory is not None and directory.strip():
-        normalized = directory.strip().strip("/")
-        if normalized:
-            query = query.where(FileObject.file_name.ilike(f"{normalized}/%"))
+    if directory is not None:
+        raw_directory = directory.strip()
+        if raw_directory == "__root__":
+            query = query.where(~FileObject.file_name.like("%/%"))
+        elif raw_directory:
+            normalized = raw_directory.strip("/")
+            if normalized:
+                prefix = f"{normalized}/"
+                query = query.where(FileObject.file_name.ilike(f"{prefix}%"))
+                query = query.where(~FileObject.file_name.ilike(f"{prefix}%/%"))
     return query
 
 

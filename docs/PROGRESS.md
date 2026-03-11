@@ -3145,3 +3145,34 @@
   - 在极窄分辨率下表格仍可能触发横向滚动（移动端预期行为）
 - 下一个任务：
   - 提交C：目录过滤改为“当前目录直系文件”语义
+
+---
+
+## 2026-03-11 11:48:49 CST
+
+- 任务：第二十一轮开发-提交C：目录过滤改为当前层级直系文件语义
+- 时间：2026-03-11 11:48:49 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `357c0e7`
+- 本次修改：
+  - 更新 `backend/app/services/file_service.py`：
+    - `directory="__root__"` 时仅返回根目录直系文件（不含 `/`）
+    - `directory="logs"` 时仅返回 `logs/*` 的直系文件（排除更深层）
+  - 更新 `backend/app/api/files.py`：补充 `directory` 参数语义说明
+  - 更新 `backend/tests/test_file_list_api.py`：新增根目录/目录直系过滤断言
+  - 更新 `frontend/src/views/FileCenterView.vue`：
+    - 根目录节点改为 `__root__` 标记
+    - 树节点选择时稳定解析目录值
+    - 顶部“当前目录”与“上传到当前目录”适配根目录标记
+- 已完成事项：
+  - 根目录和 logs 目录现在采用文件浏览器语义，不再递归混合显示
+- 未完成事项：
+  - 历史对象路径兼容修复（下载/预览404）
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py`（3 passed）
+  - `cd frontend && npm run build`
+  - 页面手工测试：点击“根目录 / logs”应看到不同层级结果
+- 风险说明：
+  - 若目录下仅有子目录无直系文件，则列表会为空（符合直系语义）
+- 下一个任务：
+  - 提交D：对象存储 fallback 兼容历史路径，修复下载/预览404

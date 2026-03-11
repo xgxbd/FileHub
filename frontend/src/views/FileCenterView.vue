@@ -17,6 +17,7 @@ import { useAuthStore } from "../stores/auth";
 
 const router = useRouter();
 const authStore = useAuthStore();
+const ROOT_DIRECTORY_MARKER = "__root__";
 
 const loading = ref(false);
 const error = ref("");
@@ -28,7 +29,7 @@ const pageSize = ref(10);
 const keyword = ref("");
 const minSize = ref(null);
 const maxSize = ref(null);
-const selectedDirectory = ref("");
+const selectedDirectory = ref(ROOT_DIRECTORY_MARKER);
 
 const downloadError = ref("");
 const deleteError = ref("");
@@ -36,12 +37,12 @@ const treeError = ref("");
 const downloadingFileId = ref(null);
 const deletingFileId = ref(null);
 const treeLoading = ref(false);
-const selectedTreeKey = ref("dir:");
+const selectedTreeKey = ref(`dir:${ROOT_DIRECTORY_MARKER}`);
 const treeNodes = ref([
   {
-    key: "dir:",
+    key: `dir:${ROOT_DIRECTORY_MARKER}`,
     label: "根目录 /",
-    data: { directory: "" },
+    data: { directory: ROOT_DIRECTORY_MARKER },
     children: []
   }
 ]);
@@ -69,13 +70,13 @@ function sortTree(node) {
 
 function buildTree(files) {
   const root = {
-    key: "dir:",
+    key: `dir:${ROOT_DIRECTORY_MARKER}`,
     label: "根目录 /",
-    data: { directory: "" },
+    data: { directory: ROOT_DIRECTORY_MARKER },
     children: []
   };
   const nodeMap = new Map();
-  nodeMap.set("", root);
+  nodeMap.set(ROOT_DIRECTORY_MARKER, root);
 
   files.forEach((fileItem) => {
     const folder = folderOf(fileItem.file_name);
@@ -87,7 +88,7 @@ function buildTree(files) {
       currentPath = currentPath ? `${currentPath}/${segment}` : segment;
       if (nodeMap.has(currentPath)) return;
 
-      const parentPath = index === 0 ? "" : segments.slice(0, index).join("/");
+      const parentPath = index === 0 ? ROOT_DIRECTORY_MARKER : segments.slice(0, index).join("/");
       const parentNode = nodeMap.get(parentPath);
       if (!parentNode) return;
 
@@ -190,15 +191,17 @@ async function resetFilters() {
 }
 
 async function clearDirectoryFilter() {
-  selectedDirectory.value = "";
-  selectedTreeKey.value = "dir:";
+  selectedDirectory.value = ROOT_DIRECTORY_MARKER;
+  selectedTreeKey.value = `dir:${ROOT_DIRECTORY_MARKER}`;
   page.value = 1;
   await loadFiles();
 }
 
 async function onDirectorySelect(event) {
-  selectedDirectory.value = event.node?.data?.directory || "";
-  selectedTreeKey.value = event.node?.key || "dir:";
+  const directoryFromNode = event.node?.data?.directory;
+  const directoryFromKey = String(event.node?.key || "").replace(/^dir:/, "");
+  selectedDirectory.value = directoryFromNode || directoryFromKey || ROOT_DIRECTORY_MARKER;
+  selectedTreeKey.value = event.node?.key || `dir:${ROOT_DIRECTORY_MARKER}`;
   page.value = 1;
   await loadFiles();
 }
@@ -262,7 +265,7 @@ function triggerPreview(fileItem) {
 
 function jumpUploadWithCurrentDirectory() {
   const folder = selectedDirectory.value;
-  if (!folder) {
+  if (!folder || folder === ROOT_DIRECTORY_MARKER) {
     router.push("/upload");
     return;
   }
@@ -284,7 +287,10 @@ onMounted(async () => {
       <div class="file-filter-actions">
         <Button label="上传到当前目录" icon="pi pi-upload" @click="jumpUploadWithCurrentDirectory" />
         <Button label="回收站" severity="secondary" text @click="router.push('/recycle')" />
-        <Tag severity="info" :value="selectedDirectory ? `当前目录：${selectedDirectory}` : '当前目录：根目录 /'" />
+        <Tag
+          severity="info"
+          :value="selectedDirectory === ROOT_DIRECTORY_MARKER ? '当前目录：根目录 /' : `当前目录：${selectedDirectory}`"
+        />
       </div>
 
       <div class="file-center-layout">

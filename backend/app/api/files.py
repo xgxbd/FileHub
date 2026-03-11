@@ -52,7 +52,10 @@ def get_files(
     keyword: str | None = Query(default=None),
     min_size: int | None = Query(default=None, ge=0),
     max_size: int | None = Query(default=None, ge=0),
-    directory: str | None = Query(default=None, description="目录路径前缀，例如 docs/specs"),
+    directory: str | None = Query(
+        default=None,
+        description="目录筛选，'__root__' 表示根目录直系文件，其他值表示该目录直系文件",
+    ),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),

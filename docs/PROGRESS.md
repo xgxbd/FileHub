@@ -2596,3 +2596,29 @@
   - 预览页需有效 `fileId` 才能加载内容，若直接访问 `/preview` 需手动输入文件 ID
 - 下一个任务：
   - 提交E：更新 UI 选型文档并固化“后续改动必须适配方案 D”的开发约束
+
+---
+
+## 2026-03-11 09:26:32 CST
+
+- 任务：第十六轮开发-提交E：固化方案D定版文档与后续开发约束
+- 时间：2026-03-11 09:26:32 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `83b8317`
+- 本次修改：
+  - 重写 `docs/UI_OPTIONS.md` 为“方案 D 已定版”说明与开发约束
+  - 更新 `frontend/README.md`，同步独立上传页与预览页路由说明
+  - 验证 `docs/ui-prototypes/v5/scheme-d/preview.html` 路径存在
+- 已完成事项：
+  - 方案 D 已成为当前文档层面的唯一 UI 基线
+  - 后续改动需适配方案 D 的约束已写入文档
+- 未完成事项：
+  - 细节级 1:1 视觉还原（按钮/表格间距、局部组件细节）仍可继续迭代
+  - 现有 E2E 用例尚未覆盖新 `/upload`、`/preview/:fileId` 路由
+- 当前可测试内容：
+  - `docs/ui-prototypes/v5/scheme-d/preview.html` 路径可访问
+  - 前端独立页面路由与方案 D 壳层可联调验证
+- 风险说明：
+  - 若后续新增页面未同步本定版文档，可能再次出现 UI 偏离
+- 下一个任务：
+  - 第十六轮规范收尾：补充回归验证并推送分支等待合并

@@ -4272,3 +4272,45 @@
   - 当前前端错误分流依赖后端返回的状态码与 detail 文案，若后端后续改文案，需要同步校验前端映射
 - 下一个任务：
   - 进行本轮规范收尾与阶段结果汇总
+
+---
+
+## 2026-03-11 17:06:18 CST
+
+- 任务：第三十四轮开发-发布候选：合并 develop 到 release 并完成候选验证
+- 时间：2026-03-11 17:06:18 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`release/v0.1.0`；提交前基线 `97b984a`
+- 本次修改：
+  - 将 `feature/round16-ui-scheme-d-alignment` 合并到 `develop`
+  - 将 `develop` 合并到 `release/v0.1.0`
+  - 更新 `docs/RELEASE_NOTES_v0.1.0.md`
+  - 更新 `docs/RELEASE_CHECKLIST.md`
+  - 更新 `docs/ROLLBACK_PLAN.md`
+  - 修正发布验证命令口径，统一要求对后端脚本显式设置 `APP_SERVE_FRONTEND=false`
+  - 记录本次发布候选的真实验证结果与顺序执行要求
+- 已完成事项：
+  - `develop` 已纳入第十六轮全部收口结果
+  - `release/v0.1.0` 已更新到当前候选版本
+  - 后端测试通过（`44 passed`）
+  - 主链路烟雾通过
+  - 性能基线已采集
+  - 前端构建通过
+  - 常规前端 E2E 通过（`12 passed`）
+  - 后端托管前端 smoke 通过（`1 passed`）
+- 未完成事项：
+  - 尚未打发布标签
+  - 尚未将 `release/v0.1.0` 合并回 `main`
+  - 尚未执行最终人工验收
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false python scripts/smoke_core_flow.py`
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false python scripts/perf_baseline.py`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:hosted`
+- 风险说明：
+  - 常规 E2E 与托管模式 E2E 必须顺序执行，不能并行占用 `127.0.0.1:8000`
+  - 当前候选仍以本地单机验证为主，正式发布前仍需按环境替换 `JWT_SECRET` 与管理员密码
+- 下一个任务：
+  - 完成最终人工验收并决定是否打 `v0.1.0` 标签与合并到 `main`

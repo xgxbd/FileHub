@@ -11,7 +11,7 @@
 ```bash
 cd infra
 cp .env.example .env
-docker compose up -d
+docker compose up -d mysql redis minio
 ```
 
 服务说明：
@@ -20,6 +20,48 @@ docker compose up -d
 - Redis: `127.0.0.1:6379`
 - MinIO API: `127.0.0.1:9000`
 - MinIO Console: `http://127.0.0.1:9001`
+
+## 2.1 一键启动完整系统（Docker Compose）
+
+如果你要直接启动完整的 FileHub Web 系统，而不是只起中间件，使用下面这组命令：
+
+前置条件：
+
+- 已安装 Docker
+- Docker daemon 已启动（例如 Docker Desktop 已运行）
+
+```bash
+cd infra
+cp -n .env.example .env
+docker compose up -d --build
+```
+
+启动后可直接访问：
+
+- Web：`http://127.0.0.1:8000/files`
+- API 健康检查：`http://127.0.0.1:8000/api/healthz`
+- MinIO Console：`http://127.0.0.1:9001`
+
+默认不会把 MySQL、Redis、MinIO API 映射到宿主机，避免和本地已有服务冲突。
+
+默认管理员账号取自 `infra/.env`：
+
+- 用户名：`ADMIN_USERNAME`
+- 密码：`ADMIN_PASSWORD`
+
+常用命令：
+
+```bash
+cd infra
+docker compose ps
+docker compose logs -f api
+docker compose down
+```
+
+说明：
+
+- Compose 已为新增变量提供默认值，旧的 `infra/.env` 不会再因为缺字段产生启动级警告。
+- 默认镜像源和 npm/pip 源已切到更适合当前网络环境的镜像，可按 `infra/.env` 覆盖。
 
 ## 3. 后端虚拟环境规范（必须）
 

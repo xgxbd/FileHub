@@ -4101,3 +4101,33 @@
   - 后端托管前端验证依赖本地可绑定 `127.0.0.1:8000`；在受限沙箱中需显式放开端口权限
 - 下一个任务：
   - 提交C：更新启动、发布、回滚文档到当前可执行口径
+
+---
+
+## 2026-03-11 16:33:22 CST
+
+- 任务：第三十三轮开发-提交C：收敛启动、发布与回滚文档
+- 时间：2026-03-11 16:33:22 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `125906b`
+- 本次修改：
+  - 更新 `docs/SETUP.md`
+  - 补充发布前最小验证命令，覆盖后端 pytest、前端 E2E、后端托管前端 E2E
+  - 更新 `docs/RELEASE_CHECKLIST.md`
+  - 增加推荐执行顺序、托管模式验证项与当前基线口径
+  - 更新 `docs/ROLLBACK_PLAN.md`
+  - 增加回滚后的托管模式 smoke 验证与最小回滚执行模板
+- 已完成事项：
+  - 启动说明、发布清单、回滚预案已与当前仓库能力对齐
+  - 发布前验证命令已文档化，可直接执行
+- 未完成事项：
+  - 尚未进入管理端体验收口
+  - 尚未进入上传与预览稳定性增强
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:hosted`
+- 风险说明：
+  - 当前文档仍以本地单机部署为主，若切换到 MySQL/Redis/MinIO 的完整生产拓扑，还需补部署侧操作手册
+- 下一个任务：
+  - 进入管理端体验收口设计与实现

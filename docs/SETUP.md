@@ -71,3 +71,32 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 - 页面入口：`http://127.0.0.1:8000/files`
 - API 入口：`http://127.0.0.1:8000/api/healthz`
+
+## 5. 发布前最小验证命令
+
+### 后端全量测试
+
+```bash
+cd backend
+source .venv/bin/activate
+APP_SERVE_FRONTEND=false pytest -q
+```
+
+### 前端常规 E2E
+
+```bash
+cd frontend
+npm run e2e
+```
+
+### 后端托管前端 E2E
+
+```bash
+cd frontend
+npm run e2e:hosted
+```
+
+说明：
+
+- `npm run e2e`：验证前后端分离开发模式。
+- `npm run e2e:hosted`：先构建前端，再由后端托管静态资源，验证最终交付形态。

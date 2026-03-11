@@ -49,3 +49,24 @@
 1. Compose 变量默认值补齐。
 2. Docker 镜像源和包源默认切到更可用的镜像。
 3. 文档明确旧 `.env` 兼容策略和可覆盖的镜像源参数。
+
+## 问题 3：宿主机端口冲突导致 `docker compose up -d` 启动失败
+
+- 问题现象：
+  - `docker compose up -d` 在创建容器后失败，报错 `listen tcp 0.0.0.0:3306: bind: address already in use`。
+- 可能原因：
+  - Compose 把 MySQL、Redis、MinIO API 都直接映射到宿主机端口。
+  - 用户本机已经运行了本地 MySQL / Redis 等服务，占用了默认端口。
+  - 对“一键启动 Web 应用”来说，这些内部服务并不需要默认暴露到宿主机。
+- 验证步骤：
+  - 检查 `infra/docker-compose.yml` 的 `ports` 配置。
+  - 结合启动日志确认冲突出现在 MySQL 3306 绑定阶段。
+- 验证结果：
+  - Compose 的确对 `mysql`、`redis`、`minio` API 都声明了宿主机端口映射。
+  - 实际启动时在 `3306` 绑定失败，导致整套启动被中断。
+- 最终根因：
+  - 一键启动场景下错误地把仅供容器内部访问的中间件服务暴露到了宿主机，增加了不必要的端口冲突面。
+- 修复方案：
+  - 对默认一键启动场景移除 MySQL、Redis 的宿主机端口映射。
+  - MinIO 仅保留 Console 端口供人工查看，API 继续走容器内部网络。
+  - 文档同步说明：Web 入口默认只需要 `8000`，MinIO Console 默认只需要 `9001`。

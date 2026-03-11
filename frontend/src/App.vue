@@ -20,21 +20,13 @@ const navItems = computed(() => {
     { label: "上传", to: "/upload", requiresAuth: true },
     { label: "预览", to: "/preview", requiresAuth: true },
     { label: "回收站", to: "/recycle", requiresAuth: true },
-    { label: "后台", to: "/admin/files", requiresAuth: true, requiresAdmin: true },
-    { label: "日志", to: "/admin/logs", requiresAuth: true, requiresAdmin: true }
+    { label: "后台", to: "/admin/files", requiresAuth: true, requiresAdmin: true, adminOnlyLabel: true },
+    { label: "日志", to: "/admin/logs", requiresAuth: true, requiresAdmin: true, adminOnlyLabel: true }
   ];
 
   return baseItems.filter((item) => {
-    if (item.guestOnly) {
-      return !authStore.isAuthenticated;
-    }
-    if (item.requiresAuth && !authStore.isAuthenticated) {
-      return false;
-    }
-    if (item.requiresAdmin && authStore.user?.role !== "admin") {
-      return false;
-    }
-    return true;
+    if (item.guestOnly) return !authStore.isAuthenticated;
+    return authStore.isAuthenticated;
   });
 });
 
@@ -49,9 +41,13 @@ const activeNavPath = computed(() => {
   return route.path;
 });
 
-function jumpTo(to) {
-  if (route.path !== to) {
-    router.push(to);
+function jumpTo(item) {
+  if (item.requiresAdmin && authStore.user?.role !== "admin") {
+    window.alert("该页面仅管理员可访问");
+    return;
+  }
+  if (route.path !== item.to) {
+    router.push(item.to);
   }
 }
 
@@ -64,7 +60,12 @@ function logout() {
 <template>
   <div class="scheme-root">
     <header class="topbar">
-      <div class="brand" @click="jumpTo(authStore.isAuthenticated ? '/files' : '/login')">FileHub</div>
+      <div
+        class="brand"
+        @click="jumpTo({ to: authStore.isAuthenticated ? '/files' : '/login', requiresAdmin: false })"
+      >
+        FileHub
+      </div>
       <div class="page-info">
         <h1>{{ pageTitle }}</h1>
         <p>{{ pageSubtitle }}</p>
@@ -77,8 +78,14 @@ function logout() {
           <Button size="small" label="退出" icon="pi pi-sign-out" @click="logout" />
         </template>
         <template v-else>
-          <Button size="small" severity="secondary" text label="登录" @click="jumpTo('/login')" />
-          <Button size="small" label="注册" @click="jumpTo('/register')" />
+          <Button
+            size="small"
+            severity="secondary"
+            text
+            label="登录"
+            @click="jumpTo({ to: '/login', requiresAdmin: false })"
+          />
+          <Button size="small" label="注册" @click="jumpTo({ to: '/register', requiresAdmin: false })" />
         </template>
       </div>
     </header>
@@ -90,9 +97,10 @@ function logout() {
           :key="item.to"
           class="nav-item"
           :class="{ active: activeNavPath === item.to }"
-          @click="jumpTo(item.to)"
+          @click="jumpTo(item)"
         >
           {{ item.label }}
+          <span v-if="item.adminOnlyLabel" class="nav-badge">管理员</span>
         </button>
       </aside>
 

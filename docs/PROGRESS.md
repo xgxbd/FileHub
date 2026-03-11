@@ -4506,3 +4506,33 @@
   - 当前默认镜像源与包源针对你当前网络环境做了优化，若后续在其他网络环境中表现不同，可通过 `infra/.env` 覆盖镜像与包源变量
 - 下一个任务：
   - 合并 Docker 一键启动分支，或继续做容器化环境下的业务人工验收与问题收口
+
+
+---
+
+## 2026-03-12 00:20:48 CST
+
+- 任务：v0.3.0 发布分支建立与 Docker 人工验收清单准备
+- 时间：2026-03-12 00:20:48 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：release/v0.3.0 / 5bdec73
+- 本次修改：
+  - 将 `feature/round38-docker-one-click` 合并到 `develop`
+  - 从 `develop` 创建 `release/v0.3.0`
+  - 新增 `docs/RELEASE_v0.3.0_DOCKER_ACCEPTANCE.md`
+  - 新增 `docs/RELEASE_NOTES_v0.3.0.md`
+- 已完成事项：
+  - Docker 一键启动能力已进入发布分支
+  - v0.3.0 的 Docker 最小人工验收清单已整理完成
+  - 发布说明已建立
+- 未完成事项：
+  - Docker 环境下的人工验收
+  - 验收通过后的正式发布闭环
+- 当前可测试内容：
+  - `cd /Users/xloser/Owner/Code/VibeCoding/FileHub/infra && docker compose up -d --build`
+  - 访问 `http://127.0.0.1:8000/files`
+  - 按 `docs/RELEASE_v0.3.0_DOCKER_ACCEPTANCE.md` 执行人工验收
+- 风险说明：
+  - 当前仍需做最后一轮人工验收，确认 Docker 交付形态下业务链路无回归
+- 下一个任务：
+  - 按 v0.3.0 Docker 人工验收清单逐项验收并收口问题

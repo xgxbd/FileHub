@@ -1,4 +1,4 @@
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, asc, desc, func, select
 from sqlalchemy.orm import Session
 
 from app.models.file_object import FileObject
@@ -33,6 +33,18 @@ def _apply_filters(
     return query
 
 
+def _apply_sort(*, query: Select, sort_by: str) -> Select:
+    sort_mapping = {
+        "created_at_desc": desc(FileObject.created_at),
+        "created_at_asc": asc(FileObject.created_at),
+        "file_name_asc": asc(FileObject.file_name),
+        "file_name_desc": desc(FileObject.file_name),
+        "size_desc": desc(FileObject.size_bytes),
+        "size_asc": asc(FileObject.size_bytes),
+    }
+    return query.order_by(sort_mapping.get(sort_by, desc(FileObject.created_at)))
+
+
 def list_files(
     *,
     db: Session,
@@ -42,6 +54,7 @@ def list_files(
     min_size: int | None,
     max_size: int | None,
     directory: str | None = None,
+    sort_by: str = "created_at_desc",
     page: int,
     page_size: int,
 ) -> FileListResponse:
@@ -61,7 +74,7 @@ def list_files(
     count_query = select(func.count()).select_from(filtered_query.subquery())
     total = db.scalar(count_query) or 0
 
-    list_query = filtered_query.order_by(FileObject.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    list_query = _apply_sort(query=filtered_query, sort_by=sort_by).offset((page - 1) * page_size).limit(page_size)
     records = db.execute(list_query).scalars().all()
 
     return FileListResponse(

@@ -131,3 +131,38 @@ def test_files_api_directory_filter() -> None:
         assert specs_only.status_code == 200
         assert specs_only.json()["total"] == 1
         assert specs_only.json()["items"][0]["file_name"] == "docs/specs/a.txt"
+
+
+def test_files_api_sorting() -> None:
+    with TestClient(app) as client:
+        client.post(
+            "/auth/register",
+            json={"email": "sort@example.com", "username": "sort001", "password": "Passw0rd!"},
+        )
+        login = client.post("/auth/login", json={"account": "sort001", "password": "Passw0rd!"})
+        token = login.json()["access_token"]
+
+        user_id = _resolve_user_id("sort001")
+        _seed_file(user_id, "z-last.txt", 500)
+        _seed_file(user_id, "a-first.txt", 100)
+        _seed_file(user_id, "m-middle.txt", 300)
+
+        name_asc = client.get(
+            "/files",
+            params={"sort_by": "file_name_asc"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert name_asc.status_code == 200
+        assert [item["file_name"] for item in name_asc.json()["items"]] == [
+            "a-first.txt",
+            "m-middle.txt",
+            "z-last.txt",
+        ]
+
+        size_desc = client.get(
+            "/files",
+            params={"sort_by": "size_desc"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert size_desc.status_code == 200
+        assert [item["size_bytes"] for item in size_desc.json()["items"]] == [500, 300, 100]

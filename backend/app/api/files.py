@@ -56,6 +56,10 @@ def get_files(
         default=None,
         description="目录筛选，'__root__' 表示根目录直系文件，其他值表示该目录直系文件",
     ),
+    sort_by: str = Query(
+        default="created_at_desc",
+        description="排序方式：created_at_desc/created_at_asc/file_name_asc/file_name_desc/size_desc/size_asc",
+    ),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -69,6 +73,7 @@ def get_files(
         min_size=min_size,
         max_size=max_size,
         directory=directory,
+        sort_by=sort_by,
         page=page,
         page_size=page_size,
     )

@@ -3304,3 +3304,28 @@
   - 排序能力若只加在 `/files`，其他页面查询区不会自动获得同样选项（本轮属预期）
 - 下一个任务：
   - 提交B：实现 `/files` 排序参数与测试
+
+---
+
+## 2026-03-11 12:28:34 CST
+
+- 任务：第二十三轮开发-提交B：实现文件列表排序参数与测试
+- 时间：2026-03-11 12:28:34 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `67d23f0`
+- 本次修改：
+  - 更新 `backend/app/api/files.py`：新增 `sort_by` 查询参数
+  - 更新 `backend/app/services/file_service.py`：新增 6 种排序映射与排序应用逻辑
+  - 更新 `backend/tests/test_file_list_api.py`：新增按文件名和文件大小排序断言
+- 已完成事项：
+  - `/files` 已支持前端需要的排序能力
+  - 后端排序测试通过
+- 未完成事项：
+  - 前端文件列表页改成“关键字 + 排序”表单
+  - 左侧文件树加宽并压缩字体
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py`（4 passed）
+- 风险说明：
+  - 当前排序只作用于 `/files`，不影响回收站与后台管理页
+- 下一个任务：
+  - 提交C：实现文件列表页树形区与查询区前端改造

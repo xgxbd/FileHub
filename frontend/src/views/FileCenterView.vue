@@ -423,7 +423,7 @@ watch(sortBy, async (nextValue, prevValue) => {
         <section class="panel folder-tree-panel">
           <div class="folder-tree-header">
                 <strong>文件树</strong>
-                <div class="file-row-actions">
+                <div class="file-row-actions folder-tree-actions">
                   <Button
                     size="small"
                     text

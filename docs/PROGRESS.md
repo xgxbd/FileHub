@@ -3643,3 +3643,34 @@
   - 当前文件夹重命名交互仍使用浏览器原生 `prompt`，后续若要完全贴合方案 D，需要替换为统一弹窗
 - 下一个任务：
   - 提交D：修复文件树与文件列表排版，并增加目录层级虚线
+
+---
+
+## 2026-03-11 13:33:33 CST
+
+- 任务：第二十七轮开发-提交D：修复文件树与文件列表排版并增加目录层级虚线
+- 时间：2026-03-11 13:33:33 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `1a201e6`
+- 本次修改：
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 为文件树头部操作区增加独立样式类
+  - 更新 `frontend/src/styles/main.css`
+  - 加宽左侧文件树面板
+  - 按钮与表格标题统一强制横向显示，避免中文被挤成竖排
+  - 操作按钮改为可横向换行而非逐字竖排
+  - 为目录树增加父子/同层级虚线连接
+  - 为表格增加横向滚动兜底
+- 已完成事项：
+  - 文件树按钮与表格标题已恢复为横向可读布局
+  - 左侧文件树层级关系已用虚线补强
+  - 布局调整后核心流程与稳定性回归全部通过
+- 未完成事项：
+  - 文件夹重命名与删除交互仍是原生弹窗，未统一为方案 D 风格弹窗
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/layout-stability.spec.js e2e/file-center-tree-sort.spec.js e2e/folder-lifecycle.spec.js`
+- 风险说明：
+  - 目录虚线当前基于 PrimeVue Tree DOM 结构样式实现，后续若升级 PrimeVue 主版本，需要复核选择器兼容性
+- 下一个任务：
+  - 推送本轮目录生命周期与文件树排版改造提交

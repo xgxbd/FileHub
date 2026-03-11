@@ -259,7 +259,7 @@ body {
 }
 
 .file-row-actions {
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 .file-filter-actions {
@@ -276,7 +276,7 @@ body {
 
 .file-center-layout {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: minmax(380px, 420px) minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -288,8 +288,16 @@ body {
 
 .folder-tree-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 12px;
+}
+
+.folder-tree-actions {
+  justify-content: flex-end;
+  row-gap: 8px;
+  column-gap: 8px;
+  flex: 1;
 }
 
 .folder-tree-panel .p-tree {
@@ -297,22 +305,64 @@ body {
   padding: 0;
   font-size: 12px;
   background: transparent;
+  overflow-x: auto;
+}
+
+.folder-tree-panel .p-tree-root-children,
+.folder-tree-panel .p-tree-node-children {
+  position: relative;
+}
+
+.folder-tree-panel .p-tree-node-children {
+  margin-left: 10px;
+  padding-left: 14px;
+}
+
+.folder-tree-panel .p-tree-node-children::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 10px;
+  border-left: 1px dashed #d2d6db;
+}
+
+.folder-tree-panel .p-tree-node {
+  position: relative;
 }
 
 .folder-tree-panel .p-tree-node-content {
+  position: relative;
   min-height: 24px;
-  padding: 2px 6px;
+  padding: 2px 6px 2px 8px;
   border-radius: 4px;
+  white-space: nowrap;
+}
+
+.folder-tree-panel .p-tree-node-content::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  width: 12px;
+  border-top: 1px dashed #d2d6db;
+  transform: translateY(-50%);
+}
+
+.folder-tree-panel .p-tree-root-children > .p-tree-node > .p-tree-node-content::before {
+  display: none;
 }
 
 .folder-tree-panel .p-tree-node-label {
   font-size: 12px;
   line-height: 16px;
+  white-space: nowrap;
 }
 
 .folder-tree-panel .p-tree-node-toggle-button {
   width: 20px;
   height: 20px;
+  flex: 0 0 20px;
 }
 
 .folder-manual-box {
@@ -437,11 +487,28 @@ body {
 .p-datatable .p-datatable-thead > tr > th,
 .p-datatable .p-datatable-tbody > tr > td {
   border-color: var(--line);
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .p-datatable-table {
   width: 100%;
   table-layout: auto;
+}
+
+.p-datatable-wrapper {
+  overflow-x: auto;
+}
+
+.file-row-actions .p-button,
+.folder-tree-actions .p-button {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.file-row-actions .p-button .p-button-label,
+.folder-tree-actions .p-button .p-button-label {
+  white-space: nowrap;
 }
 
 @media (max-width: 960px) {

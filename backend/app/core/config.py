@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     app_host: str = "127.0.0.1"
     app_port: int = 8000
     app_debug: bool = True
+    app_serve_frontend: bool = False
+    frontend_dist_dir: str = ""
 
     database_url: str = "sqlite:///./filehub.db"
 

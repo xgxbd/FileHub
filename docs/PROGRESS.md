@@ -2779,3 +2779,28 @@
   - 若前端未 build 或 dist 缺失，托管模式无法提供页面
 - 下一个任务：
   - 提交B：实现后端静态托管与 SPA 回退路由
+
+---
+
+## 2026-03-11 10:05:13 CST
+
+- 任务：第十八轮开发-提交B：实现前端build后后端静态托管与SPA回退
+- 时间：2026-03-11 10:05:13 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `a100d10`
+- 本次修改：
+  - 新增后端配置项：`APP_SERVE_FRONTEND`、`FRONTEND_DIST_DIR`
+  - `APP_SERVE_FRONTEND=true` 时，API 路由改为 `/api/*`
+  - 增加前端 `dist` 静态文件托管与 SPA fallback（非 `/api/*` 路径回退 `index.html`）
+- 已完成事项：
+  - 已实现单后端托管模式核心能力
+  - 已验证托管模式下 `/`、`/files`、静态文件与 `/api/healthz` 可访问
+- 未完成事项：
+  - README 与 SETUP 文档尚未补充“单后端托管模式”操作说明
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q tests/test_range_download_api.py`（通过）
+  - 临时脚本验证：托管模式下 `/` 与 `/files` 返回 `index.html`，`/api/healthz` 返回 200
+- 风险说明：
+  - 托管模式依赖前端 `dist` 存在，未构建时仅提供 API
+- 下一个任务：
+  - 提交C：更新 `.env.example`、README、SETUP，补充单后端启动说明

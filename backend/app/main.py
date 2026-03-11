@@ -1,7 +1,9 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.api.router import api_router
 from app.core.config import settings
@@ -30,4 +32,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(api_router)
+
+def _resolve_frontend_dist_dir() -> Path:
+    if settings.frontend_dist_dir:
+        return Path(settings.frontend_dist_dir).expanduser().resolve()
+    # backend/app/main.py -> backend -> repo -> frontend/dist
+    return Path(__file__).resolve().parents[2].parent / "frontend" / "dist"
+
+
+if settings.app_serve_frontend:
+    app.include_router(api_router, prefix="/api")
+    frontend_dist_dir = _resolve_frontend_dist_dir()
+    frontend_index = frontend_dist_dir / "index.html"
+
+    if frontend_index.exists():
+        @app.get("/", include_in_schema=False)
+        def serve_index():
+            return FileResponse(frontend_index)
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        def serve_spa(full_path: str):
+            if full_path.startswith("api/"):
+                raise HTTPException(status_code=404, detail="接口不存在")
+            candidate = (frontend_dist_dir / full_path).resolve()
+            if candidate.is_file() and frontend_dist_dir in candidate.parents:
+                return FileResponse(candidate)
+            return FileResponse(frontend_index)
+else:
+    app.include_router(api_router)

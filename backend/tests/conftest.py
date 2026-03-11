@@ -11,6 +11,8 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 os.environ["DATABASE_URL"] = "sqlite:///./test_suite.db"
+os.environ["APP_SERVE_FRONTEND"] = "false"
+os.environ["ADMIN_BOOTSTRAP_ENABLED"] = "false"
 
 from app.db import Base, engine
 from app.models import FileObject, OperationLog, User

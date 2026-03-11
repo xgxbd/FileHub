@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
@@ -16,8 +17,25 @@ from app.services.operation_log_service import record_operation
 router = APIRouter(prefix="/files", tags=["files"])
 
 
-def _is_previewable(mime_type: str) -> bool:
-    return mime_type.startswith("image/") or mime_type == "application/pdf" or mime_type.startswith("text/")
+TEXT_PREVIEW_EXTENSIONS = {".txt", ".md", ".log", ".json", ".csv", ".yaml", ".yml"}
+
+
+def _file_ext(file_name: str) -> str:
+    return Path(file_name).suffix.lower()
+
+
+def _is_previewable(mime_type: str, file_name: str) -> bool:
+    if mime_type.startswith("image/") or mime_type == "application/pdf" or mime_type.startswith("text/"):
+        return True
+    return _file_ext(file_name) in TEXT_PREVIEW_EXTENSIONS
+
+
+def _preview_media_type(mime_type: str, file_name: str) -> str:
+    if mime_type != "application/octet-stream":
+        return mime_type
+    if _file_ext(file_name) in TEXT_PREVIEW_EXTENSIONS:
+        return "text/plain; charset=utf-8"
+    return mime_type
 
 
 def _build_content_disposition(*, disposition: str, file_name: str) -> str:
@@ -95,7 +113,11 @@ def download_file(
     if current_user.role != "admin" and file_record.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权下载该文件")
 
-    total_size = object_storage_service.get_file_size(object_key=file_record.object_key)
+    try:
+        total_size = object_storage_service.get_file_size(object_key=file_record.object_key)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件内容不存在") from exc
+
     start = 0
     end = total_size - 1
     status_code = status.HTTP_200_OK
@@ -126,7 +148,10 @@ def download_file(
         end = min(end, total_size - 1)
         status_code = status.HTTP_206_PARTIAL_CONTENT
 
-    data = object_storage_service.read_range(object_key=file_record.object_key, start=start, end=end)
+    try:
+        data = object_storage_service.read_range(object_key=file_record.object_key, start=start, end=end)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件内容不存在") from exc
     headers = {
         "Accept-Ranges": "bytes",
         "Content-Length": str(len(data)),
@@ -166,15 +191,18 @@ def preview_file(
     if current_user.role != "admin" and file_record.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权预览该文件")
 
-    if not _is_previewable(file_record.mime_type):
+    if not _is_previewable(file_record.mime_type, file_record.file_name):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="当前文件类型不支持在线预览")
 
-    total_size = object_storage_service.get_file_size(object_key=file_record.object_key)
-    data = object_storage_service.read_range(
-        object_key=file_record.object_key,
-        start=0,
-        end=max(total_size - 1, 0),
-    )
+    try:
+        total_size = object_storage_service.get_file_size(object_key=file_record.object_key)
+        data = object_storage_service.read_range(
+            object_key=file_record.object_key,
+            start=0,
+            end=max(total_size - 1, 0),
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件内容不存在") from exc
 
     headers = {
         "Content-Disposition": _build_content_disposition(
@@ -183,4 +211,9 @@ def preview_file(
         ),
         "Content-Length": str(len(data)),
     }
-    return Response(content=data, media_type=file_record.mime_type, headers=headers, status_code=status.HTTP_200_OK)
+    return Response(
+        content=data,
+        media_type=_preview_media_type(file_record.mime_type, file_record.file_name),
+        headers=headers,
+        status_code=status.HTTP_200_OK,
+    )

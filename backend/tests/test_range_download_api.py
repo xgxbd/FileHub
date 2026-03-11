@@ -1,6 +1,9 @@
 from fastapi.testclient import TestClient
 
+from app.db import SessionLocal
+from app.models.file_object import FileObject
 from app.main import app
+from app.services.object_storage import object_storage_service
 
 
 def _prepare_uploaded_file(
@@ -105,3 +108,18 @@ def test_download_with_non_ascii_filename() -> None:
         assert response.status_code == 200
         assert response.content == content
         assert "filename*=" in response.headers["content-disposition"]
+
+
+def test_download_returns_404_when_object_missing() -> None:
+    with TestClient(app) as client:
+        token, file_id, _ = _prepare_uploaded_file(client, email="missing@test.com", username="missing001")
+        headers = {"Authorization": f"Bearer {token}"}
+
+        with SessionLocal() as db:
+            file_record = db.get(FileObject, file_id)
+            assert file_record is not None
+            object_storage_service.delete_object(object_key=file_record.object_key)
+
+        response = client.get(f"/files/{file_id}/download", headers=headers)
+        assert response.status_code == 404
+        assert response.json()["detail"] == "文件内容不存在"

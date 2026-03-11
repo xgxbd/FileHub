@@ -2933,3 +2933,35 @@
   - 若现网已有历史“对象缺失但元数据存在”数据，修复后会从 500 变为 404（属于正确行为但会暴露存储一致性问题）
 - 下一个任务：
   - 提交B：修复后端下载500与TXT预览失败，并补充回归测试
+
+---
+
+## 2026-03-11 11:15:40 CST
+
+- 任务：第二十轮开发-提交B：修复下载500与TXT预览失败（含回归测试）
+- 时间：2026-03-11 11:15:40 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `55affd1`
+- 本次修改：
+  - 更新 `backend/app/api/files.py`：
+    - 下载/预览接口统一捕获对象缺失 `FileNotFoundError`，返回 404 `文件内容不存在`
+    - 预览规则新增文本扩展名兜底（`.txt/.md/.log/.json/.csv/.yaml/.yml`）
+    - `application/octet-stream` 且文本扩展名时按 `text/plain` 预览
+  - 更新 `backend/tests/conftest.py`：测试环境强制 `APP_SERVE_FRONTEND=false`，避免静态托管模式污染 API 用例
+  - 新增回归测试：
+    - `tests/test_range_download_api.py::test_download_returns_404_when_object_missing`
+    - `tests/test_file_preview_api.py::test_preview_text_extension_with_octet_stream_supported`
+    - `tests/test_file_preview_api.py::test_preview_returns_404_when_object_missing`
+- 已完成事项：
+  - 下载 500 根因修复，异常已转为可理解的 404
+  - TXT/LOG 等文本文件在 MIME 不准确时可正常预览
+  - 相关测试全部通过（`10 passed`）
+- 未完成事项：
+  - 前端标题栏稳定性和右上角伪按钮交互修复
+  - 文件树展示与“按路径预览”交互改造
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_range_download_api.py tests/test_file_preview_api.py`
+- 风险说明：
+  - 旧数据若对象内容已丢失，会稳定返回 404（不再 500），需要后续补一致性巡检策略
+- 下一个任务：
+  - 提交C：修复前端标题区抖动并替换右上角误导性按钮

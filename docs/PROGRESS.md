@@ -2492,3 +2492,27 @@
   - 版本后续演进建议转入 v0.1.1 迭代规划
 - 下一个任务：
   - 合并第十五轮到 `develop` 并同步主干基线
+
+---
+
+## 2026-03-11 09:18:47 CST
+
+- 任务：第十六轮开发-提交A：方案D对齐设计与最小提交拆分
+- 时间：2026-03-11 09:18:47 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `53a7364`
+- 本次修改：
+  - 新增 `docs/ROUND16_UI_SCHEME_D_ALIGNMENT_DESIGN.md`
+  - 明确 V5 方案 D 的页面结构、路由映射、样式令牌与最小提交计划
+- 已完成事项：
+  - 完成“先设计后实现”的设计阶段
+  - 明确 7 个页面独立化与壳层组件化改造路径
+- 未完成事项：
+  - 恢复 `docs/ui-prototypes/v5/scheme-d/preview.html` 等 V5 资产
+  - 前端页面按方案 D 完整落地
+- 当前可测试内容：
+  - 设计文档可直接评审：`docs/ROUND16_UI_SCHEME_D_ALIGNMENT_DESIGN.md`
+- 风险说明：
+  - 现有页面业务逻辑集中在 `FileCenterView`，拆分上传/预览页面时需防止行为回归
+- 下一个任务：
+  - 提交B：恢复 V5 设计资产并校验方案 D 路径可访问

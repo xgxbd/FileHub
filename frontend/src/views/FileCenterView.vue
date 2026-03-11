@@ -29,7 +29,6 @@ const keyword = ref("");
 const minSize = ref(null);
 const maxSize = ref(null);
 const selectedDirectory = ref("");
-const manualDirectory = ref("");
 
 const downloadError = ref("");
 const deleteError = ref("");
@@ -192,15 +191,7 @@ async function resetFilters() {
 
 async function clearDirectoryFilter() {
   selectedDirectory.value = "";
-  manualDirectory.value = "";
   selectedTreeKey.value = "dir:";
-  page.value = 1;
-  await loadFiles();
-}
-
-async function applyManualDirectory() {
-  selectedDirectory.value = normalizeFolder(manualDirectory.value);
-  selectedTreeKey.value = selectedDirectory.value ? `dir:${selectedDirectory.value}` : "dir:";
   page.value = 1;
   await loadFiles();
 }
@@ -208,7 +199,6 @@ async function applyManualDirectory() {
 async function onDirectorySelect(event) {
   selectedDirectory.value = event.node?.data?.directory || "";
   selectedTreeKey.value = event.node?.key || "dir:";
-  manualDirectory.value = selectedDirectory.value;
   page.value = 1;
   await loadFiles();
 }
@@ -301,7 +291,10 @@ onMounted(async () => {
         <section class="panel folder-tree-panel">
           <div class="folder-tree-header">
             <strong>文件树</strong>
-            <Button size="small" text severity="secondary" label="刷新" icon="pi pi-refresh" @click="loadDirectoryTree" />
+            <div class="file-row-actions">
+              <Button size="small" text severity="secondary" label="根目录" icon="pi pi-home" @click="clearDirectoryFilter" />
+              <Button size="small" text severity="secondary" label="刷新" icon="pi pi-refresh" @click="loadDirectoryTree" />
+            </div>
           </div>
 
           <Message v-if="treeError" severity="error" :closable="false">{{ treeError }}</Message>
@@ -313,15 +306,6 @@ onMounted(async () => {
             v-model:selectionKeys="selectedTreeKey"
             @node-select="onDirectorySelect"
           />
-
-          <div class="folder-manual-box">
-            <label class="auth-label">手动输入目录</label>
-            <InputText v-model="manualDirectory" placeholder="例如：docs/specs" />
-            <div class="file-filter-actions">
-              <Button size="small" label="切换目录" icon="pi pi-folder-open" @click="applyManualDirectory" />
-              <Button size="small" text severity="secondary" label="回到根目录" @click="clearDirectoryFilter" />
-            </div>
-          </div>
         </section>
 
         <section class="panel">

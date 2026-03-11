@@ -3204,3 +3204,30 @@
   - 若对象在所有候选路径及 MinIO 中都不存在，仍会返回 404（真实缺失）
 - 下一个任务：
   - 提交E：前后端自动化回归全量复跑并规范收尾
+
+---
+
+## 2026-03-11 12:03:45 CST
+
+- 任务：第二十一轮开发-提交E：自动化回归复跑与规范收尾记录
+- 时间：2026-03-11 12:03:45 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `31ec201`
+- 本次修改：
+  - 执行后端全量测试：`cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`（28 passed）
+  - 执行前端 E2E：`cd frontend && npm run e2e`（3 passed）
+  - 记录一次并行测试干扰结论：`pytest` 清理 `tmp/uploads` 会影响并行 E2E 上传，后续改为串行执行
+  - 清理回归过程生成的临时目录 `tmp/`
+- 已完成事项：
+  - 本轮修复项均有自动化验证通过
+  - 已形成可复现的回归命令集
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - 后端全量：`cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q`
+  - 前端 E2E：`cd frontend && npm run e2e`
+  - 前端构建：`cd frontend && npm run build`
+- 风险说明：
+  - 回归阶段需避免并行执行“会清理上传临时目录”的测试命令与E2E
+- 下一个任务：
+  - 推送本轮提交到远端并等待你复测页面交互与下载预览链路

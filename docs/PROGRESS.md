@@ -3974,3 +3974,36 @@
   - 静默刷新不会显示整表 loading，但行级按钮仍保留 loading 态；若后续动作接口明显变慢，可再补更细粒度的行内提示
 - 下一个任务：
   - 提交C：实现上传页多文件选择与拖拽批量上传
+
+---
+
+## 2026-03-11 15:54:10 CST
+
+- 任务：第三十一轮开发-提交C：实现上传页多文件批量上传
+- 时间：2026-03-11 15:54:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `518651c`
+- 本次修改：
+  - 更新 `frontend/src/views/UploadView.vue`
+  - 上传状态机由单文件改为队列模型
+  - 文件选择器开启 `multiple`
+  - 拖拽支持多文件
+  - 按队列顺序逐个上传文件，展示总进度与逐文件状态
+  - 单文件上传保持原有完成提示，多文件上传显示汇总结果
+  - 更新 `frontend/src/styles/main.css`
+  - 新增上传队列项样式
+  - 新增 `frontend/e2e/upload-multiple-files.spec.js`
+  - 覆盖多文件选择与批量上传回归
+- 已完成事项：
+  - 上传页支持多文件选择
+  - 上传页支持多文件拖拽
+  - 批量上传可顺序完成，并保留单文件上传兼容文案
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/upload-preview-flow.spec.js e2e/upload-multiple-files.spec.js`
+- 风险说明：
+  - 当前批量上传采用串行策略，稳定性优先；若后续改为并发上传，需要重新设计总进度聚合与失败重试策略
+- 下一个任务：
+  - 继续收敛文件仓库剩余交互细节，并保持方案 D 视觉一致性

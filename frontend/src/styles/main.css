@@ -429,6 +429,13 @@ body {
   font-size: 13px;
 }
 
+.queue-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .bar {
   height: 6px;
   background: #f0f0f0;

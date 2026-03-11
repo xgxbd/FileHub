@@ -1,4 +1,5 @@
 import re
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
@@ -17,6 +18,15 @@ router = APIRouter(prefix="/files", tags=["files"])
 
 def _is_previewable(mime_type: str) -> bool:
     return mime_type.startswith("image/") or mime_type == "application/pdf" or mime_type.startswith("text/")
+
+
+def _build_content_disposition(*, disposition: str, file_name: str) -> str:
+    ascii_fallback = file_name.encode("ascii", "ignore").decode("ascii").strip()
+    if not ascii_fallback:
+        ascii_fallback = "download"
+    ascii_fallback = ascii_fallback.replace("\\", "_").replace('"', "_")
+    utf8_name = quote(file_name)
+    return f"{disposition}; filename=\"{ascii_fallback}\"; filename*=UTF-8''{utf8_name}"
 
 
 @router.get("", response_model=FileListResponse)
@@ -120,7 +130,10 @@ def download_file(
     headers = {
         "Accept-Ranges": "bytes",
         "Content-Length": str(len(data)),
-        "Content-Disposition": f'attachment; filename=\"{file_record.file_name}\"',
+        "Content-Disposition": _build_content_disposition(
+            disposition="attachment",
+            file_name=file_record.file_name,
+        ),
     }
     if status_code == status.HTTP_206_PARTIAL_CONTENT:
         headers["Content-Range"] = f"bytes {start}-{end}/{total_size}"
@@ -164,7 +177,10 @@ def preview_file(
     )
 
     headers = {
-        "Content-Disposition": f'inline; filename=\"{file_record.file_name}\"',
+        "Content-Disposition": _build_content_disposition(
+            disposition="inline",
+            file_name=file_record.file_name,
+        ),
         "Content-Length": str(len(data)),
     }
     return Response(content=data, media_type=file_record.mime_type, headers=headers, status_code=status.HTTP_200_OK)

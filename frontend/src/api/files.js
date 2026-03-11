@@ -50,8 +50,11 @@ export async function downloadFile({
   });
 
   if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    throw new Error(payload.detail || "下载失败");
+    const payload = await response.json().catch(async () => {
+      const text = await response.text().catch(() => "");
+      return { detail: text };
+    });
+    throw new Error(payload.detail || `下载失败（HTTP ${response.status}）`);
   }
 
   return response.blob();

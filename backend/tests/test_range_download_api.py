@@ -3,7 +3,13 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-def _prepare_uploaded_file(client: TestClient, *, email: str, username: str) -> tuple[str, int, bytes]:
+def _prepare_uploaded_file(
+    client: TestClient,
+    *,
+    email: str,
+    username: str,
+    file_name: str = "range.txt",
+) -> tuple[str, int, bytes]:
     content = b"range-download-content-demo"
     chunk_size = 6
     chunks = [content[i : i + chunk_size] for i in range(0, len(content), chunk_size)]
@@ -20,7 +26,7 @@ def _prepare_uploaded_file(client: TestClient, *, email: str, username: str) -> 
         "/upload/sessions",
         headers=headers,
         json={
-            "file_name": "range.txt",
+            "file_name": file_name,
             "total_size": len(content),
             "chunk_size": chunk_size,
             "total_chunks": len(chunks),
@@ -83,3 +89,19 @@ def test_download_forbidden_for_other_user() -> None:
 
         forbidden = client.get(f"/files/{file_id}/download", headers=other_headers)
         assert forbidden.status_code == 403
+
+
+def test_download_with_non_ascii_filename() -> None:
+    with TestClient(app) as client:
+        token, file_id, content = _prepare_uploaded_file(
+            client,
+            email="cnrange@test.com",
+            username="cnrange001",
+            file_name="中文报告.txt",
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = client.get(f"/files/{file_id}/download", headers=headers)
+        assert response.status_code == 200
+        assert response.content == content
+        assert "filename*=" in response.headers["content-disposition"]

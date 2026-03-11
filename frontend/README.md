@@ -58,6 +58,25 @@ npm run dev
 - 支持按 owner、关键字、状态筛选文件
 - 支持删除、恢复、彻底删除状态操作
 
+## 前端关键流程 E2E（第十三轮）
+
+- 用例目录：`frontend/e2e/`
+- 查看用例：
+  ```bash
+  cd frontend
+  npm run e2e:list
+  ```
+- 执行一次：
+  ```bash
+  cd frontend
+  npm run e2e
+  ```
+- 连续两次稳定性回归：
+  ```bash
+  cd frontend
+  npm run e2e:repeat
+  ```
+
 ## 联调验证
 
 1. 启动后端：

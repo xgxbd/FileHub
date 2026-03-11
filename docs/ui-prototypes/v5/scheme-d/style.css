@@ -1,0 +1,20 @@
+:root{--bg:#fafafa;--surface:#fff;--line:#e8e8e8;--text:#111;--muted:#6a6a6a;--pri:#111;--sec:#555;--ok:#166534;--warn:#9a3412;--bad:#991b1b}
+*{box-sizing:border-box}body{margin:0;font-family:"Helvetica Neue","PingFang SC",sans-serif;background:var(--bg);color:var(--text)}
+#app{min-height:100vh}
+.topbar{height:78px;display:grid;grid-template-columns:180px 1fr 220px;align-items:center;padding:0 24px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}.brand{font:700 24px "Iowan Old Style","Songti SC",serif}.page-info h1{margin:0;font-size:19px;font-family:"Iowan Old Style","Songti SC",serif}.page-info p{margin:4px 0 0;color:var(--muted);font-size:12px}.top-actions{display:flex;gap:8px;justify-content:flex-end}
+.shell{display:grid;grid-template-columns:1fr;max-width:1040px;margin:0 auto;min-height:calc(100vh - 78px);padding:24px 16px}
+.sidebar{display:flex;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.nav-item{text-decoration:none;color:var(--muted);font-size:14px;padding-bottom:6px}.nav-item.active{color:var(--text);border-bottom:1px solid var(--text);font-weight:600}
+.main{display:grid;grid-template-rows:auto 1fr;gap:14px}.kpi-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.kpi{border:1px solid var(--line);padding:10px;background:#fff;font-size:13px}
+.content-layout{display:grid;grid-template-columns:1fr;gap:12px}.secondary{display:none}
+.panel{border:1px solid var(--line);background:#fff;padding:14px}
+.btn{border:1px solid var(--line);background:#fff;padding:8px 10px;font-size:12px}.btn.primary{background:#111;color:#fff;border-color:#111}
+.toolbar,.actions{display:flex;gap:8px;flex-wrap:wrap}.actions.stack{display:grid}
+.table-wrap{margin-top:10px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-weight:500}
+.tag{font-size:11px;padding:2px 8px;border:1px solid var(--line)}.tag.ok{color:var(--ok)}.tag.warn{color:var(--warn)}.tag.bad{color:var(--bad)}
+.dropzone{min-height:260px;border:1px dashed #cfcfcf;display:grid;place-items:center;color:var(--muted)}.upload-layout{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.queue .item{padding:9px 0;border-bottom:1px solid var(--line)}.bar{height:6px;background:#f0f0f0;margin-top:6px}.bar span{display:block;height:100%;background:#111}
+.preview-layout{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}.preview-box{min-height:340px;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)}.meta .row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.chart-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.chart{border:1px solid var(--line);padding:10px}.bars{height:88px;display:flex;align-items:flex-end;gap:7px;margin-top:8px}.bars i{display:block;width:14%;background:#111}.bars i:nth-child(1){height:32%}.bars i:nth-child(2){height:64%}.bars i:nth-child(3){height:51%}.bars i:nth-child(4){height:82%}.bars i:nth-child(5){height:58%}.bars i:nth-child(6){height:72%}
+.login-panel{display:grid;grid-template-columns:1.3fr 1fr;gap:20px}.intro{border-left:2px solid #111;padding-left:12px}.intro h2{margin:0 0 10px;font:600 32px "Iowan Old Style","Songti SC",serif}.chips{display:flex;gap:8px;flex-wrap:wrap}.chips span{font-size:11px;padding:3px 8px;border:1px solid var(--line)}
+.form label{font-size:12px;color:var(--muted)}.form input{width:100%;padding:9px;border:1px solid var(--line);margin:5px 0 8px}

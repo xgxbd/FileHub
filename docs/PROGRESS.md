@@ -2516,3 +2516,29 @@
   - 现有页面业务逻辑集中在 `FileCenterView`，拆分上传/预览页面时需防止行为回归
 - 下一个任务：
   - 提交B：恢复 V5 设计资产并校验方案 D 路径可访问
+
+---
+
+## 2026-03-11 09:19:44 CST
+
+- 任务：第十六轮开发-提交B：恢复V5高保真原型与预览资产
+- 时间：2026-03-11 09:19:44 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `e6c2129`
+- 本次修改：
+  - 从历史提交恢复 `docs/ui-prototypes/v5/*` 全量原型文件
+  - 恢复 `docs/ui-previews/v5/*` 五套预览图
+  - 确认你选定路径 `docs/ui-prototypes/v5/scheme-d/preview.html` 已回到当前分支
+- 已完成事项：
+  - V5 设计资产已在当前分支可追踪、可评审
+  - 选定方案 D 的原型路径已恢复
+- 未完成事项：
+  - 前端运行代码尚未切换为方案 D 布局
+  - 方案 D 作为唯一后续 UI 基线的文档约束尚未固化
+- 当前可测试内容：
+  - 可直接打开 `docs/ui-prototypes/v5/scheme-d/preview.html`
+  - 可对比 `docs/ui-previews/v5/v5-d-files.png`
+- 风险说明：
+  - 当前仅恢复设计资产，业务前端页面仍是旧骨架样式
+- 下一个任务：
+  - 提交C：落地方案 D 全局样式令牌与应用壳布局

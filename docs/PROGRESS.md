@@ -2622,3 +2622,33 @@
   - 若后续新增页面未同步本定版文档，可能再次出现 UI 偏离
 - 下一个任务：
   - 第十六轮规范收尾：补充回归验证并推送分支等待合并
+
+---
+
+## 2026-03-11 09:27:31 CST
+
+- 任务：第十六轮开发规范收尾与远端同步
+- 时间：2026-03-11 09:27:31 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；收尾前最新 Commit `2ec8bc9`
+- 本次修改：
+  - 执行第十六轮完成度核查（设计->实现->验证->文档）
+  - 复跑前端构建验证并确认 `scheme-d` 原型路径可访问
+  - 推送分支到远端 `origin/feature/round16-ui-scheme-d-alignment`
+- 已完成事项：
+  - 第十六轮最小任务 A-E 全部完成且均已独立提交
+  - 提交信息均为具体中文自然语言
+  - `docs/ui-prototypes/v5/scheme-d/preview.html` 已恢复并可用
+  - 前端壳层与 7 页面路由已对齐方案 D
+- 未完成事项：
+  - 可选优化：对照方案 D 做 1:1 细节还原（控件间距/表格行高/按钮样式）
+  - 可选优化：补充 `/upload`、`/preview/:fileId` 的 E2E 用例
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - 登录后访问：`/files`、`/upload`、`/preview/:fileId`、`/recycle`、`/admin/files`、`/admin/logs`
+  - 原型路径：`docs/ui-prototypes/v5/scheme-d/preview.html`
+- 风险说明：
+  - 预览页依赖文件 ID 输入，若缺少可用文件会影响预览演示
+  - 前端当前仍以 MVP 为主，未做像素级还原
+- 下一个任务：
+  - 从本分支发起 PR 合并到 `develop`，随后进入下一轮“方案 D 细节还原 + E2E 补齐”

@@ -2295,3 +2295,29 @@
   - 首次进入各路由页面会触发按需加载请求，弱网下首屏切换可能有轻微延迟
 - 下一个任务：
   - 提交D：执行后端测试、前端构建、前端E2E回归
+
+---
+
+## 2026-03-11 08:43:49 CST
+
+- 任务：第十四轮开发-提交D：优化后全量回归验证
+- 时间：2026-03-11 08:43:49 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 顺序执行后端测试、前端构建、前端E2E回归
+  - 归档验证输出结果
+- 已完成事项：
+  - 后端测试通过：`pytest -q`（21 passed，1 warning）
+  - 前端构建通过：`npm run build`
+  - 前端 E2E 通过：`npm run e2e`（2 passed）
+- 未完成事项：
+  - 提交E：文档收口
+  - 第十四轮规范收尾
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - 仍存在第三方依赖 `passlib` 的 `crypt` 弃用告警
+- 下一个任务：
+  - 提交E：更新文档并完成第十四轮收口

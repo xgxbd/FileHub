@@ -1,12 +1,12 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import Button from "primevue/button";
 import Card from "primevue/card";
-import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import ProgressBar from "primevue/progressbar";
+import Tag from "primevue/tag";
 
 import { completeUploadSession, createUploadSession, uploadChunk } from "../api/upload";
 import { useAuthStore } from "../stores/auth";
@@ -21,6 +21,7 @@ const uploadProgress = ref(0);
 const uploadMessage = ref("");
 const uploadError = ref("");
 const targetFolder = ref("");
+const fileInputRef = ref(null);
 
 function normalizeFolder(raw) {
   const cleaned = String(raw || "")
@@ -37,11 +38,39 @@ function mergedFileName(fileName) {
   return folder ? `${folder}/${fileName}` : fileName;
 }
 
+const targetFolderLabel = computed(() => {
+  const folder = normalizeFolder(targetFolder.value);
+  return folder ? `/${folder}/` : "/";
+});
+
 function onFileChange(event) {
   selectedFile.value = event.target.files?.[0] || null;
   uploadProgress.value = 0;
   uploadMessage.value = "";
   uploadError.value = "";
+}
+
+function pickFile(file) {
+  selectedFile.value = file || null;
+  uploadProgress.value = 0;
+  uploadMessage.value = "";
+  uploadError.value = "";
+}
+
+function openFilePicker() {
+  fileInputRef.value?.click();
+}
+
+function onDrop(event) {
+  event.preventDefault();
+  const file = event.dataTransfer?.files?.[0] || null;
+  if (file) {
+    pickFile(file);
+  }
+}
+
+function onDragOver(event) {
+  event.preventDefault();
 }
 
 async function startUpload() {
@@ -85,7 +114,7 @@ async function startUpload() {
         chunkIndex: index,
         chunkBlob: blob
       });
-      uploadProgress.value = Math.floor(((index + 1) / totalChunks) * 100);
+      uploadProgress.value = Math.min(95, Math.floor(((index + 1) / totalChunks) * 95));
     }
 
     await completeUploadSession({
@@ -93,6 +122,7 @@ async function startUpload() {
       uploadId: session.upload_id
     });
 
+    uploadProgress.value = 100;
     uploadMessage.value = `上传完成：${mergedFileName(selectedFile.value.name)}`;
   } catch (err) {
     uploadError.value = err instanceof Error ? err.message : "上传失败";
@@ -114,13 +144,15 @@ onMounted(() => {
     <template #content>
       <div class="upload-layout">
         <section class="panel">
-          <div class="dropzone">拖拽文件到此处或点击上传</div>
-          <div class="file-filter-item" style="margin-top: 10px">
-            <label class="auth-label">目标文件夹（可选）</label>
-            <InputText v-model="targetFolder" placeholder="例如：docs/specs 或 images/2026" />
+          <div class="file-filter-actions">
+            <Tag severity="info" :value="`目标目录：${targetFolderLabel}`" />
+          </div>
+          <div class="dropzone" @click="openFilePicker" @drop="onDrop" @dragover="onDragOver">
+            拖拽文件到此处或点击选择文件
           </div>
           <div class="upload-actions" style="margin-top: 10px">
-            <input type="file" @change="onFileChange" />
+            <input ref="fileInputRef" type="file" style="display: none" @change="onFileChange" />
+            <Button label="选择文件" severity="secondary" text icon="pi pi-folder-open" @click="openFilePicker" />
             <Button label="开始上传" icon="pi pi-upload" :loading="uploadLoading" @click="startUpload" />
             <Button label="返回文件列表" severity="secondary" text @click="router.push('/files')" />
           </div>

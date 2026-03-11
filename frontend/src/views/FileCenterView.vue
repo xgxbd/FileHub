@@ -338,7 +338,8 @@ async function promptCreateFolder() {
     selectedTreeKeys.value = { [`dir:${created.path}`]: true };
     expandedTreeKeys.value = buildExpandedKeysForPath(created.path);
     page.value = 1;
-    await Promise.all([loadDirectoryTree(), loadFiles()]);
+    await loadDirectoryTree();
+    await loadFiles();
   } catch (err) {
     treeError.value = err instanceof Error ? err.message : "创建文件夹失败";
   } finally {
@@ -367,7 +368,8 @@ async function removeCurrentFolder() {
     };
     expandedTreeKeys.value = buildExpandedKeysForPath(selectedDirectory.value === ROOT_DIRECTORY_MARKER ? "" : selectedDirectory.value);
     page.value = 1;
-    await Promise.all([loadDirectoryTree(), loadFiles()]);
+    await loadDirectoryTree();
+    await loadFiles();
   } catch (err) {
     treeError.value = err instanceof Error ? err.message : "删除文件夹失败";
   } finally {
@@ -400,7 +402,8 @@ async function promptRenameFolder() {
     selectedTreeKeys.value = { [`dir:${renamed.path}`]: true };
     expandedTreeKeys.value = buildExpandedKeysForPath(renamed.path);
     page.value = 1;
-    await Promise.all([loadDirectoryTree(), loadFiles()]);
+    await loadDirectoryTree();
+    await loadFiles();
   } catch (err) {
     treeError.value = err instanceof Error ? err.message : "重命名文件夹失败";
   } finally {

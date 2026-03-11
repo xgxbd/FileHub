@@ -15,13 +15,13 @@ os.environ["APP_SERVE_FRONTEND"] = "false"
 os.environ["ADMIN_BOOTSTRAP_ENABLED"] = "false"
 
 from app.db import Base, engine
-from app.models import FileObject, OperationLog, User
+from app.models import FileObject, Folder, OperationLog, User
 from app.core.config import settings
 
 
 @pytest.fixture(autouse=True)
 def reset_test_database():
-    _ = (User, FileObject, OperationLog)
+    _ = (User, FileObject, Folder, OperationLog)
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     tmp_upload_dir = Path(settings.upload_tmp_dir)

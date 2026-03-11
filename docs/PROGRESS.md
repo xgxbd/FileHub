@@ -3464,3 +3464,34 @@
   - 当前仅修复显示语义，不影响目录筛选参数本身
 - 下一个任务：
   - 提交C：实现后端文件夹创建/删除与目录树接口
+
+---
+
+## 2026-03-11 13:11:10 CST
+
+- 任务：第二十五轮开发-提交C：实现后端文件夹创建删除与目录树接口
+- 时间：2026-03-11 13:11:10 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `948e907`
+- 本次修改：
+  - 新增 `backend/app/models/folder.py`，引入文件夹元数据表
+  - 新增 `backend/app/services/folder_service.py`，实现目录路径标准化、目录树聚合、新建文件夹、删除空文件夹
+  - 新增 `backend/app/api/folders.py`，提供 `/folders/tree`、`POST /folders`、`DELETE /folders`
+  - 更新 `backend/app/api/router.py`、`backend/app/db/init_db.py`、`backend/app/models/__init__.py`、`backend/app/schemas/__init__.py`
+  - 新增 `backend/app/schemas/folder.py`
+  - 新增 `backend/tests/test_folder_api.py`
+  - 更新 `backend/tests/conftest.py` 以纳入 `Folder` 模型建表/清理
+- 已完成事项：
+  - 已支持真实文件夹元数据
+  - 已支持目录树接口返回“显式文件夹 + 文件路径派生目录”的合并结果
+  - 已支持在任意已存在目录下创建文件夹
+  - 已支持删除空文件夹，并阻止删除含文件或子目录的文件夹
+- 未完成事项：
+  - 前端文件树尚未接入新接口
+  - 文件列表页尚未提供新建/删除文件夹按钮
+- 当前可测试内容：
+  - `rm -f backend/test_suite.db && cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_folder_api.py && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py`
+- 风险说明：
+  - 当前后端测试共用同一个 SQLite 文件，回归时必须串行执行，不能并行跑
+- 下一个任务：
+  - 提交D：实现前端文件树的新建/删除文件夹交互并补充 E2E

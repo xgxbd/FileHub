@@ -9,7 +9,7 @@ function buildUser() {
   };
 }
 
-test('方案D关键页面标题区高度保持稳定', async ({ page }) => {
+test('方案D关键页面标题区与导航栏高度保持稳定', async ({ page }) => {
   const user = buildUser();
 
   await page.goto('/register');
@@ -28,9 +28,11 @@ test('方案D关键页面标题区高度保持稳定', async ({ page }) => {
 
     const measured = await page.evaluate(() => {
       const topbar = document.querySelector('.topbar');
+      const sidebar = document.querySelector('.sidebar');
       const caption = document.querySelector('.p-card .p-card-caption');
       return {
         topbarHeight: topbar ? Math.round(topbar.getBoundingClientRect().height) : 0,
+        sidebarHeight: sidebar ? Math.round(sidebar.getBoundingClientRect().height) : 0,
         captionHeight: caption ? Math.round(caption.getBoundingClientRect().height) : 0
       };
     });
@@ -39,10 +41,12 @@ test('方案D关键页面标题区高度保持稳定', async ({ page }) => {
   }
 
   const topbarBase = heights[0].topbarHeight;
+  const sidebarBase = heights[0].sidebarHeight;
   const captionBase = heights[0].captionHeight;
 
   for (const item of heights) {
     expect(Math.abs(item.topbarHeight - topbarBase), `${item.route} topbar 高度异常`).toBeLessThanOrEqual(1);
+    expect(Math.abs(item.sidebarHeight - sidebarBase), `${item.route} 导航栏高度异常`).toBeLessThanOrEqual(1);
     expect(Math.abs(item.captionHeight - captionBase), `${item.route} 标题区高度异常`).toBeLessThanOrEqual(1);
   }
 });

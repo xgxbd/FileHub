@@ -99,8 +99,8 @@ body {
 }
 
 .shell {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   min-height: calc(100vh - 80px);
   padding: 20px 24px;
@@ -109,12 +109,13 @@ body {
 .sidebar {
   display: flex;
   gap: 16px;
-  align-items: flex-end;
-  min-height: 36px;
-  padding-bottom: 14px;
+  align-items: center;
+  flex: 0 0 42px;
+  height: 42px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 14px;
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .nav-item {

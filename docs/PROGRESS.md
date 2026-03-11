@@ -3254,3 +3254,30 @@
   - 若后续重新引入 Grid 自动行拉伸，导航栏跳动会复发
 - 下一个任务：
   - 提交B：将 `.shell` 改为纵向 Flex 并固定导航栏垂直对齐
+
+---
+
+## 2026-03-11 12:14:41 CST
+
+- 任务：第二十二轮开发-提交B：修复导航栏高度跳动根因并补稳定性断言
+- 时间：2026-03-11 12:14:41 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `6f729b8`
+- 本次修改：
+  - 更新 `frontend/src/styles/main.css`
+  - 将 `.shell` 从 Grid 改为纵向 Flex，避免自动行在 `min-height` 下被拉伸
+  - 将 `.sidebar` 改为固定 `42px` 高度，并设置 `align-items: center`
+  - 更新 `frontend/e2e/layout-stability.spec.js`，新增导航栏高度稳定断言
+  - 真实浏览器复测四页：`.sidebar` 统一为 `42px`，导航按钮顶部坐标统一为 `107px`
+- 已完成事项：
+  - 文件列表、上传、预览、后台日志切换时，导航栏高度已固定
+  - 根因修复已转化为自动化断言，避免回归
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/layout-stability.spec.js`（1 passed）
+- 风险说明：
+  - 若后续再次把 `.shell` 改回 Grid 并保留 `min-height`，问题会复发
+- 下一个任务：
+  - 推送本次修复到远端，等待你复测这一个导航栏高度问题

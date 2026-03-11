@@ -2804,3 +2804,29 @@
   - 托管模式依赖前端 `dist` 存在，未构建时仅提供 API
 - 下一个任务：
   - 提交C：更新 `.env.example`、README、SETUP，补充单后端启动说明
+
+---
+
+## 2026-03-11 10:06:17 CST
+
+- 任务：第十八轮开发-提交C：补充单后端托管启动文档与环境样板
+- 时间：2026-03-11 10:06:17 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `5784b73`
+- 本次修改：
+  - 更新 `backend/.env.example`，新增 `APP_SERVE_FRONTEND`、`FRONTEND_DIST_DIR`
+  - 更新 `README.md`，补充“前端 build + 后端托管”单进程启动步骤
+  - 更新 `docs/SETUP.md`，补充单后端托管模式完整命令与验证方式
+- 已完成事项：
+  - 已提供可执行的单后端启动说明
+  - 已明确托管模式下页面与 API 访问入口
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `APP_SERVE_FRONTEND=true` 后启动后端并访问 `http://127.0.0.1:8000/files`
+  - `GET http://127.0.0.1:8000/api/healthz`
+- 风险说明：
+  - 若未先执行前端 build，后端托管模式不会返回页面文件
+- 下一个任务：
+  - 第十八轮规范收尾与远端同步

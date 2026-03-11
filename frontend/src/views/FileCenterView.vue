@@ -11,7 +11,14 @@ import Message from "primevue/message";
 import Tag from "primevue/tag";
 import Tree from "primevue/tree";
 
-import { downloadFile, fetchFileList, softDeleteFile } from "../api/files";
+import {
+  createFolder,
+  deleteFolder,
+  downloadFile,
+  fetchFileList,
+  fetchFolderTree,
+  softDeleteFile
+} from "../api/files";
 import { useAuthStore } from "../stores/auth";
 
 const router = useRouter();
@@ -35,6 +42,8 @@ const treeError = ref("");
 const downloadingFileId = ref(null);
 const deletingFileId = ref(null);
 const treeLoading = ref(false);
+const creatingFolder = ref(false);
+const deletingFolder = ref(false);
 const selectedTreeKeys = ref({ [`dir:${ROOT_DIRECTORY_MARKER}`]: true });
 const expandedTreeKeys = ref({ [`dir:${ROOT_DIRECTORY_MARKER}`]: true });
 const treeNodes = ref([
@@ -71,19 +80,13 @@ function normalizeFolder(raw) {
     .join("/");
 }
 
-function folderOf(fileName) {
-  const normalized = normalizeFolder(fileName);
-  const lastSlash = normalized.lastIndexOf("/");
-  return lastSlash === -1 ? "" : normalized.slice(0, lastSlash);
-}
-
 function sortTree(node) {
   if (!Array.isArray(node.children)) return;
   node.children.sort((a, b) => a.label.localeCompare(b.label, "zh-CN"));
   node.children.forEach((child) => sortTree(child));
 }
 
-function buildTree(files) {
+function buildTree(paths) {
   const root = {
     key: `dir:${ROOT_DIRECTORY_MARKER}`,
     label: "根目录 /",
@@ -93,8 +96,8 @@ function buildTree(files) {
   const nodeMap = new Map();
   nodeMap.set(ROOT_DIRECTORY_MARKER, root);
 
-  files.forEach((fileItem) => {
-    const folder = folderOf(fileItem.file_name);
+  paths.forEach((folderPath) => {
+    const folder = normalizeFolder(folderPath);
     if (!folder) return;
 
     const segments = folder.split("/");
@@ -120,6 +123,19 @@ function buildTree(files) {
 
   sortTree(root);
   return [root];
+}
+
+function buildExpandedKeysForPath(path) {
+  const normalized = normalizeFolder(path);
+  const expanded = { [`dir:${ROOT_DIRECTORY_MARKER}`]: true };
+  if (!normalized) return expanded;
+
+  let current = "";
+  for (const segment of normalized.split("/")) {
+    current = current ? `${current}/${segment}` : segment;
+    expanded[`dir:${current}`] = true;
+  }
+  return expanded;
 }
 
 function formatBytes(bytes) {
@@ -163,29 +179,12 @@ async function loadDirectoryTree() {
   treeError.value = "";
 
   try {
-    let currentPage = 1;
-    let fetchedTotal = 0;
-    const collected = [];
-
-    while (currentPage <= 50) {
-      const payload = await fetchFileList({
-        accessToken: authStore.accessToken,
-        page: currentPage,
-        pageSize: 100
-      });
-      const batch = payload.items || [];
-      fetchedTotal = payload.total || 0;
-      collected.push(...batch);
-
-      if (!batch.length || collected.length >= fetchedTotal) {
-        break;
-      }
-      currentPage += 1;
-    }
-
-    treeNodes.value = buildTree(collected);
+    const folders = await fetchFolderTree({
+      accessToken: authStore.accessToken
+    });
+    treeNodes.value = buildTree(folders.map((item) => item.path));
     expandedTreeKeys.value = {
-      [`dir:${ROOT_DIRECTORY_MARKER}`]: true,
+      ...buildExpandedKeysForPath(selectedDirectory.value === ROOT_DIRECTORY_MARKER ? "" : selectedDirectory.value),
       ...expandedTreeKeys.value
     };
   } catch (err) {
@@ -208,12 +207,10 @@ async function resetFilters() {
 }
 
 async function clearDirectoryFilter() {
+  treeError.value = "";
   selectedDirectory.value = ROOT_DIRECTORY_MARKER;
   selectedTreeKeys.value = { [`dir:${ROOT_DIRECTORY_MARKER}`]: true };
-  expandedTreeKeys.value = {
-    [`dir:${ROOT_DIRECTORY_MARKER}`]: true,
-    ...expandedTreeKeys.value
-  };
+  expandedTreeKeys.value = buildExpandedKeysForPath("");
   page.value = 1;
   await loadFiles();
 }
@@ -225,8 +222,13 @@ async function onDirectorySelect(nodeOrEvent) {
   const nextDirectory = directoryFromNode || directoryFromKey || ROOT_DIRECTORY_MARKER;
   const nextKey = selectedNode?.key || `dir:${ROOT_DIRECTORY_MARKER}`;
 
+  treeError.value = "";
   selectedDirectory.value = nextDirectory;
   selectedTreeKeys.value = { [nextKey]: true };
+  expandedTreeKeys.value = {
+    ...expandedTreeKeys.value,
+    ...buildExpandedKeysForPath(nextDirectory === ROOT_DIRECTORY_MARKER ? "" : nextDirectory)
+  };
   page.value = 1;
   await loadFiles();
 }
@@ -297,6 +299,66 @@ function jumpUploadWithCurrentDirectory() {
   router.push({ path: "/upload", query: { folder } });
 }
 
+async function promptCreateFolder() {
+  if (!authStore.accessToken) return;
+
+  const rawName = window.prompt(`在 ${currentDirectoryLabel.value} 下创建新文件夹`, "");
+  if (rawName === null) return;
+
+  const folderName = rawName.trim();
+  if (!folderName) {
+    treeError.value = "文件夹名称不能为空";
+    return;
+  }
+
+  creatingFolder.value = true;
+  treeError.value = "";
+  try {
+    const created = await createFolder({
+      accessToken: authStore.accessToken,
+      parentDirectory: selectedDirectory.value,
+      folderName
+    });
+    selectedDirectory.value = created.path;
+    selectedTreeKeys.value = { [`dir:${created.path}`]: true };
+    expandedTreeKeys.value = buildExpandedKeysForPath(created.path);
+    page.value = 1;
+    await Promise.all([loadDirectoryTree(), loadFiles()]);
+  } catch (err) {
+    treeError.value = err instanceof Error ? err.message : "创建文件夹失败";
+  } finally {
+    creatingFolder.value = false;
+  }
+}
+
+async function removeCurrentFolder() {
+  if (!authStore.accessToken || selectedDirectory.value === ROOT_DIRECTORY_MARKER) return;
+  if (!window.confirm(`确认删除文件夹“${currentDirectoryLabel.value}”吗？仅允许删除空文件夹。`)) {
+    return;
+  }
+
+  deletingFolder.value = true;
+  treeError.value = "";
+  try {
+    await deleteFolder({
+      accessToken: authStore.accessToken,
+      path: selectedDirectory.value
+    });
+    const parentPath = normalizeFolder(selectedDirectory.value).split("/").slice(0, -1).join("/");
+    selectedDirectory.value = parentPath || ROOT_DIRECTORY_MARKER;
+    selectedTreeKeys.value = {
+      [`dir:${selectedDirectory.value === ROOT_DIRECTORY_MARKER ? ROOT_DIRECTORY_MARKER : selectedDirectory.value}`]: true
+    };
+    expandedTreeKeys.value = buildExpandedKeysForPath(selectedDirectory.value === ROOT_DIRECTORY_MARKER ? "" : selectedDirectory.value);
+    page.value = 1;
+    await Promise.all([loadDirectoryTree(), loadFiles()]);
+  } catch (err) {
+    treeError.value = err instanceof Error ? err.message : "删除文件夹失败";
+  } finally {
+    deletingFolder.value = false;
+  }
+}
+
 onMounted(async () => {
   await Promise.all([loadFiles(), loadDirectoryTree()]);
 });
@@ -324,11 +386,29 @@ watch(sortBy, async (nextValue, prevValue) => {
       <div class="file-center-layout">
         <section class="panel folder-tree-panel">
           <div class="folder-tree-header">
-            <strong>文件树</strong>
-            <div class="file-row-actions">
-              <Button size="small" text severity="secondary" label="根目录" icon="pi pi-home" @click="clearDirectoryFilter" />
-              <Button size="small" text severity="secondary" label="刷新" icon="pi pi-refresh" @click="loadDirectoryTree" />
-            </div>
+                <strong>文件树</strong>
+                <div class="file-row-actions">
+                  <Button
+                    size="small"
+                    text
+                    label="新建文件夹"
+                    icon="pi pi-folder-plus"
+                    :loading="creatingFolder"
+                    @click="promptCreateFolder"
+                  />
+                  <Button
+                    size="small"
+                    text
+                    severity="danger"
+                    label="删除当前文件夹"
+                    icon="pi pi-folder-minus"
+                    :disabled="selectedDirectory === ROOT_DIRECTORY_MARKER"
+                    :loading="deletingFolder"
+                    @click="removeCurrentFolder"
+                  />
+                  <Button size="small" text severity="secondary" label="根目录" icon="pi pi-home" @click="clearDirectoryFilter" />
+                  <Button size="small" text severity="secondary" label="刷新" icon="pi pi-refresh" @click="loadDirectoryTree" />
+                </div>
           </div>
 
           <Message v-if="treeError" severity="error" :closable="false">{{ treeError }}</Message>

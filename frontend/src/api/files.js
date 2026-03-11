@@ -31,6 +31,69 @@ export async function fetchFileList({
   return payload;
 }
 
+export async function fetchFolderTree({ accessToken }) {
+  const response = await fetch(`${API_PREFIX}/folders/tree`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  const payload = await response.json().catch(() => []);
+  if (!response.ok) {
+    throw new Error(payload.detail || "获取目录树失败");
+  }
+  return Array.isArray(payload) ? payload : [];
+}
+
+export async function createFolder({
+  accessToken,
+  parentDirectory,
+  folderName
+}) {
+  const response = await fetch(`${API_PREFIX}/folders`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      parent_directory: parentDirectory,
+      folder_name: folderName
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "创建文件夹失败");
+  }
+  return payload;
+}
+
+export async function deleteFolder({
+  accessToken,
+  path
+}) {
+  const params = new URLSearchParams();
+  params.set("path", path);
+
+  const response = await fetch(`${API_PREFIX}/folders?${params.toString()}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "删除文件夹失败");
+  }
+  return payload;
+}
+
 export async function downloadFile({
   accessToken,
   fileId,

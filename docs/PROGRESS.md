@@ -3495,3 +3495,35 @@
   - 当前后端测试共用同一个 SQLite 文件，回归时必须串行执行，不能并行跑
 - 下一个任务：
   - 提交D：实现前端文件树的新建/删除文件夹交互并补充 E2E
+
+---
+
+## 2026-03-11 13:13:53 CST
+
+- 任务：第二十五轮开发-提交D：实现文件树文件夹创建删除交互
+- 时间：2026-03-11 13:13:53 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `35299a8`
+- 本次修改：
+  - 更新 `frontend/src/api/files.js`，新增目录树、新建文件夹、删除文件夹请求封装
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 文件树改为读取 `/folders/tree`
+  - 新增 `新建文件夹`、`删除当前文件夹` 按钮
+  - 创建后自动选中新目录，删除后自动回退到上级目录
+  - 新增 `frontend/e2e/file-center-folder-management.spec.js`
+  - 覆盖创建根目录子文件夹、创建二级文件夹、删除空文件夹、阻止删除含文件目录
+- 已完成事项：
+  - 文件列表页已支持任意已存在目录下创建新文件夹
+  - 文件列表页已支持删除空文件夹
+  - 删除含文件目录会给出明确错误提示
+  - 原有目录切换和排序回归测试保持通过
+- 未完成事项：
+  - 暂未提供文件夹重命名能力
+  - 暂未提供批量目录操作
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-tree-sort.spec.js e2e/file-center-folder-management.spec.js`
+- 风险说明：
+  - 当前新建文件夹交互使用浏览器原生 `prompt`，后续如果要统一方案 D 的视觉语言，应替换为 PrimeVue 对话框
+- 下一个任务：
+  - 规范收尾并推送本轮全部提交

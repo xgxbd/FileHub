@@ -123,3 +123,36 @@ def test_download_returns_404_when_object_missing() -> None:
         response = client.get(f"/files/{file_id}/download", headers=headers)
         assert response.status_code == 404
         assert response.json()["detail"] == "文件内容不存在"
+
+
+def test_download_reads_legacy_fallback_path() -> None:
+    with TestClient(app) as client:
+        token, file_id, content = _prepare_uploaded_file(
+            client,
+            email="legacy@test.com",
+            username="legacy001",
+            file_name="legacy.txt",
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+
+        with SessionLocal() as db:
+            file_record = db.get(FileObject, file_id)
+            assert file_record is not None
+
+            candidates = object_storage_service._fallback_candidates(file_record.object_key)
+            if len(candidates) < 2:
+                return
+            primary = candidates[0]
+            legacy = candidates[-1]
+
+            primary.parent.mkdir(parents=True, exist_ok=True)
+            primary.write_bytes(content)
+            if legacy.exists():
+                legacy.unlink()
+            legacy.parent.mkdir(parents=True, exist_ok=True)
+            legacy.write_bytes(content)
+            primary.unlink()
+
+        response = client.get(f"/files/{file_id}/download", headers=headers)
+        assert response.status_code == 200
+        assert response.content == content

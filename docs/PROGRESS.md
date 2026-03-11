@@ -3176,3 +3176,31 @@
   - 若目录下仅有子目录无直系文件，则列表会为空（符合直系语义）
 - 下一个任务：
   - 提交D：对象存储 fallback 兼容历史路径，修复下载/预览404
+
+---
+
+## 2026-03-11 11:53:23 CST
+
+- 任务：第二十一轮开发-提交D：对象存储兼容历史路径，修复下载/预览404
+- 时间：2026-03-11 11:53:23 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `0cf5a97`
+- 本次修改：
+  - 更新 `backend/app/services/object_storage.py`：
+    - fallback 从单路径改为多候选路径（当前目录、`backend/tmp/object_store`、`repo/tmp/object_store`）
+    - 下载/预览读取时自动扫描历史路径，兼容旧上传文件
+    - 删除对象时同步清理多路径副本
+  - 更新 `backend/tests/test_range_download_api.py`：
+    - 新增 `test_download_reads_legacy_fallback_path`，覆盖“主路径缺失但历史路径存在”场景
+  - 清理本轮测试产物目录 `tmp/`
+- 已完成事项：
+  - 历史 fallback 路径导致的下载/预览 404 问题已修复
+  - 回归测试覆盖并通过
+- 未完成事项：
+  - 本轮最终收尾与E2E复跑汇总
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_range_download_api.py tests/test_file_preview_api.py tests/test_file_list_api.py`（14 passed）
+- 风险说明：
+  - 若对象在所有候选路径及 MinIO 中都不存在，仍会返回 404（真实缺失）
+- 下一个任务：
+  - 提交E：前后端自动化回归全量复跑并规范收尾

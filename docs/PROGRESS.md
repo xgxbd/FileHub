@@ -4369,3 +4369,30 @@
   - 当前仓库仍未具备应用镜像能力，尚不能直接执行 `docker compose up -d --build`
 - 下一个任务：
   - 实现应用镜像构建能力并补齐 Compose `api` 服务
+
+
+---
+
+## 2026-03-11 23:39:18 CST
+
+- 任务：第 38 轮 Docker 一键启动-实现应用镜像构建能力
+- 时间：2026-03-11 23:39:18 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 新增根目录 `.dockerignore`，收敛 Docker 构建上下文
+  - 新增 `backend/Dockerfile`，采用前端构建 + 后端运行的多阶段镜像
+  - 在 `backend/requirements.txt` 增加 `pymysql`
+- 已完成事项：
+  - 应用镜像构建链路已具备基础形态
+  - 前端静态产物可在镜像构建阶段生成并注入后端运行时
+  - MySQL 驱动缺失问题已补齐
+- 未完成事项：
+  - Compose `api` 服务
+  - Docker 一键启动说明与验收
+- 当前可测试内容：
+  - 可评审 `backend/Dockerfile` 和 `.dockerignore`
+- 风险说明：
+  - 尚未接入 Compose `api` 服务，当前仍不能直接一键启动完整系统
+- 下一个任务：
+  - 将应用镜像接入 `infra/docker-compose.yml` 并补齐一键启动文档

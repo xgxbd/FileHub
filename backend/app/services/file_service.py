@@ -12,6 +12,7 @@ def _apply_filters(
     keyword: str | None,
     min_size: int | None,
     max_size: int | None,
+    directory: str | None,
 ) -> Select:
     if keyword:
         query = query.where(FileObject.file_name.ilike(f"%{keyword.strip()}%"))
@@ -19,6 +20,10 @@ def _apply_filters(
         query = query.where(FileObject.size_bytes >= min_size)
     if max_size is not None:
         query = query.where(FileObject.size_bytes <= max_size)
+    if directory is not None and directory.strip():
+        normalized = directory.strip().strip("/")
+        if normalized:
+            query = query.where(FileObject.file_name.ilike(f"{normalized}/%"))
     return query
 
 
@@ -30,6 +35,7 @@ def list_files(
     keyword: str | None,
     min_size: int | None,
     max_size: int | None,
+    directory: str | None = None,
     page: int,
     page_size: int,
 ) -> FileListResponse:
@@ -43,6 +49,7 @@ def list_files(
         keyword=keyword,
         min_size=min_size,
         max_size=max_size,
+        directory=directory,
     )
 
     count_query = select(func.count()).select_from(filtered_query.subquery())
@@ -65,6 +72,7 @@ def list_files_for_admin(
     keyword: str | None,
     min_size: int | None,
     max_size: int | None,
+    directory: str | None = None,
     owner_id: int | None,
     status_filter: str,
     page: int,
@@ -84,6 +92,7 @@ def list_files_for_admin(
         keyword=keyword,
         min_size=min_size,
         max_size=max_size,
+        directory=directory,
     )
     total = db.scalar(select(func.count()).select_from(filtered_query.subquery())) or 0
     records = (

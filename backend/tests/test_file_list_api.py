@@ -87,3 +87,35 @@ def test_files_api_filter_and_pagination() -> None:
         assert page_resp.status_code == 200
         assert page_resp.json()["total"] == 2
         assert len(page_resp.json()["items"]) == 1
+
+
+def test_files_api_directory_filter() -> None:
+    with TestClient(app) as client:
+        client.post(
+            "/auth/register",
+            json={"email": "dir@example.com", "username": "dir001", "password": "Passw0rd!"},
+        )
+        login = client.post("/auth/login", json={"account": "dir001", "password": "Passw0rd!"})
+        token = login.json()["access_token"]
+
+        user_id = _resolve_user_id("dir001")
+        _seed_file(user_id, "docs/specs/a.txt", 100)
+        _seed_file(user_id, "docs/design/b.txt", 120)
+        _seed_file(user_id, "images/c.png", 140)
+
+        docs_only = client.get(
+            "/files",
+            params={"directory": "docs"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert docs_only.status_code == 200
+        assert docs_only.json()["total"] == 2
+
+        specs_only = client.get(
+            "/files",
+            params={"directory": "docs/specs"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert specs_only.status_code == 200
+        assert specs_only.json()["total"] == 1
+        assert specs_only.json()["items"][0]["file_name"] == "docs/specs/a.txt"

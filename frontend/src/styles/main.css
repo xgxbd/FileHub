@@ -263,6 +263,35 @@ body {
   font-size: 12px;
 }
 
+.file-center-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.folder-tree-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.folder-tree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.folder-manual-box {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.folder-manual-box .file-filter-actions {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 .upload-panel {
   border: 1px solid var(--line);
   background: var(--surface);
@@ -390,7 +419,8 @@ body {
   }
 
   .upload-layout,
-  .preview-layout {
+  .preview-layout,
+  .file-center-layout {
     grid-template-columns: 1fr;
   }
 }

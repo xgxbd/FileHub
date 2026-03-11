@@ -2995,3 +2995,44 @@
   - 若后续增加极长标题文案，仍会被单行截断（属于预期）
 - 下一个任务：
   - 提交D：实现文件树视图、上传目标目录和预览页按文件选择
+
+---
+
+## 2026-03-11 11:24:28 CST
+
+- 任务：第二十轮开发-提交D：文件树目录视图、路径上传与预览交互改造
+- 时间：2026-03-11 11:24:28 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `581d409`
+- 本次修改：
+  - 后端目录过滤能力：
+    - `GET /files` 新增 `directory` 查询参数（目录前缀过滤）
+    - `backend/app/services/file_service.py` 增加目录过滤逻辑
+    - 新增测试 `tests/test_file_list_api.py::test_files_api_directory_filter`
+  - 前端文件树与目录工作流：
+    - `frontend/src/views/FileCenterView.vue` 增加“文件树（基于路径）+ 目录切换 + 手动目录输入 + 上传到当前目录”
+    - 文件表格字段由“文件名”升级为“文件路径”
+  - 上传支持目标目录：
+    - `frontend/src/views/UploadView.vue` 新增“目标文件夹”输入
+    - 上传请求 `file_name` 按 `folder/filename` 组装
+  - 预览页去 fileId 手输：
+    - `frontend/src/views/PreviewView.vue` 改为“最近文件列表选择后预览”
+    - 导航直接进预览页时无需知道 fileId，可先选文件路径
+  - API 与样式配套：
+    - `frontend/src/api/files.js` 支持传递 `directory`
+    - `frontend/src/styles/main.css` 新增文件树布局样式
+- 已完成事项：
+  - 文件列表具备树形目录视角（MVP 虚拟目录）
+  - 上传可指定目录路径
+  - 预览流程从“输入ID”改为“按文件路径选择”
+- 未完成事项：
+  - 目录为空时的“纯文件夹（无文件）”持久化暂未实现（当前采用路径虚拟目录）
+  - 页面交互标注文档需按新交互刷新
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py tests/test_range_download_api.py tests/test_file_preview_api.py`（13 passed）
+  - `cd frontend && npm run build`
+  - 登录后在文件列表页验证：目录树切换、上传到当前目录、预览页按路径选择
+- 风险说明：
+  - 文件树由已有文件路径推导，不包含“空目录”实体；若后续需要空目录管理，需引入独立目录模型
+- 下一个任务：
+  - 提交E：更新页面交互说明文档，逐按钮标注行为与预期反馈

@@ -52,6 +52,7 @@ def get_files(
     keyword: str | None = Query(default=None),
     min_size: int | None = Query(default=None, ge=0),
     max_size: int | None = Query(default=None, ge=0),
+    directory: str | None = Query(default=None, description="目录路径前缀，例如 docs/specs"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -64,6 +65,7 @@ def get_files(
         keyword=keyword,
         min_size=min_size,
         max_size=max_size,
+        directory=directory,
         page=page,
         page_size=page_size,
     )

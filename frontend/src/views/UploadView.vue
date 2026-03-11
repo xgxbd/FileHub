@@ -1,9 +1,10 @@
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import Button from "primevue/button";
 import Card from "primevue/card";
+import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import ProgressBar from "primevue/progressbar";
 
@@ -11,6 +12,7 @@ import { completeUploadSession, createUploadSession, uploadChunk } from "../api/
 import { useAuthStore } from "../stores/auth";
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 const selectedFile = ref(null);
@@ -18,6 +20,22 @@ const uploadLoading = ref(false);
 const uploadProgress = ref(0);
 const uploadMessage = ref("");
 const uploadError = ref("");
+const targetFolder = ref("");
+
+function normalizeFolder(raw) {
+  const cleaned = String(raw || "")
+    .replace(/\\/g, "/")
+    .split("/")
+    .map((part) => part.trim())
+    .filter((part) => part && part !== "." && part !== "..")
+    .join("/");
+  return cleaned;
+}
+
+function mergedFileName(fileName) {
+  const folder = normalizeFolder(targetFolder.value);
+  return folder ? `${folder}/${fileName}` : fileName;
+}
 
 function onFileChange(event) {
   selectedFile.value = event.target.files?.[0] || null;
@@ -48,7 +66,7 @@ async function startUpload() {
     const session = await createUploadSession({
       accessToken: authStore.accessToken,
       payload: {
-        file_name: selectedFile.value.name,
+        file_name: mergedFileName(selectedFile.value.name),
         total_size: selectedFile.value.size,
         chunk_size: chunkSize,
         total_chunks: totalChunks,
@@ -75,13 +93,18 @@ async function startUpload() {
       uploadId: session.upload_id
     });
 
-    uploadMessage.value = "上传完成";
+    uploadMessage.value = `上传完成：${mergedFileName(selectedFile.value.name)}`;
   } catch (err) {
     uploadError.value = err instanceof Error ? err.message : "上传失败";
   } finally {
     uploadLoading.value = false;
   }
 }
+
+onMounted(() => {
+  const folder = typeof route.query.folder === "string" ? route.query.folder : "";
+  targetFolder.value = normalizeFolder(folder);
+});
 </script>
 
 <template>
@@ -92,13 +115,17 @@ async function startUpload() {
       <div class="upload-layout">
         <section class="panel">
           <div class="dropzone">拖拽文件到此处或点击上传</div>
+          <div class="file-filter-item" style="margin-top: 10px">
+            <label class="auth-label">目标文件夹（可选）</label>
+            <InputText v-model="targetFolder" placeholder="例如：docs/specs 或 images/2026" />
+          </div>
           <div class="upload-actions" style="margin-top: 10px">
             <input type="file" @change="onFileChange" />
             <Button label="开始上传" icon="pi pi-upload" :loading="uploadLoading" @click="startUpload" />
             <Button label="返回文件列表" severity="secondary" text @click="router.push('/files')" />
           </div>
           <div class="upload-status">
-            <span v-if="selectedFile">已选择：{{ selectedFile.name }}</span>
+            <span v-if="selectedFile">已选择：{{ mergedFileName(selectedFile.name) }}</span>
             <span v-else>未选择文件</span>
           </div>
           <ProgressBar :value="uploadProgress"></ProgressBar>

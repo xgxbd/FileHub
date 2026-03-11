@@ -5,6 +5,7 @@ export async function fetchFileList({
   keyword,
   minSize,
   maxSize,
+  directory,
   page = 1,
   pageSize = 20
 }) {
@@ -15,6 +16,7 @@ export async function fetchFileList({
   if (keyword) params.set("keyword", keyword);
   if (minSize !== null && minSize !== undefined && minSize !== "") params.set("min_size", String(minSize));
   if (maxSize !== null && maxSize !== undefined && maxSize !== "") params.set("max_size", String(maxSize));
+  if (directory) params.set("directory", directory);
 
   const response = await fetch(`${API_PREFIX}/files?${params.toString()}`, {
     method: "GET",

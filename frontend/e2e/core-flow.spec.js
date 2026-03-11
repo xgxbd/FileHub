@@ -16,7 +16,7 @@ test('关键流程：注册登录上传下载删除恢复', async ({ page }) => 
   await page.waitForURL('**/files');
   await expect(page.getByRole('heading', { name: '文件仓库首页 / 文件列表' })).toBeVisible();
 
-  await page.getByRole('button', { name: '前往上传页' }).click();
+  await page.getByRole('button', { name: '上传到当前目录' }).click();
   await page.waitForURL('**/upload');
   await page.locator('input[type="file"]').setInputFiles({
     name: fileName,

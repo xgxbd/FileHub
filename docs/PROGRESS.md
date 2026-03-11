@@ -3060,3 +3060,27 @@
   - 若后续新增按钮或调整文案，需同步更新该文档避免测试口径漂移
 - 下一个任务：
   - 提交F：用 Playwright 自动回归核心链路并输出问题清单（如有）
+
+---
+
+## 2026-03-11 11:29:07 CST
+
+- 任务：第二十轮开发-提交F：自动化回归测试适配新UI并复跑通过
+- 时间：2026-03-11 11:29:07 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `b8279fc`
+- 本次修改：
+  - 更新 `frontend/e2e/core-flow.spec.js`，将旧按钮选择器“前往上传页”调整为“上传到当前目录”
+  - 先执行一轮自动化验证定位失败点，再修复后复跑 `npm run e2e` 全通过
+- 已完成事项：
+  - E2E 已适配当前方案 D UI 改造
+  - 前端自动化用例 3/3 通过：核心流程、登录页可达、标题区稳定性
+- 未完成事项：
+  - 暂无
+- 当前可测试内容：
+  - `cd frontend && npm run e2e`（3 passed）
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_list_api.py tests/test_range_download_api.py tests/test_file_preview_api.py`（13 passed）
+- 风险说明：
+  - E2E 选择器依赖按钮文案，后续若改文案需同步更新测试
+- 下一个任务：
+  - 本轮规范收尾：汇总分支状态、提交记录、可测试清单与下一步

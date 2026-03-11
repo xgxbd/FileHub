@@ -1,5 +1,13 @@
 const API_PREFIX = import.meta.env.VITE_API_PREFIX || "/api";
 
+class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 export async function fetchFileList({
   accessToken,
   keyword,
@@ -164,7 +172,7 @@ export async function previewFile({
 
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
-    throw new Error(payload.detail || "预览失败");
+    throw new ApiError(payload.detail || "预览失败", response.status);
   }
 
   return {

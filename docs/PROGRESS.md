@@ -4241,3 +4241,34 @@
   - 当前停止队列会中断正在上传的文件并将其标记为已取消，后续若引入并发上传，需要重新设计取消语义
 - 下一个任务：
   - 提交I：实现预览错误提示分流并补错误状态回归
+
+---
+
+## 2026-03-11 16:59:37 CST
+
+- 任务：第三十三轮开发-提交I：实现预览错误提示分流并补错误状态回归
+- 时间：2026-03-11 16:59:37 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `6c5a984`
+- 本次修改：
+  - 更新 `frontend/src/api/files.js`
+  - 预览接口抛出带状态码的错误对象
+  - 更新 `frontend/src/views/PreviewView.vue`
+  - 按状态码区分不支持预览、无权限、文件不存在、文件内容不存在等提示
+  - 新增 `frontend/e2e/preview-error-states.spec.js`
+  - 覆盖不支持预览与文件不存在的错误状态回归测试
+- 已完成事项：
+  - 预览页错误提示已具备基础分流能力
+  - 预览错误专项 E2E 通过（`1 passed`）
+  - 常规前端全量 E2E 通过（`12 passed`）
+  - 后端托管前端 smoke 通过（`1 passed`）
+- 未完成事项：
+  - 当前阶段任务已完成
+- 当前可测试内容：
+  - `cd frontend && npx playwright test e2e/preview-error-states.spec.js`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:hosted`
+- 风险说明：
+  - 当前前端错误分流依赖后端返回的状态码与 detail 文案，若后端后续改文案，需要同步校验前端映射
+- 下一个任务：
+  - 进行本轮规范收尾与阶段结果汇总

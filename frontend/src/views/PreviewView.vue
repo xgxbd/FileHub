@@ -80,6 +80,25 @@ function resetPreviewState() {
   previewUrl.value = "";
 }
 
+function mapPreviewError(err) {
+  const status = Number(err?.status || 0);
+  const detail = String(err?.message || "");
+
+  if (status === 400) {
+    return detail || "当前类型不支持在线预览";
+  }
+  if (status === 403) {
+    return "你无权预览该文件";
+  }
+  if (status === 404 && detail.includes("文件内容不存在")) {
+    return "文件元数据存在，但文件内容不存在，请重新上传";
+  }
+  if (status === 404) {
+    return detail || "文件不存在";
+  }
+  return detail || "预览失败";
+}
+
 async function loadPreviewById(fileId) {
   if (!fileId) {
     previewError.value = "请先从下方文件列表选择要预览的文件";
@@ -112,7 +131,7 @@ async function loadPreviewById(fileId) {
       previewError.value = "当前类型不支持预览";
     }
   } catch (err) {
-    previewError.value = err instanceof Error ? err.message : "预览失败";
+    previewError.value = mapPreviewError(err);
   } finally {
     previewLoading.value = false;
   }

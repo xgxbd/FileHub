@@ -2,23 +2,32 @@ from pathlib import Path
 from pathlib import PurePosixPath
 
 from minio import Minio
+import urllib3
 
 from app.core.config import settings
 
 
 class ObjectStorageService:
     def __init__(self) -> None:
+        http_client = urllib3.PoolManager(
+            timeout=urllib3.Timeout(connect=0.5, read=0.5),
+            retries=False,
+        )
         self._client = Minio(
             settings.minio_endpoint,
             access_key=settings.minio_access_key,
             secret_key=settings.minio_secret_key,
             secure=settings.minio_secure,
+            http_client=http_client,
         )
         self._fallback_roots = self._build_fallback_roots()
         for root in self._fallback_roots:
             root.mkdir(parents=True, exist_ok=True)
 
     def upload_file(self, *, local_path: Path, object_key: str, content_type: str) -> str:
+        fallback_path = self._primary_fallback_path(object_key)
+        fallback_path.parent.mkdir(parents=True, exist_ok=True)
+        fallback_path.write_bytes(local_path.read_bytes())
         try:
             self._ensure_bucket()
             self._client.fput_object(
@@ -29,19 +38,18 @@ class ObjectStorageService:
             )
             return object_key
         except Exception:
-            # 开发测试回落本地对象目录，避免无 MinIO 时阻塞验证。
-            fallback_path = self._primary_fallback_path(object_key)
-            fallback_path.parent.mkdir(parents=True, exist_ok=True)
-            fallback_path.write_bytes(local_path.read_bytes())
+            # 开发测试环境始终保留本地对象副本，避免 MinIO 波动阻塞验证。
             return object_key
 
     def get_file_size(self, *, object_key: str) -> int:
+        fallback = self._find_existing_fallback_path(object_key)
+        if fallback.exists():
+            return fallback.stat().st_size
         try:
             self._ensure_bucket()
             stat = self._client.stat_object(settings.minio_bucket, object_key)
             return stat.size
         except Exception:
-            fallback = self._find_existing_fallback_path(object_key)
             if not fallback.exists():
                 raise FileNotFoundError(f"对象不存在: {object_key}")
             return fallback.stat().st_size
@@ -50,6 +58,11 @@ class ObjectStorageService:
         if start < 0 or end < start:
             raise ValueError("无效的下载范围")
         length = end - start + 1
+        fallback = self._find_existing_fallback_path(object_key)
+        if fallback.exists():
+            with fallback.open("rb") as fp:
+                fp.seek(start)
+                return fp.read(length)
         try:
             self._ensure_bucket()
             response = self._client.get_object(
@@ -64,7 +77,6 @@ class ObjectStorageService:
                 response.close()
                 response.release_conn()
         except Exception:
-            fallback = self._find_existing_fallback_path(object_key)
             if not fallback.exists():
                 raise FileNotFoundError(f"对象不存在: {object_key}")
             with fallback.open("rb") as fp:
@@ -100,12 +112,14 @@ class ObjectStorageService:
             self._client.make_bucket(settings.minio_bucket)
 
     def _object_exists(self, object_key: str) -> bool:
+        if any(candidate.exists() for candidate in self._fallback_candidates(object_key)):
+            return True
         try:
             self._ensure_bucket()
             self._client.stat_object(settings.minio_bucket, object_key)
             return True
         except Exception:
-            return any(candidate.exists() for candidate in self._fallback_candidates(object_key))
+            return False
 
     @staticmethod
     def _upload_prefix(object_key: str) -> str:
@@ -120,18 +134,6 @@ class ObjectStorageService:
         candidates: list[str] = []
         seen = set()
 
-        try:
-            self._ensure_bucket()
-            for item in self._client.list_objects(settings.minio_bucket, prefix=f"{upload_prefix}/", recursive=True):
-                if PurePosixPath(item.object_name).name != basename:
-                    continue
-                if item.object_name in seen:
-                    continue
-                seen.add(item.object_name)
-                candidates.append(item.object_name)
-        except Exception:
-            pass
-
         for root in self._fallback_roots:
             base_dir = root / upload_prefix
             if not base_dir.exists():
@@ -144,6 +146,18 @@ class ObjectStorageService:
                     continue
                 seen.add(object_name)
                 candidates.append(object_name)
+
+        try:
+            self._ensure_bucket()
+            for item in self._client.list_objects(settings.minio_bucket, prefix=f"{upload_prefix}/", recursive=True):
+                if PurePosixPath(item.object_name).name != basename:
+                    continue
+                if item.object_name in seen:
+                    continue
+                seen.add(item.object_name)
+                candidates.append(item.object_name)
+        except Exception:
+            pass
 
         return candidates
 

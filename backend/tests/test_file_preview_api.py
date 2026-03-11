@@ -197,3 +197,57 @@ def test_preview_recovers_from_legacy_object_key_path_mismatch() -> None:
         preview = client.get(f"/files/{file_id}/preview", headers=headers)
         assert preview.status_code == 200
         assert preview.text == "preview me"
+
+
+def test_preview_prefers_local_fallback_before_minio_probe(monkeypatch) -> None:
+    with TestClient(app) as client:
+        client.post(
+            "/auth/register",
+            json={"email": "previewlocal@test.com", "username": "previewlocal001", "password": "Passw0rd!"},
+        )
+        login = client.post("/auth/login", json={"account": "previewlocal001", "password": "Passw0rd!"})
+        token = login.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        file_id = _upload_file(
+            client,
+            token=token,
+            file_name="logs/local-readme.txt",
+            mime_type="text/plain",
+            content=b"local preview",
+        )
+
+        def fail_minio_probe() -> None:
+            raise AssertionError("存在本地对象时不应先探测 MinIO")
+
+        monkeypatch.setattr(object_storage_service, "_ensure_bucket", fail_minio_probe)
+
+        preview = client.get(f"/files/{file_id}/preview", headers=headers)
+        assert preview.status_code == 200
+        assert preview.text == "local preview"
+
+
+def test_upload_keeps_local_fallback_copy_for_preview() -> None:
+    with TestClient(app) as client:
+        client.post(
+            "/auth/register",
+            json={"email": "previewcopy@test.com", "username": "previewcopy001", "password": "Passw0rd!"},
+        )
+        login = client.post("/auth/login", json={"account": "previewcopy001", "password": "Passw0rd!"})
+        token = login.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        file_id = _upload_file(
+            client,
+            token=token,
+            file_name="logs/fallback-copy.txt",
+            mime_type="text/plain",
+            content=b"fallback copy",
+        )
+
+        with SessionLocal() as db:
+            file_record = db.get(FileObject, file_id)
+            assert file_record is not None
+            fallback = object_storage_service._primary_fallback_path(file_record.object_key)
+            assert fallback.exists()
+            assert fallback.read_bytes() == b"fallback copy"

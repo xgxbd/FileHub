@@ -126,9 +126,12 @@ async function loadCandidates() {
     const payload = await fetchFileList({
       accessToken: authStore.accessToken,
       page: 1,
-      pageSize: 20
+      pageSize: 100
     });
     fileCandidates.value = payload.items || [];
+    if (!currentFileId.value && fileCandidates.value.length > 0) {
+      pickFile(fileCandidates.value[0]);
+    }
   } catch (err) {
     fileCandidatesError.value = err instanceof Error ? err.message : "加载文件列表失败";
   } finally {

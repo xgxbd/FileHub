@@ -3821,3 +3821,40 @@
   - 上传页当前仍是单文件串行上传，后续若引入并发分片，需要重新定义进度聚合方式
 - 下一个任务：
   - 提交C：修复预览读取链路并补充上传预览回归测试
+
+---
+
+## 2026-03-11 15:09:21 CST
+
+- 任务：第二十九轮开发-提交C：修复预览读取链路并补充上传预览回归测试
+- 时间：2026-03-11 15:09:21 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `f716b37`
+- 本次修改：
+  - 更新 `backend/app/services/object_storage.py`
+  - 上传时始终保留本地 fallback 对象副本
+  - 读取大小、读取范围、对象存在判断优先检查本地 fallback
+  - MinIO 客户端增加短超时，避免本地无 MinIO 时阻塞
+  - 更新 `backend/tests/test_file_preview_api.py`
+  - 新增上传后必须保留本地 fallback 副本的回归测试
+  - 更新 `backend/tests/test_range_download_api.py`
+  - 新增本地 fallback 优先于 MinIO 探测的下载回归测试
+  - 更新 `frontend/src/views/PreviewView.vue`
+  - 增加预览候选文件加载范围，空路由进入预览页时自动选中第一项
+  - 新增 `frontend/e2e/upload-preview-flow.spec.js`
+  - 覆盖“上传完成后预览文本内容”链路
+- 已完成事项：
+  - 上传完成后，文件内容可稳定落到本地 fallback 对象目录
+  - 本地无 MinIO 时，预览和下载不再依赖远端对象探测
+  - 上传后立即预览文本文件已恢复正常
+  - 后端与前端关键回归均已通过
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_file_preview_api.py tests/test_range_download_api.py`
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/upload-preview-flow.spec.js e2e/folder-lifecycle.spec.js`
+- 风险说明：
+  - 当前策略会在本地保留一份对象副本，开发环境稳定性更好，但正式环境若完全依赖 MinIO，后续需再明确本地 fallback 的保留策略
+- 下一个任务：
+  - 继续收敛文件仓库剩余交互细节，优先处理目录树与文件操作体验问题

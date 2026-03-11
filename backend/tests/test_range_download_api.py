@@ -192,3 +192,23 @@ def test_download_recovers_from_legacy_object_key_path_mismatch() -> None:
             file_record = db.get(FileObject, file_id)
             assert file_record is not None
             assert file_record.object_key.endswith("/log/readme.txt")
+
+
+def test_download_prefers_local_fallback_before_minio_probe(monkeypatch) -> None:
+    with TestClient(app) as client:
+        token, file_id, content = _prepare_uploaded_file(
+            client,
+            email="localdownload@test.com",
+            username="localdownload001",
+            file_name="logs/local.txt",
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+
+        def fail_minio_probe() -> None:
+            raise AssertionError("存在本地对象时不应先探测 MinIO")
+
+        monkeypatch.setattr(object_storage_service, "_ensure_bucket", fail_minio_probe)
+
+        response = client.get(f"/files/{file_id}/download", headers=headers)
+        assert response.status_code == 200
+        assert response.content == content

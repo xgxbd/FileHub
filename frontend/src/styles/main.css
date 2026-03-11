@@ -337,6 +337,7 @@ body {
   padding: 2px 6px 2px 8px;
   border-radius: 4px;
   white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .folder-tree-panel .p-tree-node-content::before {
@@ -357,6 +358,21 @@ body {
   font-size: 12px;
   line-height: 16px;
   white-space: nowrap;
+}
+
+.folder-tree-panel .p-tree-node-content[data-p-selected="true"] {
+  background: #111111;
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px #111111;
+}
+
+.folder-tree-panel .p-tree-node-content[data-p-selected="true"] .p-tree-node-label {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.folder-tree-panel .p-tree-node-content:hover {
+  background: #f2f4f7;
 }
 
 .folder-tree-panel .p-tree-node-toggle-button {

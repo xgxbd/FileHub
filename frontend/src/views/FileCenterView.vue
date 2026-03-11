@@ -151,6 +151,19 @@ function formatTime(iso) {
   return new Date(iso).toLocaleString("zh-CN");
 }
 
+function fileBaseName(fileName) {
+  const normalized = normalizeFolder(fileName);
+  const parts = normalized.split("/");
+  return parts[parts.length - 1] || normalized;
+}
+
+function fileDirectoryLabel(fileName) {
+  const normalized = normalizeFolder(fileName);
+  const parts = normalized.split("/");
+  if (parts.length <= 1) return "/";
+  return `/${parts.slice(0, -1).join("/")}/`;
+}
+
 async function loadFiles() {
   if (!authStore.accessToken) return;
 
@@ -255,7 +268,7 @@ async function triggerDownload(fileItem) {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = fileItem.file_name;
+    anchor.download = fileBaseName(fileItem.file_name);
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
@@ -289,7 +302,7 @@ async function triggerSoftDelete(fileItem) {
 }
 
 function triggerPreview(fileItem) {
-  router.push({ path: `/preview/${fileItem.id}`, query: { name: fileItem.file_name } });
+  router.push({ path: `/preview/${fileItem.id}`, query: { name: fileBaseName(fileItem.file_name) } });
 }
 
 function jumpUploadWithCurrentDirectory() {
@@ -509,7 +522,12 @@ watch(sortBy, async (nextValue, prevValue) => {
             :totalRecords="total"
             @page="onPageChange"
           >
-            <Column field="file_name" header="文件路径"></Column>
+            <Column header="文件名">
+              <template #body="{ data }">{{ fileBaseName(data.file_name) }}</template>
+            </Column>
+            <Column header="所在目录">
+              <template #body="{ data }">{{ fileDirectoryLabel(data.file_name) }}</template>
+            </Column>
             <Column header="大小">
               <template #body="{ data }">{{ formatBytes(data.size_bytes) }}</template>
             </Column>

@@ -71,13 +71,16 @@ test('文件列表页目录切换与排序切换即时生效', async ({ page }) 
   await expect(page.locator('tbody tr')).toHaveCount(3);
 
   await page.selectOption('.sort-select', 'file_name_asc');
-  await expect(page.locator('tbody tr').first()).toContainText('logs/alpha-log.txt');
+  await expect(page.locator('tbody tr').first()).toContainText('alpha-log.txt');
+  await expect(page.locator('tbody tr').first()).toContainText('/logs/');
 
   await page.selectOption('.sort-select', 'size_desc');
-  await expect(page.locator('tbody tr').first()).toContainText('logs/big-log.txt');
+  await expect(page.locator('tbody tr').first()).toContainText('big-log.txt');
+  await expect(page.locator('tbody tr').first()).toContainText('/logs/');
 
   await page.getByRole('button', { name: '根目录' }).click();
   await expect(page.getByText('当前目录：/')).toBeVisible();
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await expect(page.locator('tbody tr').first()).toContainText('alpha-root.txt');
+  await expect(page.locator('tbody tr').first()).toContainText('/');
 });

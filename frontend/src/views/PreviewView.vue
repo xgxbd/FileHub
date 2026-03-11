@@ -42,6 +42,28 @@ const selectedLabel = computed(() => {
   return "未选择文件";
 });
 
+function normalizeFilePath(raw) {
+  return String(raw || "")
+    .replace(/\\/g, "/")
+    .split("/")
+    .map((part) => part.trim())
+    .filter((part) => part && part !== "." && part !== "..")
+    .join("/");
+}
+
+function fileBaseName(fileName) {
+  const normalized = normalizeFilePath(fileName);
+  const parts = normalized.split("/");
+  return parts[parts.length - 1] || normalized;
+}
+
+function fileDirectoryLabel(fileName) {
+  const normalized = normalizeFilePath(fileName);
+  const parts = normalized.split("/");
+  if (parts.length <= 1) return "/";
+  return `/${parts.slice(0, -1).join("/")}/`;
+}
+
 function formatTime(iso) {
   return new Date(iso).toLocaleString("zh-CN");
 }
@@ -117,7 +139,7 @@ async function loadCandidates() {
 function pickFile(fileItem) {
   router.push({
     path: `/preview/${fileItem.id}`,
-    query: { name: fileItem.file_name }
+    query: { name: fileBaseName(fileItem.file_name) }
   });
 }
 
@@ -197,12 +219,17 @@ onBeforeUnmount(() => {
 
       <section class="panel" style="margin-top: 12px">
         <div class="file-filter-actions" style="justify-content: space-between">
-          <strong>最近文件（按路径）</strong>
+          <strong>最近文件</strong>
           <Button size="small" text severity="secondary" label="刷新列表" icon="pi pi-refresh" @click="loadCandidates" />
         </div>
         <Message v-if="fileCandidatesError" severity="error" :closable="false">{{ fileCandidatesError }}</Message>
         <DataTable :value="fileCandidates" :loading="fileCandidatesLoading">
-          <Column field="file_name" header="文件路径"></Column>
+          <Column header="文件名">
+            <template #body="{ data }">{{ fileBaseName(data.file_name) }}</template>
+          </Column>
+          <Column header="所在目录">
+            <template #body="{ data }">{{ fileDirectoryLabel(data.file_name) }}</template>
+          </Column>
           <Column field="mime_type" header="类型"></Column>
           <Column header="创建时间">
             <template #body="{ data }">{{ formatTime(data.created_at) }}</template>

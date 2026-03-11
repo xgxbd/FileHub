@@ -60,7 +60,8 @@ test('文件夹支持重命名、递归删除并在回收站恢复', async ({ pa
   page.once('dialog', (dialog) => dialog.accept('reports'));
   await page.getByRole('button', { name: '重命名' }).click();
   await expect(page.getByText('当前目录：/reports/')).toBeVisible();
-  await expect(page.locator('tbody tr').first()).toContainText('reports/readme.txt');
+  await expect(page.locator('tbody tr').first()).toContainText('readme.txt');
+  await expect(page.locator('tbody tr').first()).toContainText('/reports/');
 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: '删除当前文件夹' }).click();
@@ -68,7 +69,8 @@ test('文件夹支持重命名、递归删除并在回收站恢复', async ({ pa
   await expect(page.locator('.folder-tree-panel .p-tree-node-content').filter({ hasText: 'reports' })).toHaveCount(0);
 
   await page.goto('/recycle');
-  await expect(page.getByText('/reports/')).toBeVisible();
+  await expect(page.locator('tbody tr').filter({ hasText: 'readme.txt' }).first()).toContainText('/reports/');
+  await expect(page.getByRole('button', { name: '恢复文件夹' })).toBeVisible();
   await page.getByRole('button', { name: '恢复文件夹' }).click();
   await expect(page.getByText('已恢复文件夹：/reports/')).toBeVisible();
 
@@ -76,5 +78,6 @@ test('文件夹支持重命名、递归删除并在回收站恢复', async ({ pa
   await page.getByRole('button', { name: '刷新' }).click();
   await page.locator('.folder-tree-panel .p-tree-node-content').filter({ hasText: 'reports' }).click();
   await expect(page.getByText('当前目录：/reports/')).toBeVisible();
-  await expect(page.locator('tbody tr').first()).toContainText('reports/readme.txt');
+  await expect(page.locator('tbody tr').first()).toContainText('readme.txt');
+  await expect(page.locator('tbody tr').first()).toContainText('/reports/');
 });

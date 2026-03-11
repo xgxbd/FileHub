@@ -3729,3 +3729,38 @@
   - 兼容查找基于同一上传会话目录与文件名匹配，若未来允许同一上传会话内存多文件，需要重新约束对象定位策略
 - 下一个任务：
   - 提交C：修复前端文件名显示、回收站文件可见性与文件树选中态
+
+---
+
+## 2026-03-11 14:17:00 CST
+
+- 任务：第二十八轮开发-提交C：修复前端文件名显示回收站可见性与树选中态
+- 时间：2026-03-11 14:17:00 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `c89de14`
+- 本次修改：
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 文件列表改为“文件名 + 所在目录”展示
+  - 下载与预览路由默认使用 basename
+  - 更新 `frontend/src/views/PreviewView.vue`
+  - 最近文件列表改为“文件名 + 所在目录”
+  - 更新 `frontend/src/views/RecycleBinView.vue`
+  - 回收站文件表改为“文件名 + 所在目录”，提升被删除文件可见性
+  - 更新 `frontend/src/styles/main.css`
+  - 强化文件树选中态与 hover 态
+  - 更新 `frontend/e2e/file-center-tree-sort.spec.js`
+  - 更新 `frontend/e2e/folder-lifecycle.spec.js`
+- 已完成事项：
+  - 文件名不再显示成完整路径
+  - 回收站里被删除文件与文件夹都能更直观地看到
+  - 文件树当前选中目录的视觉状态已明显增强
+  - 前端相关 E2E 回归通过
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-tree-sort.spec.js e2e/folder-lifecycle.spec.js e2e/file-center-folder-management.spec.js e2e/layout-stability.spec.js`
+- 风险说明：
+  - 当前 basename / 目录拆分逻辑在多个页面局部实现，后续可下沉为共享工具函数避免重复
+- 下一个任务：
+  - 推送本轮文件显示与下载异常修复提交

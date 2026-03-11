@@ -39,6 +39,28 @@ const purgingFileId = ref(null);
 const restoringFolderPath = ref("");
 const purgingFolderPath = ref("");
 
+function normalizeFilePath(raw) {
+  return String(raw || "")
+    .replace(/\\/g, "/")
+    .split("/")
+    .map((part) => part.trim())
+    .filter((part) => part && part !== "." && part !== "..")
+    .join("/");
+}
+
+function fileBaseName(fileName) {
+  const normalized = normalizeFilePath(fileName);
+  const parts = normalized.split("/");
+  return parts[parts.length - 1] || normalized;
+}
+
+function fileDirectoryLabel(fileName) {
+  const normalized = normalizeFilePath(fileName);
+  const parts = normalized.split("/");
+  if (parts.length <= 1) return "/";
+  return `/${parts.slice(0, -1).join("/")}/`;
+}
+
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -229,7 +251,12 @@ onMounted(() => {
         :totalRecords="total"
         @page="onPageChange"
       >
-        <Column field="file_name" header="文件名"></Column>
+        <Column header="文件名">
+          <template #body="{ data }">{{ fileBaseName(data.file_name) }}</template>
+        </Column>
+        <Column header="所在目录">
+          <template #body="{ data }">{{ fileDirectoryLabel(data.file_name) }}</template>
+        </Column>
         <Column header="大小">
           <template #body="{ data }">{{ formatBytes(data.size_bytes) }}</template>
         </Column>

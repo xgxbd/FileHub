@@ -3384,3 +3384,31 @@
   - 若继续把 `Tree` 当作非受控组件使用，目录状态问题会反复出现
 - 下一个任务：
   - 提交B：修复目录选择状态、当前目录同步和排序自动重排
+
+---
+
+## 2026-03-11 12:57:53 CST
+
+- 任务：第二十四轮开发-提交B：修复文件列表目录切换与排序即时生效
+- 时间：2026-03-11 12:57:53 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `7b1eb15`
+- 本次修改：
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 修正 PrimeVue `Tree` 的 `node-select` 事件处理签名，目录点击后同步更新当前目录与文件列表
+  - 保留排序切换即时触发加载逻辑
+  - 更新 `frontend/e2e/file-center-tree-sort.spec.js`
+  - 将目录点击定位收紧到左侧文件树节点，补齐“切目录 + 当前目录同步 + 排序即时生效”回归断言
+- 已完成事项：
+  - 点击 `logs` 目录后，当前目录会切换到 `logs`
+  - 根目录与子目录文件列表按当前层级正确过滤
+  - 排序方式切换后，文件列表会立即重排
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-tree-sort.spec.js`
+- 风险说明：
+  - 当前目录树仍依赖全量文件列表构建，目录量非常大时需要再考虑独立目录索引接口
+- 下一个任务：
+  - 推送本次修复并等待你复测根目录、logs 目录和排序切换

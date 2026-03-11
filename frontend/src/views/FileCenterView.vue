@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import Button from "primevue/button";
@@ -35,7 +35,8 @@ const treeError = ref("");
 const downloadingFileId = ref(null);
 const deletingFileId = ref(null);
 const treeLoading = ref(false);
-const selectedTreeKey = ref(`dir:${ROOT_DIRECTORY_MARKER}`);
+const selectedTreeKeys = ref({ [`dir:${ROOT_DIRECTORY_MARKER}`]: true });
+const expandedTreeKeys = ref({ [`dir:${ROOT_DIRECTORY_MARKER}`]: true });
 const treeNodes = ref([
   {
     key: `dir:${ROOT_DIRECTORY_MARKER}`,
@@ -183,6 +184,10 @@ async function loadDirectoryTree() {
     }
 
     treeNodes.value = buildTree(collected);
+    expandedTreeKeys.value = {
+      [`dir:${ROOT_DIRECTORY_MARKER}`]: true,
+      ...expandedTreeKeys.value
+    };
   } catch (err) {
     treeError.value = err instanceof Error ? err.message : "加载文件树失败";
   } finally {
@@ -204,16 +209,24 @@ async function resetFilters() {
 
 async function clearDirectoryFilter() {
   selectedDirectory.value = ROOT_DIRECTORY_MARKER;
-  selectedTreeKey.value = `dir:${ROOT_DIRECTORY_MARKER}`;
+  selectedTreeKeys.value = { [`dir:${ROOT_DIRECTORY_MARKER}`]: true };
+  expandedTreeKeys.value = {
+    [`dir:${ROOT_DIRECTORY_MARKER}`]: true,
+    ...expandedTreeKeys.value
+  };
   page.value = 1;
   await loadFiles();
 }
 
-async function onDirectorySelect(event) {
-  const directoryFromNode = event.node?.data?.directory;
-  const directoryFromKey = String(event.node?.key || "").replace(/^dir:/, "");
-  selectedDirectory.value = directoryFromNode || directoryFromKey || ROOT_DIRECTORY_MARKER;
-  selectedTreeKey.value = event.node?.key || `dir:${ROOT_DIRECTORY_MARKER}`;
+async function onDirectorySelect(nodeOrEvent) {
+  const selectedNode = nodeOrEvent?.data ? nodeOrEvent : nodeOrEvent?.node;
+  const directoryFromNode = selectedNode?.data?.directory;
+  const directoryFromKey = String(selectedNode?.key || "").replace(/^dir:/, "");
+  const nextDirectory = directoryFromNode || directoryFromKey || ROOT_DIRECTORY_MARKER;
+  const nextKey = selectedNode?.key || `dir:${ROOT_DIRECTORY_MARKER}`;
+
+  selectedDirectory.value = nextDirectory;
+  selectedTreeKeys.value = { [nextKey]: true };
   page.value = 1;
   await loadFiles();
 }
@@ -287,6 +300,12 @@ function jumpUploadWithCurrentDirectory() {
 onMounted(async () => {
   await Promise.all([loadFiles(), loadDirectoryTree()]);
 });
+
+watch(sortBy, async (nextValue, prevValue) => {
+  if (nextValue === prevValue) return;
+  page.value = 1;
+  await loadFiles();
+});
 </script>
 
 <template>
@@ -318,7 +337,8 @@ onMounted(async () => {
             :loading="treeLoading"
             selectionMode="single"
             :metaKeySelection="false"
-            v-model:selectionKeys="selectedTreeKey"
+            v-model:selectionKeys="selectedTreeKeys"
+            v-model:expandedKeys="expandedTreeKeys"
             @node-select="onDirectorySelect"
           />
         </section>

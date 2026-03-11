@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
-import AdminLogsView from "../views/AdminLogsView.vue";
-import AdminFilesView from "../views/AdminFilesView.vue";
-import FileCenterView from "../views/FileCenterView.vue";
-import LoginView from "../views/LoginView.vue";
-import RecycleBinView from "../views/RecycleBinView.vue";
-import RegisterView from "../views/RegisterView.vue";
+const LoginView = () => import("../views/LoginView.vue");
+const RegisterView = () => import("../views/RegisterView.vue");
+const FileCenterView = () => import("../views/FileCenterView.vue");
+const RecycleBinView = () => import("../views/RecycleBinView.vue");
+const AdminLogsView = () => import("../views/AdminLogsView.vue");
+const AdminFilesView = () => import("../views/AdminFilesView.vue");
 
 const router = createRouter({
   history: createWebHistory(),

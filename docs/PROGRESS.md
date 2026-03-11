@@ -2224,3 +2224,153 @@
   - E2E 运行依赖端口占用状态，执行前需确认本地环境干净
 - 下一个任务：
   - 第十四轮开发：先设计性能与告警治理MVP，再实现分包与后端弃用项修复
+
+---
+
+## 2026-03-11 08:36:05 CST
+
+- 任务：第十四轮开发-提交A：性能与告警治理MVP设计
+- 时间：2026-03-11 08:36:05 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 新增 `docs/ROUND14_PERFORMANCE_WARNING_GOVERNANCE_DESIGN.md`
+  - 明确后端弃用告警治理与前端分包优化范围
+  - 拆分提交 A-E 并定义验证标准
+- 已完成事项：
+  - 第十四轮设计阶段完成
+- 未完成事项：
+  - 提交B-E 的实现与验证
+- 当前可测试内容：
+  - 设计文档可直接评审
+- 风险说明：
+  - 路由懒加载改造需关注路由守卫与权限逻辑兼容
+- 下一个任务：
+  - 提交B：完成后端弃用告警治理
+
+---
+
+## 2026-03-11 08:38:58 CST
+
+- 任务：第十四轮开发-提交B：后端弃用告警治理
+- 时间：2026-03-11 08:38:58 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - `main.py` 启动流程迁移到 `lifespan`
+  - 下载接口 416 常量改为 `HTTP_416_RANGE_NOT_SATISFIABLE`
+- 已完成事项：
+  - FastAPI `on_event` 与 416 常量弃用告警已消除
+  - 后端测试通过：`pytest -q`（21 passed）
+  - 现存告警仅剩第三方依赖 `passlib` 的 `crypt` 弃用提醒
+- 未完成事项：
+  - 提交C：前端分包优化
+  - 提交D：全量回归（pytest/build/e2e）
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+- 风险说明：
+  - `passlib` 依赖告警来自上游库，需后续评估替代方案
+- 下一个任务：
+  - 提交C：前端路由懒加载与分包优化
+
+---
+
+## 2026-03-11 08:40:39 CST
+
+- 任务：第十四轮开发-提交C：前端分包与首包优化
+- 时间：2026-03-11 08:40:39 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 路由组件改为懒加载
+  - Vite `manualChunks` 精确拆分 `vue/pinia/vue-router` 公共包
+  - 修正分包匹配规则，避免 `primevue` 被误并入 `vue-vendor`
+- 已完成事项：
+  - 前端构建主包显著下降，路由页按需加载
+  - 构建结果已消除 >500k 的 chunk 告警
+- 未完成事项：
+  - 提交D：回归验证（pytest/build/e2e）
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+- 风险说明：
+  - 首次进入各路由页面会触发按需加载请求，弱网下首屏切换可能有轻微延迟
+- 下一个任务：
+  - 提交D：执行后端测试、前端构建、前端E2E回归
+
+---
+
+## 2026-03-11 08:43:49 CST
+
+- 任务：第十四轮开发-提交D：优化后全量回归验证
+- 时间：2026-03-11 08:43:49 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 顺序执行后端测试、前端构建、前端E2E回归
+  - 归档验证输出结果
+- 已完成事项：
+  - 后端测试通过：`pytest -q`（21 passed，1 warning）
+  - 前端构建通过：`npm run build`
+  - 前端 E2E 通过：`npm run e2e`（2 passed）
+- 未完成事项：
+  - 提交E：文档收口
+  - 第十四轮规范收尾
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - 仍存在第三方依赖 `passlib` 的 `crypt` 弃用告警
+- 下一个任务：
+  - 提交E：更新文档并完成第十四轮收口
+
+---
+
+## 2026-03-11 08:44:57 CST
+
+- 任务：第十四轮开发-提交E：性能与告警治理文档收口
+- 时间：2026-03-11 08:44:57 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 更新 `backend/README.md`：补充后端告警治理说明
+  - 更新 `frontend/README.md`：补充前端懒加载与分包优化说明
+  - 更新根文档 `README.md`：同步第十四轮治理状态
+  - 收口前复跑前端构建
+- 已完成事项：
+  - 第十四轮“性能与告警治理MVP（设计+实现）”完成
+  - 前端构建通过：`npm run build`
+- 未完成事项：
+  - 第十四轮规范收尾
+  - 下一轮任务（v0.1.1 优化项）
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - `passlib` 依赖告警仍需在后续版本处理
+- 下一个任务：
+  - 执行第十四轮规范收尾检查并归档结果
+
+---
+
+## 2026-03-11 08:45:36 CST
+
+- 任务：第十四轮开发规范收尾检查与归档
+- 时间：2026-03-11 08:45:36 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - 核查第十四轮提交完整性（A-E）与提交信息规范
+  - 归档验证结果：`pytest -q` 通过、`npm run build` 通过、`npm run e2e` 通过
+- 已完成事项：
+  - 第十四轮最小任务 A-E 均已完成并推送
+  - 提交信息均为具体中文自然语言
+  - 后端关键弃用告警已清理，前端大包告警已消除
+- 未完成事项：
+  - 剩余第三方依赖告警（`passlib` -> `crypt`）
+  - v0.1.1 规划与增量优化
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+- 风险说明：
+  - 密码哈希库升级涉及兼容迁移，需谨慎做平滑替换
+- 下一个任务：
+  - 第十五轮开发：先设计认证加密库告警治理，再实现平滑迁移

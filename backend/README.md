@@ -107,3 +107,9 @@ pytest -q
   source .venv/bin/activate
   python scripts/perf_baseline.py
   ```
+
+## 告警治理（第十四轮）
+
+- 应用生命周期已从 `on_event("startup")` 迁移至 `lifespan`
+- Range 下载接口已使用 `HTTP_416_RANGE_NOT_SATISFIABLE` 常量
+- 当前剩余弃用告警主要来自第三方依赖 `passlib`（`crypt` 将在 Python 3.13 移除）

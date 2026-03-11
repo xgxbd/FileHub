@@ -93,7 +93,7 @@ def download_file(
     if range_header:
         match = re.match(r"bytes=(\d*)-(\d*)", range_header.strip())
         if not match:
-            raise HTTPException(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, detail="无效Range")
+            raise HTTPException(status_code=status.HTTP_416_RANGE_NOT_SATISFIABLE, detail="无效Range")
 
         start_group, end_group = match.groups()
         if start_group and end_group:
@@ -105,14 +105,14 @@ def download_file(
         elif end_group:
             suffix = int(end_group)
             if suffix <= 0:
-                raise HTTPException(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, detail="无效Range")
+                raise HTTPException(status_code=status.HTTP_416_RANGE_NOT_SATISFIABLE, detail="无效Range")
             start = max(total_size - suffix, 0)
             end = total_size - 1
         else:
-            raise HTTPException(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, detail="无效Range")
+            raise HTTPException(status_code=status.HTTP_416_RANGE_NOT_SATISFIABLE, detail="无效Range")
 
         if start < 0 or end < start or start >= total_size:
-            raise HTTPException(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, detail="Range越界")
+            raise HTTPException(status_code=status.HTTP_416_RANGE_NOT_SATISFIABLE, detail="Range越界")
         end = min(end, total_size - 1)
         status_code = status.HTTP_206_PARTIAL_CONTENT
 

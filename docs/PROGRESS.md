@@ -3575,3 +3575,38 @@
   - 文件夹重命名需要级联更新文件路径，必须补测试避免预览、下载、回收站路径失配
 - 下一个任务：
   - 提交B：实现后端文件夹重命名、递归删除与回收站接口
+
+---
+
+## 2026-03-11 13:28:27 CST
+
+- 任务：第二十七轮开发-提交B：实现后端文件夹重命名递归删除与回收站接口
+- 时间：2026-03-11 13:28:27 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `6a59d62`
+- 本次修改：
+  - 更新 `backend/app/services/folder_service.py`
+  - 新增文件夹重命名、递归删除、文件夹回收站列表、恢复、彻底删除能力
+  - 更新 `backend/app/api/folders.py`
+  - 新增 `PATCH /folders/rename`
+  - 扩展 `DELETE /folders` 支持 `recursive=true`
+  - 更新 `backend/app/api/recycle.py`
+  - 新增 `GET /recycle/folders`
+  - 新增 `POST /recycle/folders/restore`
+  - 新增 `DELETE /recycle/folders/purge`
+  - 更新 `backend/app/schemas/folder.py` 与 `backend/app/schemas/__init__.py`
+  - 更新 `backend/tests/test_folder_api.py`，补齐重命名、递归删除、文件夹回收站恢复与彻底删除测试
+- 已完成事项：
+  - 已支持文件夹重命名并级联更新子文件与子目录路径
+  - 已支持递归删除非空文件夹到回收站
+  - 已支持文件夹回收站列表、恢复、彻底删除
+  - 已消除“目录消失但没有恢复入口”的目录生命周期断层
+- 未完成事项：
+  - 前端尚未接入文件夹重命名、递归删除、文件夹回收站
+  - 文件树横向排版与虚线层级尚未调整
+- 当前可测试内容：
+  - `rm -f backend/test_suite.db && cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_folder_api.py tests/test_recycle_api.py`
+- 风险说明：
+  - 文件夹重命名会直接更新文件元数据路径，后续需补前端流程回归，确认预览、下载入口仍正常
+- 下一个任务：
+  - 提交C：实现前端文件夹重命名、递归删除和文件夹回收站交互

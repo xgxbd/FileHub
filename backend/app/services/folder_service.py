@@ -117,6 +117,19 @@ def list_directory_paths(*, db: Session, current_user: User) -> list[FolderPathP
     ]
 
 
+def list_deleted_folders(*, db: Session, current_user: User) -> list[Folder]:
+    return (
+        db.execute(
+            select(Folder).where(
+                Folder.owner_id == current_user.id,
+                Folder.is_deleted.is_(True),
+            ).order_by(Folder.updated_at.desc(), Folder.path.asc())
+        )
+        .scalars()
+        .all()
+    )
+
+
 def _folder_exists(*, db: Session, owner_id: int, path: str) -> bool:
     normalized = normalize_directory_path(path)
     if not normalized:
@@ -140,6 +153,93 @@ def _folder_exists(*, db: Session, owner_id: int, path: str) -> bool:
         )
     ).scalar_one_or_none()
     return file_child is not None
+
+
+def _folder_exists_with_deleted(*, db: Session, owner_id: int, path: str) -> bool:
+    normalized = normalize_directory_path(path)
+    if not normalized:
+        return True
+
+    explicit = db.execute(
+        select(Folder.id).where(
+            Folder.owner_id == owner_id,
+            Folder.path == normalized,
+        )
+    ).scalar_one_or_none()
+    if explicit is not None:
+        return True
+
+    file_record = db.execute(
+        select(FileObject.id).where(
+            FileObject.owner_id == owner_id,
+            FileObject.file_name.like(f"{normalized}/%"),
+        )
+    ).scalar_one_or_none()
+    return file_record is not None
+
+
+def _collect_file_records(*, db: Session, owner_id: int, prefix: str, deleted: bool | None) -> list[FileObject]:
+    query = select(FileObject).where(
+        FileObject.owner_id == owner_id,
+        FileObject.file_name.like(f"{prefix}/%"),
+    )
+    if deleted is not None:
+        query = query.where(FileObject.is_deleted.is_(deleted))
+    return db.execute(query.order_by(FileObject.file_name.asc())).scalars().all()
+
+
+def _collect_explicit_folders(*, db: Session, owner_id: int, prefix: str, deleted: bool | None) -> list[Folder]:
+    query = select(Folder).where(
+        Folder.owner_id == owner_id,
+        ((Folder.path == prefix) | Folder.path.like(f"{prefix}/%")),
+    )
+    if deleted is not None:
+        query = query.where(Folder.is_deleted.is_(deleted))
+    return db.execute(query.order_by(Folder.path.asc())).scalars().all()
+
+
+def _collect_derived_paths_from_records(file_records: list[FileObject], *, prefix: str) -> set[str]:
+    file_paths = [record.file_name for record in file_records]
+    return {
+        path
+        for path in _derive_directories_from_files(file_paths)
+        if path == prefix or path.startswith(f"{prefix}/")
+    }
+
+
+def _upsert_folder_rows(*, db: Session, owner_id: int, paths: set[str], is_deleted: bool) -> list[Folder]:
+    updated_rows: list[Folder] = []
+    for path in sorted(paths):
+        parts = split_folder_path(path)
+        row = db.execute(
+            select(Folder).where(
+                Folder.owner_id == owner_id,
+                Folder.path == parts.path,
+            )
+        ).scalar_one_or_none()
+        if row is None:
+            row = Folder(
+                owner_id=owner_id,
+                path=parts.path,
+                name=parts.name,
+                parent_path=parts.parent_path,
+                is_deleted=is_deleted,
+            )
+        else:
+            row.name = parts.name
+            row.parent_path = parts.parent_path
+            row.is_deleted = is_deleted
+        db.add(row)
+        updated_rows.append(row)
+    return updated_rows
+
+
+def _rename_path(path: str, *, source_prefix: str, target_prefix: str) -> str:
+    if path == source_prefix:
+        return target_prefix
+    if path.startswith(f"{source_prefix}/"):
+        return f"{target_prefix}{path[len(source_prefix):]}"
+    return path
 
 
 def create_folder(*, db: Session, current_user: User, parent_directory: str | None, folder_name: str) -> Folder:
@@ -193,28 +293,93 @@ def create_folder(*, db: Session, current_user: User, parent_directory: str | No
     return folder
 
 
-def delete_folder(*, db: Session, current_user: User, path: str) -> FolderPathParts:
+def rename_folder(*, db: Session, current_user: User, path: str, new_name: str) -> FolderPathParts:
     target = split_folder_path(path)
+    normalized_name = normalize_folder_name(new_name)
+    destination_path = f"{target.parent_path}/{normalized_name}".strip("/")
 
-    file_exists = db.execute(
+    if destination_path == target.path:
+        return split_folder_path(destination_path)
+
+    if not _folder_exists(db=db, owner_id=current_user.id, path=target.path):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件夹不存在")
+
+    destination_file_conflict = db.execute(
         select(FileObject.id).where(
             FileObject.owner_id == current_user.id,
             FileObject.is_deleted.is_(False),
-            FileObject.file_name.like(f"{target.path}/%"),
+            ((FileObject.file_name == destination_path) | FileObject.file_name.like(f"{destination_path}/%")),
         )
     ).scalar_one_or_none()
-    if file_exists is not None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="目录下仍有文件，不能删除")
+    if destination_file_conflict is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="目标名称已存在")
 
-    child_folder = db.execute(
+    destination_folder_conflict = db.execute(
         select(Folder.id).where(
             Folder.owner_id == current_user.id,
-            Folder.is_deleted.is_(False),
-            Folder.path.like(f"{target.path}/%"),
+            Folder.path == destination_path,
         )
     ).scalar_one_or_none()
-    if child_folder is not None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="目录下仍有子目录，不能删除")
+    if destination_folder_conflict is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="目标名称已存在")
+
+    folder_rows = _collect_explicit_folders(
+        db=db,
+        owner_id=current_user.id,
+        prefix=target.path,
+        deleted=False,
+    )
+    for folder in folder_rows:
+        new_path = _rename_path(folder.path, source_prefix=target.path, target_prefix=destination_path)
+        new_parts = split_folder_path(new_path)
+        folder.path = new_parts.path
+        folder.name = new_parts.name
+        folder.parent_path = new_parts.parent_path
+        db.add(folder)
+
+    file_rows = _collect_file_records(
+        db=db,
+        owner_id=current_user.id,
+        prefix=target.path,
+        deleted=None,
+    )
+    for file_record in file_rows:
+        file_record.file_name = _rename_path(file_record.file_name, source_prefix=target.path, target_prefix=destination_path)
+        db.add(file_record)
+
+    db.commit()
+    return split_folder_path(destination_path)
+
+
+def delete_folder(*, db: Session, current_user: User, path: str, recursive: bool = False) -> dict[str, int | str]:
+    target = split_folder_path(path)
+
+    if not _folder_exists(db=db, owner_id=current_user.id, path=target.path):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件夹不存在")
+
+    active_file_records = _collect_file_records(
+        db=db,
+        owner_id=current_user.id,
+        prefix=target.path,
+        deleted=False,
+    )
+    active_folder_rows = _collect_explicit_folders(
+        db=db,
+        owner_id=current_user.id,
+        prefix=target.path,
+        deleted=False,
+    )
+    active_derived_paths = _collect_derived_paths_from_records(active_file_records, prefix=target.path)
+
+    if not recursive:
+        if active_file_records:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="目录下仍有文件，不能删除")
+
+        child_folder = any(folder.path != target.path for folder in active_folder_rows) or any(
+            path_item != target.path for path_item in active_derived_paths
+        )
+        if child_folder:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="目录下仍有子目录，不能删除")
 
     folder = db.execute(
         select(Folder).where(
@@ -223,10 +388,112 @@ def delete_folder(*, db: Session, current_user: User, path: str) -> FolderPathPa
             Folder.is_deleted.is_(False),
         )
     ).scalar_one_or_none()
-    if folder is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件夹不存在")
 
-    folder.is_deleted = True
-    db.add(folder)
+    affected_paths = {target.path, *active_derived_paths}
+    affected_paths.update(folder_item.path for folder_item in active_folder_rows)
+    _upsert_folder_rows(db=db, owner_id=current_user.id, paths=affected_paths, is_deleted=True)
+
+    for file_record in active_file_records:
+        file_record.is_deleted = True
+        file_record.status = "deleted"
+        db.add(file_record)
+
+    if folder is not None:
+        folder.is_deleted = True
+        db.add(folder)
+
     db.commit()
-    return target
+    return {
+        "path": target.path,
+        "file_count": len(active_file_records),
+        "folder_count": len(affected_paths),
+    }
+
+
+def restore_folder(*, db: Session, current_user: User, path: str) -> dict[str, int | str]:
+    target = split_folder_path(path)
+
+    folder = db.execute(
+        select(Folder).where(
+            Folder.owner_id == current_user.id,
+            Folder.path == target.path,
+            Folder.is_deleted.is_(True),
+        )
+    ).scalar_one_or_none()
+    if folder is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件夹不在回收站")
+
+    if _folder_exists(db=db, owner_id=current_user.id, path=target.path):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="存在同名活跃目录，无法恢复")
+
+    deleted_file_records = _collect_file_records(
+        db=db,
+        owner_id=current_user.id,
+        prefix=target.path,
+        deleted=True,
+    )
+    deleted_folder_rows = _collect_explicit_folders(
+        db=db,
+        owner_id=current_user.id,
+        prefix=target.path,
+        deleted=True,
+    )
+
+    for ancestor_path in _iter_parent_paths(target.path)[:-1]:
+        _upsert_folder_rows(db=db, owner_id=current_user.id, paths={ancestor_path}, is_deleted=False)
+
+    for folder_row in deleted_folder_rows:
+        folder_row.is_deleted = False
+        db.add(folder_row)
+
+    for file_record in deleted_file_records:
+        file_record.is_deleted = False
+        file_record.status = "active"
+        db.add(file_record)
+
+    db.commit()
+    return {
+        "path": target.path,
+        "file_count": len(deleted_file_records),
+        "folder_count": len(deleted_folder_rows),
+    }
+
+
+def purge_folder(*, db: Session, current_user: User, path: str) -> dict[str, int | str]:
+    target = split_folder_path(path)
+
+    folder = db.execute(
+        select(Folder).where(
+            Folder.owner_id == current_user.id,
+            Folder.path == target.path,
+            Folder.is_deleted.is_(True),
+        )
+    ).scalar_one_or_none()
+    if folder is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文件夹不在回收站")
+
+    deleted_file_records = _collect_file_records(
+        db=db,
+        owner_id=current_user.id,
+        prefix=target.path,
+        deleted=True,
+    )
+    deleted_folder_rows = _collect_explicit_folders(
+        db=db,
+        owner_id=current_user.id,
+        prefix=target.path,
+        deleted=True,
+    )
+
+    for file_record in deleted_file_records:
+        db.delete(file_record)
+
+    for folder_row in deleted_folder_rows:
+        db.delete(folder_row)
+
+    db.commit()
+    return {
+        "path": target.path,
+        "file_count": len(deleted_file_records),
+        "folder_count": len(deleted_folder_rows),
+    }

@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.db import get_db
 from app.models.user import User
-from app.schemas.folder import FolderCreateRequest, FolderItem, FolderTreeItem
-from app.services.folder_service import create_folder, delete_folder, list_directory_paths
+from app.schemas.folder import FolderCreateRequest, FolderItem, FolderRenameRequest, FolderTreeItem
+from app.services.folder_service import create_folder, delete_folder, list_directory_paths, rename_folder
 from app.services.operation_log_service import record_operation
 
 router = APIRouter(prefix="/folders", tags=["folders"])
@@ -46,19 +46,43 @@ def create_folder_endpoint(
     return FolderItem.model_validate(folder)
 
 
-@router.delete("")
-def delete_folder_endpoint(
-    path: str = Query(..., min_length=1),
+@router.patch("/rename")
+def rename_folder_endpoint(
+    payload: FolderRenameRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    deleted_folder = delete_folder(db=db, current_user=current_user, path=path)
+    renamed = rename_folder(
+        db=db,
+        current_user=current_user,
+        path=payload.path,
+        new_name=payload.new_name,
+    )
+    record_operation(
+        db=db,
+        user=current_user,
+        action="rename_folder",
+        target_type="folder",
+        target_id=renamed.path,
+        detail={"path": payload.path, "new_path": renamed.path},
+    )
+    return {"path": renamed.path, "name": renamed.name}
+
+
+@router.delete("")
+def delete_folder_endpoint(
+    path: str = Query(..., min_length=1),
+    recursive: bool = Query(default=False),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    deleted_folder = delete_folder(db=db, current_user=current_user, path=path, recursive=recursive)
     record_operation(
         db=db,
         user=current_user,
         action="delete_folder",
         target_type="folder",
-        target_id=deleted_folder.path,
-        detail={"path": deleted_folder.path},
+        target_id=str(deleted_folder["path"]),
+        detail={"path": deleted_folder["path"], "recursive": recursive},
     )
-    return {"path": deleted_folder.path, "status": "deleted"}
+    return {**deleted_folder, "status": "deleted"}

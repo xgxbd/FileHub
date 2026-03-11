@@ -6,7 +6,9 @@ from app.db import get_db
 from app.models.file_object import FileObject
 from app.models.user import User
 from app.schemas.file import FileListResponse
+from app.schemas.folder import FolderItem
 from app.services.file_service import list_files
+from app.services.folder_service import list_deleted_folders, purge_folder, restore_folder
 from app.services.object_storage import object_storage_service
 from app.services.operation_log_service import record_operation
 
@@ -95,3 +97,69 @@ def purge_file(
     )
 
     return {"file_id": file_id, "status": "purged"}
+
+
+@router.get("/folders", response_model=list[FolderItem])
+def get_recycle_folders(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[FolderItem]:
+    items = list_deleted_folders(db=db, current_user=current_user)
+    return [FolderItem.model_validate(item) for item in items]
+
+
+@router.post("/folders/restore")
+def restore_recycle_folder(
+    path: str = Query(..., min_length=1),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    restored = restore_folder(db=db, current_user=current_user, path=path)
+    record_operation(
+        db=db,
+        user=current_user,
+        action="restore_folder",
+        target_type="folder",
+        target_id=str(restored["path"]),
+        detail={"path": restored["path"]},
+    )
+    return {**restored, "status": "active"}
+
+
+@router.delete("/folders/purge")
+def purge_recycle_folder(
+    path: str = Query(..., min_length=1),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    deleted_files = _collect_deleted_folder_files_for_purge(db=db, current_user=current_user, path=path)
+    for file_record in deleted_files:
+        object_storage_service.delete_object(object_key=file_record.object_key)
+
+    purged = purge_folder(db=db, current_user=current_user, path=path)
+    record_operation(
+        db=db,
+        user=current_user,
+        action="purge_folder",
+        target_type="folder",
+        target_id=str(purged["path"]),
+        detail={"path": purged["path"]},
+    )
+    return {**purged, "status": "purged"}
+
+
+def _collect_deleted_folder_files_for_purge(
+    *,
+    db: Session,
+    current_user: User,
+    path: str,
+) -> list[FileObject]:
+    return (
+        db.query(FileObject)
+        .filter(
+            FileObject.owner_id == current_user.id,
+            FileObject.is_deleted.is_(True),
+            FileObject.file_name.like(f"{path}/%"),
+        )
+        .all()
+    )

@@ -25,3 +25,8 @@ class FolderTreeItem(BaseModel):
 class FolderCreateRequest(BaseModel):
     parent_directory: str | None = Field(default=None, max_length=255)
     folder_name: str = Field(min_length=1, max_length=128)
+
+
+class FolderRenameRequest(BaseModel):
+    path: str = Field(min_length=1, max_length=255)
+    new_name: str = Field(min_length=1, max_length=128)

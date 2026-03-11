@@ -3945,3 +3945,32 @@
   - 多文件上传会把当前单文件状态机改为队列模型，需要补最小回归验证，避免影响现有单文件上传
 - 下一个任务：
   - 提交B：修复目录树 hover 可读性与列表静默刷新体验
+
+---
+
+## 2026-03-11 15:51:08 CST
+
+- 任务：第三十一轮开发-提交B：修复目录树选中态可读性并减少动作后闪白
+- 时间：2026-03-11 15:51:08 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `bff0784`
+- 本次修改：
+  - 更新 `frontend/src/styles/main.css`
+  - 为目录树选中节点增加独立 hover 样式，避免深色选中态被普通 hover 覆盖
+  - 弱化 DataTable loading mask 的白色覆盖
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 文件删除后的列表刷新改为静默模式，不再触发表格整块 loading 遮罩
+  - 更新 `frontend/src/views/RecycleBinView.vue`
+  - 文件恢复、彻底删除、文件夹恢复、文件夹彻底删除后的刷新改为静默模式
+- 已完成事项：
+  - 目录树选中项在 hover 状态下保持可读
+  - 删除/恢复类动作后的整表闪白现象已明显收敛
+- 未完成事项：
+  - 上传页仍未支持多文件选择与拖拽批量上传
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/folder-lifecycle.spec.js e2e/folder-rename-log.spec.js`
+- 风险说明：
+  - 静默刷新不会显示整表 loading，但行级按钮仍保留 loading 态；若后续动作接口明显变慢，可再补更细粒度的行内提示
+- 下一个任务：
+  - 提交C：实现上传页多文件选择与拖拽批量上传

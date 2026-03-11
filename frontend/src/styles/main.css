@@ -371,8 +371,18 @@ body {
   font-weight: 600;
 }
 
-.folder-tree-panel .p-tree-node-content:hover {
+.folder-tree-panel .p-tree-node-content:not([data-p-selected="true"]):hover {
   background: #f2f4f7;
+}
+
+.folder-tree-panel .p-tree-node-content[data-p-selected="true"]:hover {
+  background: #1f2937;
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px #1f2937;
+}
+
+.folder-tree-panel .p-tree-node-content[data-p-selected="true"]:hover .p-tree-node-label {
+  color: #ffffff;
 }
 
 .folder-tree-panel .p-tree-node-toggle-button {
@@ -514,6 +524,10 @@ body {
 
 .p-datatable-wrapper {
   overflow-x: auto;
+}
+
+.p-datatable .p-datatable-mask {
+  background: rgba(250, 250, 250, 0.45);
 }
 
 .file-row-actions .p-button,

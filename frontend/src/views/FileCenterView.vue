@@ -165,9 +165,15 @@ function fileDirectoryLabel(fileName) {
 }
 
 async function loadFiles() {
+  return loadFilesWithMode({ silent: false });
+}
+
+async function loadFilesWithMode({ silent = false } = {}) {
   if (!authStore.accessToken) return;
 
-  loading.value = true;
+  if (!silent) {
+    loading.value = true;
+  }
   error.value = "";
   try {
     const payload = await fetchFileList({
@@ -183,7 +189,9 @@ async function loadFiles() {
   } catch (err) {
     error.value = err instanceof Error ? err.message : "加载文件列表失败";
   } finally {
-    loading.value = false;
+    if (!silent) {
+      loading.value = false;
+    }
   }
 }
 
@@ -293,7 +301,7 @@ async function triggerSoftDelete(fileItem) {
       accessToken: authStore.accessToken,
       fileId: fileItem.id
     });
-    await Promise.all([loadFiles(), loadDirectoryTree()]);
+    await Promise.all([loadFilesWithMode({ silent: true }), loadDirectoryTree()]);
   } catch (err) {
     deleteError.value = err instanceof Error ? err.message : "删除失败";
   } finally {

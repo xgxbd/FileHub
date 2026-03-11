@@ -80,9 +80,15 @@ function formatTime(iso) {
 }
 
 async function loadRecycleFiles() {
+  return loadRecycleFilesWithMode({ silent: false });
+}
+
+async function loadRecycleFilesWithMode({ silent = false } = {}) {
   if (!authStore.accessToken) return;
 
-  loading.value = true;
+  if (!silent) {
+    loading.value = true;
+  }
   error.value = "";
   try {
     const payload = await fetchRecycleFileList({
@@ -100,7 +106,9 @@ async function loadRecycleFiles() {
   } catch (err) {
     error.value = err instanceof Error ? err.message : "加载回收站失败";
   } finally {
-    loading.value = false;
+    if (!silent) {
+      loading.value = false;
+    }
   }
 }
 
@@ -134,7 +142,7 @@ async function triggerRestore(fileItem) {
       fileId: fileItem.id
     });
     successMessage.value = `已恢复文件：${fileItem.file_name}`;
-    await loadRecycleFiles();
+    await loadRecycleFilesWithMode({ silent: true });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "恢复失败";
   } finally {
@@ -157,7 +165,7 @@ async function triggerPurge(fileItem) {
       fileId: fileItem.id
     });
     successMessage.value = `已彻底删除文件：${fileItem.file_name}`;
-    await loadRecycleFiles();
+    await loadRecycleFilesWithMode({ silent: true });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "彻底删除失败";
   } finally {
@@ -177,7 +185,7 @@ async function triggerRestoreFolder(folderItem) {
       path: folderItem.path
     });
     successMessage.value = `已恢复文件夹：/${folderItem.path}/`;
-    await loadRecycleFiles();
+    await loadRecycleFilesWithMode({ silent: true });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "恢复文件夹失败";
   } finally {
@@ -200,7 +208,7 @@ async function triggerPurgeFolder(folderItem) {
       path: folderItem.path
     });
     successMessage.value = `已彻底删除文件夹：/${folderItem.path}/`;
-    await loadRecycleFiles();
+    await loadRecycleFilesWithMode({ silent: true });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "彻底删除文件夹失败";
   } finally {

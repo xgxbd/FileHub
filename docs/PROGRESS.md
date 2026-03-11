@@ -2246,3 +2246,28 @@
   - 路由懒加载改造需关注路由守卫与权限逻辑兼容
 - 下一个任务：
   - 提交B：完成后端弃用告警治理
+
+---
+
+## 2026-03-11 08:38:58 CST
+
+- 任务：第十四轮开发-提交B：后端弃用告警治理
+- 时间：2026-03-11 08:38:58 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- 本次修改：
+  - `main.py` 启动流程迁移到 `lifespan`
+  - 下载接口 416 常量改为 `HTTP_416_RANGE_NOT_SATISFIABLE`
+- 已完成事项：
+  - FastAPI `on_event` 与 416 常量弃用告警已消除
+  - 后端测试通过：`pytest -q`（21 passed）
+  - 现存告警仅剩第三方依赖 `passlib` 的 `crypt` 弃用提醒
+- 未完成事项：
+  - 提交C：前端分包优化
+  - 提交D：全量回归（pytest/build/e2e）
+  - 提交E：文档收口
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && pytest -q`
+- 风险说明：
+  - `passlib` 依赖告警来自上游库，需后续评估替代方案
+- 下一个任务：
+  - 提交C：前端路由懒加载与分包优化

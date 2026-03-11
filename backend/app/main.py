@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,7 +8,16 @@ from app.core.config import settings
 from app.db import SessionLocal, init_db
 from app.services.admin_bootstrap_service import ensure_admin_user
 
-app = FastAPI(title=settings.app_name, debug=settings.app_debug)
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    init_db()
+    with SessionLocal() as db:
+        ensure_admin_user(db)
+    yield
+
+
+app = FastAPI(title=settings.app_name, debug=settings.app_debug, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,10 +31,3 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
-
-
-@app.on_event("startup")
-def startup_event() -> None:
-    init_db()
-    with SessionLocal() as db:
-        ensure_admin_user(db)

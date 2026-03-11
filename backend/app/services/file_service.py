@@ -94,6 +94,7 @@ def list_files_for_admin(
     directory: str | None = None,
     owner_id: int | None,
     status_filter: str,
+    sort_by: str = "created_at_desc",
     page: int,
     page_size: int,
 ) -> FileListResponse:
@@ -116,7 +117,7 @@ def list_files_for_admin(
     total = db.scalar(select(func.count()).select_from(filtered_query.subquery())) or 0
     records = (
         db.execute(
-            filtered_query.order_by(FileObject.created_at.desc())
+            _apply_sort(query=filtered_query, sort_by=sort_by)
             .offset((page - 1) * page_size)
             .limit(page_size)
         )

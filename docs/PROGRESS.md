@@ -4157,3 +4157,32 @@
   - 管理端如果再扩字段或新页面，会直接打乱当前收口节奏
 - 下一个任务：
   - 提交E：实现管理员文件页排序能力并补后端测试
+
+---
+
+## 2026-03-11 16:43:42 CST
+
+- 任务：第三十三轮开发-提交E：实现管理员文件页排序能力并补后端测试
+- 时间：2026-03-11 16:43:42 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `f03f7c9`
+- 本次修改：
+  - 更新 `backend/app/api/admin_files.py`
+  - `GET /admin/files` 新增 `sort_by` 参数
+  - 更新 `backend/app/services/file_service.py`
+  - 管理员文件查询复用现有排序规则
+  - 更新 `backend/tests/test_admin_files_api.py`
+  - 补充管理员文件页排序回归测试
+- 已完成事项：
+  - 管理员文件页后端已具备排序能力
+  - 管理员文件接口专项测试通过（`3 passed`）
+- 未完成事项：
+  - 尚未收口管理端前端页面
+  - 尚未补管理员页面 E2E
+  - 尚未进入上传与预览稳定性增强
+- 当前可测试内容：
+  - `cd backend && source .venv/bin/activate && APP_SERVE_FRONTEND=false pytest -q tests/test_admin_files_api.py`
+- 风险说明：
+  - 当前仅为管理员文件页补排序，日志页仍保持按时间倒序
+- 下一个任务：
+  - 提交F：收口管理端前端页面并补管理员 E2E

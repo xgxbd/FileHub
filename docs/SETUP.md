@@ -42,6 +42,8 @@ docker compose up -d --build
 - API 健康检查：`http://127.0.0.1:8000/api/healthz`
 - MinIO Console：`http://127.0.0.1:9001`
 
+默认不会把 MySQL、Redis、MinIO API 映射到宿主机，避免和本地已有服务冲突。
+
 默认管理员账号取自 `infra/.env`：
 
 - 用户名：`ADMIN_USERNAME`
@@ -55,6 +57,11 @@ docker compose ps
 docker compose logs -f api
 docker compose down
 ```
+
+说明：
+
+- Compose 已为新增变量提供默认值，旧的 `infra/.env` 不会再因为缺字段产生启动级警告。
+- 默认镜像源和 npm/pip 源已切到更适合当前网络环境的镜像，可按 `infra/.env` 覆盖。
 
 ## 3. 后端虚拟环境规范（必须）
 

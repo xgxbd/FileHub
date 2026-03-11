@@ -1,15 +1,21 @@
-FROM node:20-alpine AS frontend-builder
+ARG NODE_BASE_IMAGE=docker.m.daocloud.io/node:20-alpine
+ARG PYTHON_BASE_IMAGE=docker.m.daocloud.io/python:3.12-slim
+
+FROM ${NODE_BASE_IMAGE} AS frontend-builder
+ARG NPM_REGISTRY=https://registry.npmmirror.com
 
 WORKDIR /app/frontend
 
 COPY frontend/package.json frontend/package-lock.json ./
+RUN npm config set registry ${NPM_REGISTRY}
 RUN npm ci
 
 COPY frontend/ ./
 RUN npm run build
 
 
-FROM python:3.12-slim AS runtime
+FROM ${PYTHON_BASE_IMAGE} AS runtime
+ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -17,7 +23,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app/backend
 
 COPY backend/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -i ${PIP_INDEX_URL} -r requirements.txt
 
 COPY backend/ /app/backend/
 COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist

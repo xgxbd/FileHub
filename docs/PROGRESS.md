@@ -4473,3 +4473,36 @@
   - 当前 Compose 默认仍会和宿主机已有 3306/6379 服务冲突
 - 下一个任务：
   - 移除内部服务默认宿主机端口映射并重新启动整套服务
+
+
+---
+
+## 2026-03-12 00:14:36 CST
+
+- 任务：第 39 轮修复 Docker 一键启动兼容性并完成实机验证
+- 时间：2026-03-12 00:14:36 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 为 `infra/docker-compose.yml` 中新增变量补默认值，兼容旧 `infra/.env`
+  - 修正 Node 与 Python 基础镜像默认地址，切换为已验证可拉取的镜像源
+  - 为 Dockerfile 增加 npm 与 pip 国内源默认值
+  - 移除 MySQL、Redis、MinIO API 的宿主机端口暴露，仅保留 Web `8000` 与 MinIO Console `9001`
+  - 更新 Docker 启动文档说明默认镜像源、包源和端口暴露策略
+- 已完成事项：
+  - `docker compose config` 在旧 `.env` 下无缺失变量警告
+  - `docker compose build api` 实际构建成功
+  - `docker compose up -d` 实际启动成功
+  - `http://127.0.0.1:8000/api/healthz` 返回正常
+  - `http://127.0.0.1:8000/files` 已返回前端页面 HTML
+- 未完成事项：
+  - 待你本机继续做登录、上传、下载等人工验收
+- 当前可测试内容：
+  - `cd /Users/xloser/Owner/Code/VibeCoding/FileHub/infra && docker compose up -d --build`
+  - 访问 `http://127.0.0.1:8000/files`
+  - 访问 `http://127.0.0.1:8000/api/healthz`
+  - 访问 `http://127.0.0.1:9001`
+- 风险说明：
+  - 当前默认镜像源与包源针对你当前网络环境做了优化，若后续在其他网络环境中表现不同，可通过 `infra/.env` 覆盖镜像与包源变量
+- 下一个任务：
+  - 合并 Docker 一键启动分支，或继续做容器化环境下的业务人工验收与问题收口

@@ -25,6 +25,15 @@ cp -n .env.example .env
 
 如需修改端口或管理员账号，编辑 `infra/.env`。
 
+说明：
+
+- 即使你的 `infra/.env` 是旧版本，Compose 现在也会使用内置默认值补齐新增字段。
+- 默认策略是混合源：
+  - Node 基础镜像默认走 `docker.m.daocloud.io/node:20-alpine`
+  - Python 基础镜像默认走 `docker.m.daocloud.io/python:3.12-slim`
+  - npm/pip 默认走国内镜像
+- 如你的环境对其中某个源仍有限制，可直接在 `infra/.env` 覆盖 `NODE_BASE_IMAGE`、`PYTHON_BASE_IMAGE`、`NPM_REGISTRY`、`PIP_INDEX_URL`。
+
 ### 2. 启动完整系统
 
 ```bash
@@ -37,6 +46,17 @@ docker compose up -d --build
 - Web：`http://127.0.0.1:8000/files`
 - API：`http://127.0.0.1:8000/api/healthz`
 - MinIO Console：`http://127.0.0.1:9001`
+
+默认不会暴露这些内部服务到宿主机：
+
+- MySQL `3306`
+- Redis `6379`
+- MinIO API `9000`
+
+原因：
+
+- 一键启动场景只需要 Web 入口和 MinIO Console
+- 避免和你本机已有的 MySQL / Redis 端口冲突
 
 ### 4. 查看状态
 

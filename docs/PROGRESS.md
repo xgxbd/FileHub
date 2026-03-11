@@ -3610,3 +3610,36 @@
   - 文件夹重命名会直接更新文件元数据路径，后续需补前端流程回归，确认预览、下载入口仍正常
 - 下一个任务：
   - 提交C：实现前端文件夹重命名、递归删除和文件夹回收站交互
+
+---
+
+## 2026-03-11 13:31:15 CST
+
+- 任务：第二十七轮开发-提交C：实现前端文件夹生命周期交互与回收站操作
+- 时间：2026-03-11 13:31:15 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `d196624`
+- 本次修改：
+  - 更新 `frontend/src/api/files.js`
+  - 新增文件夹重命名、递归删除、文件夹回收站列表、恢复、彻底删除请求封装
+  - 更新 `frontend/src/views/FileCenterView.vue`
+  - 新增文件夹重命名按钮
+  - 删除当前文件夹改为递归移入回收站
+  - 更新 `frontend/src/views/RecycleBinView.vue`
+  - 新增文件夹回收站表格与恢复/彻底删除交互
+  - 新增 `frontend/e2e/folder-lifecycle.spec.js`
+  - 更新 `frontend/e2e/file-center-folder-management.spec.js`
+- 已完成事项：
+  - 前端已支持文件夹重命名
+  - 前端已支持递归删除非空文件夹到回收站
+  - 回收站页已支持文件夹恢复与文件夹彻底删除
+  - 相关 E2E 回归全部通过
+- 未完成事项：
+  - 文件树横向排版与虚线层级尚未调整
+- 当前可测试内容：
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/file-center-folder-management.spec.js e2e/folder-lifecycle.spec.js e2e/file-center-tree-sort.spec.js`
+- 风险说明：
+  - 当前文件夹重命名交互仍使用浏览器原生 `prompt`，后续若要完全贴合方案 D，需要替换为统一弹窗
+- 下一个任务：
+  - 提交D：修复文件树与文件列表排版，并增加目录层级虚线

@@ -17,6 +17,7 @@ import {
   downloadFile,
   fetchFileList,
   fetchFolderTree,
+  renameFolder,
   softDeleteFile
 } from "../api/files";
 import { useAuthStore } from "../stores/auth";
@@ -44,6 +45,7 @@ const deletingFileId = ref(null);
 const treeLoading = ref(false);
 const creatingFolder = ref(false);
 const deletingFolder = ref(false);
+const renamingFolder = ref(false);
 const selectedTreeKeys = ref({ [`dir:${ROOT_DIRECTORY_MARKER}`]: true });
 const expandedTreeKeys = ref({ [`dir:${ROOT_DIRECTORY_MARKER}`]: true });
 const treeNodes = ref([
@@ -333,7 +335,7 @@ async function promptCreateFolder() {
 
 async function removeCurrentFolder() {
   if (!authStore.accessToken || selectedDirectory.value === ROOT_DIRECTORY_MARKER) return;
-  if (!window.confirm(`确认删除文件夹“${currentDirectoryLabel.value}”吗？仅允许删除空文件夹。`)) {
+  if (!window.confirm(`确认删除文件夹“${currentDirectoryLabel.value}”吗？该操作会将当前目录及其中内容移入回收站。`)) {
     return;
   }
 
@@ -342,7 +344,8 @@ async function removeCurrentFolder() {
   try {
     await deleteFolder({
       accessToken: authStore.accessToken,
-      path: selectedDirectory.value
+      path: selectedDirectory.value,
+      recursive: true
     });
     const parentPath = normalizeFolder(selectedDirectory.value).split("/").slice(0, -1).join("/");
     selectedDirectory.value = parentPath || ROOT_DIRECTORY_MARKER;
@@ -356,6 +359,39 @@ async function removeCurrentFolder() {
     treeError.value = err instanceof Error ? err.message : "删除文件夹失败";
   } finally {
     deletingFolder.value = false;
+  }
+}
+
+async function promptRenameFolder() {
+  if (!authStore.accessToken || selectedDirectory.value === ROOT_DIRECTORY_MARKER) return;
+
+  const currentName = normalizeFolder(selectedDirectory.value).split("/").pop() || "";
+  const rawName = window.prompt(`重命名文件夹 ${currentDirectoryLabel.value}`, currentName);
+  if (rawName === null) return;
+
+  const nextName = rawName.trim();
+  if (!nextName) {
+    treeError.value = "文件夹名称不能为空";
+    return;
+  }
+
+  renamingFolder.value = true;
+  treeError.value = "";
+  try {
+    const renamed = await renameFolder({
+      accessToken: authStore.accessToken,
+      path: selectedDirectory.value,
+      newName: nextName
+    });
+    selectedDirectory.value = renamed.path;
+    selectedTreeKeys.value = { [`dir:${renamed.path}`]: true };
+    expandedTreeKeys.value = buildExpandedKeysForPath(renamed.path);
+    page.value = 1;
+    await Promise.all([loadDirectoryTree(), loadFiles()]);
+  } catch (err) {
+    treeError.value = err instanceof Error ? err.message : "重命名文件夹失败";
+  } finally {
+    renamingFolder.value = false;
   }
 }
 
@@ -395,6 +431,16 @@ watch(sortBy, async (nextValue, prevValue) => {
                     icon="pi pi-folder-plus"
                     :loading="creatingFolder"
                     @click="promptCreateFolder"
+                  />
+                  <Button
+                    size="small"
+                    text
+                    severity="secondary"
+                    label="重命名"
+                    icon="pi pi-pencil"
+                    :disabled="selectedDirectory === ROOT_DIRECTORY_MARKER"
+                    :loading="renamingFolder"
+                    @click="promptRenameFolder"
                   />
                   <Button
                     size="small"

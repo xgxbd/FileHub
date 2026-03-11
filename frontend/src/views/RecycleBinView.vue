@@ -10,7 +10,14 @@ import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import Tag from "primevue/tag";
 
-import { fetchRecycleFileList, purgeRecycleFile, restoreRecycleFile } from "../api/files";
+import {
+  fetchRecycleFileList,
+  fetchRecycleFolderList,
+  purgeRecycleFile,
+  purgeRecycleFolder,
+  restoreRecycleFile,
+  restoreRecycleFolder
+} from "../api/files";
 import { useAuthStore } from "../stores/auth";
 
 const authStore = useAuthStore();
@@ -19,6 +26,7 @@ const loading = ref(false);
 const error = ref("");
 const successMessage = ref("");
 const items = ref([]);
+const folderItems = ref([]);
 const total = ref(0);
 const page = ref(1);
 const pageSize = ref(10);
@@ -28,6 +36,8 @@ const minSize = ref(null);
 const maxSize = ref(null);
 const restoringFileId = ref(null);
 const purgingFileId = ref(null);
+const restoringFolderPath = ref("");
+const purgingFolderPath = ref("");
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -56,6 +66,9 @@ async function loadRecycleFiles() {
     });
     items.value = payload.items || [];
     total.value = payload.total || 0;
+    folderItems.value = await fetchRecycleFolderList({
+      accessToken: authStore.accessToken
+    });
   } catch (err) {
     error.value = err instanceof Error ? err.message : "加载回收站失败";
   } finally {
@@ -122,6 +135,49 @@ async function triggerPurge(fileItem) {
     error.value = err instanceof Error ? err.message : "彻底删除失败";
   } finally {
     purgingFileId.value = null;
+  }
+}
+
+async function triggerRestoreFolder(folderItem) {
+  if (!authStore.accessToken) return;
+
+  restoringFolderPath.value = folderItem.path;
+  error.value = "";
+  successMessage.value = "";
+  try {
+    await restoreRecycleFolder({
+      accessToken: authStore.accessToken,
+      path: folderItem.path
+    });
+    successMessage.value = `已恢复文件夹：/${folderItem.path}/`;
+    await loadRecycleFiles();
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : "恢复文件夹失败";
+  } finally {
+    restoringFolderPath.value = "";
+  }
+}
+
+async function triggerPurgeFolder(folderItem) {
+  if (!authStore.accessToken) return;
+  if (!window.confirm(`确认彻底删除文件夹“/${folderItem.path}/”？该操作会同时删除其中已删除文件。`)) {
+    return;
+  }
+
+  purgingFolderPath.value = folderItem.path;
+  error.value = "";
+  successMessage.value = "";
+  try {
+    await purgeRecycleFolder({
+      accessToken: authStore.accessToken,
+      path: folderItem.path
+    });
+    successMessage.value = `已彻底删除文件夹：/${folderItem.path}/`;
+    await loadRecycleFiles();
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : "彻底删除文件夹失败";
+  } finally {
+    purgingFolderPath.value = "";
   }
 }
 
@@ -200,6 +256,42 @@ onMounted(() => {
                 icon="pi pi-times-circle"
                 :loading="purgingFileId === data.id"
                 @click="triggerPurge(data)"
+              />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+
+      <div class="health-row" style="margin-top: 18px">
+        <Tag severity="contrast" value="已删除文件夹" />
+        <span class="health-message">共 {{ folderItems.length }} 个文件夹</span>
+      </div>
+
+      <DataTable :value="folderItems" dataKey="path" responsiveLayout="scroll">
+        <Column field="path" header="文件夹路径">
+          <template #body="{ data }">/{{ data.path }}/</template>
+        </Column>
+        <Column header="最近更新时间">
+          <template #body="{ data }">{{ formatTime(data.updated_at) }}</template>
+        </Column>
+        <Column header="操作">
+          <template #body="{ data }">
+            <div class="file-row-actions">
+              <Button
+                label="恢复文件夹"
+                size="small"
+                icon="pi pi-replay"
+                :loading="restoringFolderPath === data.path"
+                @click="triggerRestoreFolder(data)"
+              />
+              <Button
+                label="彻底删除文件夹"
+                size="small"
+                severity="danger"
+                text
+                icon="pi pi-times-circle"
+                :loading="purgingFolderPath === data.path"
+                @click="triggerPurgeFolder(data)"
               />
             </div>
           </template>

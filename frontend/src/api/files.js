@@ -72,12 +72,39 @@ export async function createFolder({
   return payload;
 }
 
+export async function renameFolder({
+  accessToken,
+  path,
+  newName
+}) {
+  const response = await fetch(`${API_PREFIX}/folders/rename`, {
+    method: "PATCH",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      path,
+      new_name: newName
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "重命名文件夹失败");
+  }
+  return payload;
+}
+
 export async function deleteFolder({
   accessToken,
-  path
+  path,
+  recursive = false
 }) {
   const params = new URLSearchParams();
   params.set("path", path);
+  params.set("recursive", String(Boolean(recursive)));
 
   const response = await fetch(`${API_PREFIX}/folders?${params.toString()}`, {
     method: "DELETE",
@@ -191,6 +218,64 @@ export async function fetchRecycleFileList({
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(payload.detail || "获取回收站列表失败");
+  }
+  return payload;
+}
+
+export async function fetchRecycleFolderList({ accessToken }) {
+  const response = await fetch(`${API_PREFIX}/recycle/folders`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  const payload = await response.json().catch(() => []);
+  if (!response.ok) {
+    throw new Error(payload.detail || "获取文件夹回收站失败");
+  }
+  return Array.isArray(payload) ? payload : [];
+}
+
+export async function restoreRecycleFolder({
+  accessToken,
+  path
+}) {
+  const params = new URLSearchParams();
+  params.set("path", path);
+
+  const response = await fetch(`${API_PREFIX}/recycle/folders/restore?${params.toString()}`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "恢复文件夹失败");
+  }
+  return payload;
+}
+
+export async function purgeRecycleFolder({
+  accessToken,
+  path
+}) {
+  const params = new URLSearchParams();
+  params.set("path", path);
+
+  const response = await fetch(`${API_PREFIX}/recycle/folders/purge?${params.toString()}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.detail || "彻底删除文件夹失败");
   }
   return payload;
 }

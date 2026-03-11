@@ -2732,3 +2732,27 @@
   - E2E 用例依赖本地自动起服务，运行时长约 25-30 秒
 - 下一个任务：
   - 第十七轮规范收尾：汇总问题修复、可测清单与MCP自动测试能力范围
+
+---
+
+## 2026-03-11 09:57:57 CST
+
+- 任务：第十七轮开发-提交D：产出方案D可视化交互标注图
+- 时间：2026-03-11 09:57:57 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `d7fee1e`
+- 本次修改：
+  - 新增 `docs/ui-annotations/scheme-d-interaction-map.html`，覆盖 7 个页面的可点击项视觉标注
+  - 导出 `docs/ui-annotations/scheme-d-interaction-map.png` 作为整页预览图
+- 已完成事项：
+  - 已提供“可视化标注图 + 编号说明”交付物
+  - 可直接按编号进行功能验收与问题定位
+- 未完成事项：
+  - 暂无（本次标注图任务已完成）
+- 当前可测试内容：
+  - 打开 `docs/ui-annotations/scheme-d-interaction-map.html` 查看交互标注
+  - 查看 `docs/ui-annotations/scheme-d-interaction-map.png` 快速预览
+- 风险说明：
+  - 标注图基于方案 D 页面结构，若后续布局改动需同步更新标注坐标
+- 下一个任务：
+  - 根据你的验收反馈继续细化页面交互或补充管理员场景标注

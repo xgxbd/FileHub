@@ -10,10 +10,10 @@
 ## 2. 后端验证
 
 - [ ] 虚拟环境可用：`cd backend && source .venv/bin/activate`
-- [ ] 单元/集成测试通过：`pytest -q`
-- [ ] 烟雾脚本通过：`python scripts/smoke_core_flow.py`
-- [ ] 性能基线已采集：`python scripts/perf_baseline.py`
-- [ ] 本轮验证结果已记录（当前基线：`43 passed`）
+- [ ] 单元/集成测试通过：`APP_SERVE_FRONTEND=false pytest -q`
+- [ ] 烟雾脚本通过：`APP_SERVE_FRONTEND=false python scripts/smoke_core_flow.py`
+- [ ] 性能基线已采集：`APP_SERVE_FRONTEND=false python scripts/perf_baseline.py`
+- [ ] 本轮验证结果已记录（当前基线：`44 passed`）
 
 ## 3. 前端验证
 
@@ -42,8 +42,8 @@
 cd backend
 source .venv/bin/activate
 APP_SERVE_FRONTEND=false pytest -q
-python scripts/smoke_core_flow.py
-python scripts/perf_baseline.py
+APP_SERVE_FRONTEND=false python scripts/smoke_core_flow.py
+APP_SERVE_FRONTEND=false python scripts/perf_baseline.py
 
 cd ../frontend
 npm run build
@@ -57,3 +57,4 @@ npm run e2e:hosted
 - 常规前端 E2E 全部通过。
 - 后端托管前端 smoke 通过。
 - `/files`、`/upload`、`/preview`、`/recycle`、`/admin/files`、`/admin/logs` 都可达。
+- `npm run e2e` 与 `npm run e2e:hosted` 需要顺序执行，避免端口冲突。

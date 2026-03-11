@@ -1,6 +1,6 @@
 # FileHub v0.1.0 发布说明
 
-发布日期：2026-03-10（候选）
+发布日期：2026-03-11（候选）
 分支：`release/v0.1.0`
 
 ## 功能范围
@@ -15,13 +15,15 @@
 
 ## 质量验证结果
 
-- 后端测试：`pytest -q` 通过（21 passed）
-- 主链路烟雾：`python scripts/smoke_core_flow.py` 通过
-- 性能基线：`python scripts/perf_baseline.py`
-  - `files_list_avg=2.31ms`
-  - `files_download_avg=12066.92ms`
-  - `upload_complete_avg=6064.33ms`
+- 后端测试：`APP_SERVE_FRONTEND=false pytest -q` 通过（44 passed）
+- 主链路烟雾：`APP_SERVE_FRONTEND=false python scripts/smoke_core_flow.py` 通过
+- 性能基线：`APP_SERVE_FRONTEND=false python scripts/perf_baseline.py`
+  - `files_list_avg=1.78ms`
+  - `files_download_avg=1.92ms`
+  - `upload_complete_avg=16.60ms`
 - 前端构建：`npm run build` 通过
+- 前端常规 E2E：`npm run e2e` 通过（12 passed）
+- 后端托管前端 smoke：`npm run e2e:hosted` 通过（1 passed）
 
 ## 已知风险
 
@@ -33,3 +35,4 @@
 
 - 按 `docs/RELEASE_CHECKLIST.md` 完成逐项检查
 - 若发布失败，按 `docs/ROLLBACK_PLAN.md` 执行回滚
+- 说明：常规 E2E 与托管模式 E2E 需要顺序执行，不能并行占用 `127.0.0.1:8000`

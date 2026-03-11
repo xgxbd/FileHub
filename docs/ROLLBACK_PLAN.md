@@ -29,7 +29,7 @@
 - `GET /healthz` 正常返回
 - 登录/上传/下载/回收链路可用
 - 管理员页面 `/admin/files`、`/admin/logs` 可访问
-- `python scripts/smoke_core_flow.py` 执行通过
+- `APP_SERVE_FRONTEND=false python scripts/smoke_core_flow.py` 执行通过
 - `cd frontend && npm run e2e:hosted` 至少通过托管模式 smoke 验证
 
 ## 5. 记录要求

@@ -9,7 +9,8 @@
     "preview": "vite preview --host 127.0.0.1 --port 4173",
     "e2e": "playwright test",
     "e2e:list": "playwright test --list",
-    "e2e:headed": "playwright test --headed"
+    "e2e:headed": "playwright test --headed",
+    "e2e:repeat": "npm run e2e && npm run e2e"
   },
   "dependencies": {
     "@primeuix/themes": "^1.2.3",

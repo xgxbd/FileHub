@@ -2706,3 +2706,29 @@
   - 若后续继续修改标题文案长度但不遵守单行规则，仍可能出现局部截断
 - 下一个任务：
   - 提交C：更新 Playwright E2E 用例并新增标题高度稳定性自动检查
+
+---
+
+## 2026-03-11 09:49:32 CST
+
+- 任务：第十七轮开发-提交C：更新E2E并新增标题稳定性自动化校验
+- 时间：2026-03-11 09:49:32 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：`feature/round16-ui-scheme-d-alignment`；提交前基线 `a7ce92b`
+- 本次修改：
+  - 更新 `frontend/e2e/core-flow.spec.js`，适配方案 D 独立上传页与侧栏导航结构
+  - 新增 `frontend/e2e/layout-stability.spec.js`，自动校验 `/files` `/upload` `/preview` `/recycle` 标题区高度稳定
+  - 复跑 `npm run e2e`，验证 3 条前端 E2E 全部通过
+- 已完成事项：
+  - 自动化测试已覆盖关键主链路（注册/登录/上传/下载/删除/恢复）
+  - 自动化测试已覆盖标题区高度稳定性（防止页面切换跳动回归）
+  - 当前 E2E 无失败用例
+- 未完成事项：
+  - 暂未覆盖管理员页交互的 E2E 用例（`/admin/files`、`/admin/logs`）
+- 当前可测试内容：
+  - `cd frontend && npm run e2e`（3 passed）
+  - `cd backend && source .venv/bin/activate && pytest -q tests/test_range_download_api.py`（4 passed）
+- 风险说明：
+  - E2E 用例依赖本地自动起服务，运行时长约 25-30 秒
+- 下一个任务：
+  - 第十七轮规范收尾：汇总问题修复、可测清单与MCP自动测试能力范围

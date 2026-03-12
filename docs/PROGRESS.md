@@ -4342,3 +4342,224 @@
   - GitFlow 闭环可由版本控制完成，但最终人工验收仍需在目标环境按页面主链路走一遍
 - 下一个任务：
   - 执行 `main` 合并、打标签并回合并到 `develop`
+
+
+---
+
+## 2026-03-11 23:35:42 CST
+
+- 任务：第 38 轮 Docker 一键启动设计冻结
+- 时间：2026-03-11 23:35:42 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 新增 `docs/ROUND38_DOCKER_ONE_CLICK_DESIGN.md`
+  - 明确单 `api` 镜像托管前端静态资源的 Docker 化方案
+  - 明确 Compose 服务、卷持久化、环境变量与验收口径
+- 已完成事项：
+  - Docker 一键启动目标形态已冻结
+  - 最小提交拆分已明确
+- 未完成事项：
+  - 应用 Dockerfile
+  - Compose `api` 服务
+  - Docker 一键启动文档与验证
+- 当前可测试内容：
+  - 评审 `docs/ROUND38_DOCKER_ONE_CLICK_DESIGN.md`
+- 风险说明：
+  - 当前仓库仍未具备应用镜像能力，尚不能直接执行 `docker compose up -d --build`
+- 下一个任务：
+  - 实现应用镜像构建能力并补齐 Compose `api` 服务
+
+
+---
+
+## 2026-03-11 23:39:18 CST
+
+- 任务：第 38 轮 Docker 一键启动-实现应用镜像构建能力
+- 时间：2026-03-11 23:39:18 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 新增根目录 `.dockerignore`，收敛 Docker 构建上下文
+  - 新增 `backend/Dockerfile`，采用前端构建 + 后端运行的多阶段镜像
+  - 在 `backend/requirements.txt` 增加 `pymysql`
+- 已完成事项：
+  - 应用镜像构建链路已具备基础形态
+  - 前端静态产物可在镜像构建阶段生成并注入后端运行时
+  - MySQL 驱动缺失问题已补齐
+- 未完成事项：
+  - Compose `api` 服务
+  - Docker 一键启动说明与验收
+- 当前可测试内容：
+  - 可评审 `backend/Dockerfile` 和 `.dockerignore`
+- 风险说明：
+  - 尚未接入 Compose `api` 服务，当前仍不能直接一键启动完整系统
+- 下一个任务：
+  - 将应用镜像接入 `infra/docker-compose.yml` 并补齐一键启动文档
+
+
+---
+
+## 2026-03-11 23:47:12 CST
+
+- 任务：第 38 轮 Docker 一键启动-接入 Compose 应用服务并补齐文档
+- 时间：2026-03-11 23:47:12 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 更新 `infra/docker-compose.yml`，新增 `api` 服务并接入 MySQL、Redis、MinIO
+  - 更新 `infra/.env.example`，补齐 Docker 一键启动所需环境变量
+  - 更新 `docs/SETUP.md`，补充完整系统 Docker 一键启动说明
+  - 新增 `docs/DOCKER_QUICK_START.md`
+- 已完成事项：
+  - Compose 已具备完整系统的一键编排能力
+  - `docker compose --env-file .env.example config` 校验通过
+  - Docker 前置条件已写入文档
+- 未完成事项：
+  - 在 Docker daemon 启动状态下完成真实镜像构建和整机启动验收
+- 当前可测试内容：
+  - `cd /Users/xloser/Owner/Code/VibeCoding/FileHub/infra && docker compose --env-file .env.example config`
+  - `cd /Users/xloser/Owner/Code/VibeCoding/FileHub/infra && cp -n .env.example .env && docker compose up -d --build`
+- 风险说明：
+  - 当前环境下 `docker compose build api` 因 Docker daemon 未启动而无法完成真实构建验证，不属于代码错误
+- 下一个任务：
+  - 在 Docker daemon 启动后完成 `docker compose up -d --build` 实机验收
+
+
+---
+
+## 2026-03-12 00:02:41 CST
+
+- 任务：第 39 轮 Docker 一键启动报错根因分析
+- 时间：2026-03-12 00:02:41 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 新增 `docs/ROUND39_DOCKER_BOOT_ISSUES_RCA.md`
+  - 明确旧 `infra/.env` 缺少默认值导致 Compose 警告
+  - 明确 Docker Hub / 默认 npm、pip 源导致构建 403 风险
+- 已完成事项：
+  - Docker 一键启动报错根因已确认
+- 未完成事项：
+  - Compose 默认值兼容修复
+  - 镜像源与包源默认值修复
+- 当前可测试内容：
+  - 评审 `docs/ROUND39_DOCKER_BOOT_ISSUES_RCA.md`
+- 风险说明：
+  - 当前仓库仍可能在旧 `.env` 和受限网络下启动失败
+- 下一个任务：
+  - 修复 Compose 默认值兼容并调整 Docker 镜像源与包源默认配置
+
+
+---
+
+## 2026-03-12 00:12:18 CST
+
+- 任务：第 39 轮补充 Docker 一键启动端口冲突根因分析
+- 时间：2026-03-12 00:12:18 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 补充 `docker compose up -d` 因宿主机 3306 端口冲突失败的根因分析
+  - 明确一键启动默认不应暴露 MySQL、Redis 等内部服务到宿主机
+- 已完成事项：
+  - Docker 一键启动第三个阻塞问题的根因已确认
+- 未完成事项：
+  - 调整 Compose 端口暴露策略
+  - 重新完成整套启动验证
+- 当前可测试内容：
+  - 评审 `docs/ROUND39_DOCKER_BOOT_ISSUES_RCA.md`
+- 风险说明：
+  - 当前 Compose 默认仍会和宿主机已有 3306/6379 服务冲突
+- 下一个任务：
+  - 移除内部服务默认宿主机端口映射并重新启动整套服务
+
+
+---
+
+## 2026-03-12 00:14:36 CST
+
+- 任务：第 39 轮修复 Docker 一键启动兼容性并完成实机验证
+- 时间：2026-03-12 00:14:36 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round38-docker-one-click / 待提交
+- 本次修改：
+  - 为 `infra/docker-compose.yml` 中新增变量补默认值，兼容旧 `infra/.env`
+  - 修正 Node 与 Python 基础镜像默认地址，切换为已验证可拉取的镜像源
+  - 为 Dockerfile 增加 npm 与 pip 国内源默认值
+  - 移除 MySQL、Redis、MinIO API 的宿主机端口暴露，仅保留 Web `8000` 与 MinIO Console `9001`
+  - 更新 Docker 启动文档说明默认镜像源、包源和端口暴露策略
+- 已完成事项：
+  - `docker compose config` 在旧 `.env` 下无缺失变量警告
+  - `docker compose build api` 实际构建成功
+  - `docker compose up -d` 实际启动成功
+  - `http://127.0.0.1:8000/api/healthz` 返回正常
+  - `http://127.0.0.1:8000/files` 已返回前端页面 HTML
+- 未完成事项：
+  - 待你本机继续做登录、上传、下载等人工验收
+- 当前可测试内容：
+  - `cd /Users/xloser/Owner/Code/VibeCoding/FileHub/infra && docker compose up -d --build`
+  - 访问 `http://127.0.0.1:8000/files`
+  - 访问 `http://127.0.0.1:8000/api/healthz`
+  - 访问 `http://127.0.0.1:9001`
+- 风险说明：
+  - 当前默认镜像源与包源针对你当前网络环境做了优化，若后续在其他网络环境中表现不同，可通过 `infra/.env` 覆盖镜像与包源变量
+- 下一个任务：
+  - 合并 Docker 一键启动分支，或继续做容器化环境下的业务人工验收与问题收口
+
+
+---
+
+## 2026-03-12 00:20:48 CST
+
+- 任务：v0.3.0 发布分支建立与 Docker 人工验收清单准备
+- 时间：2026-03-12 00:20:48 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：release/v0.3.0 / 5bdec73
+- 本次修改：
+  - 将 `feature/round38-docker-one-click` 合并到 `develop`
+  - 从 `develop` 创建 `release/v0.3.0`
+  - 新增 `docs/RELEASE_v0.3.0_DOCKER_ACCEPTANCE.md`
+  - 新增 `docs/RELEASE_NOTES_v0.3.0.md`
+- 已完成事项：
+  - Docker 一键启动能力已进入发布分支
+  - v0.3.0 的 Docker 最小人工验收清单已整理完成
+  - 发布说明已建立
+- 未完成事项：
+  - Docker 环境下的人工验收
+  - 验收通过后的正式发布闭环
+- 当前可测试内容：
+  - `cd /Users/xloser/Owner/Code/VibeCoding/FileHub/infra && docker compose up -d --build`
+  - 访问 `http://127.0.0.1:8000/files`
+  - 按 `docs/RELEASE_v0.3.0_DOCKER_ACCEPTANCE.md` 执行人工验收
+- 风险说明：
+  - 当前仍需做最后一轮人工验收，确认 Docker 交付形态下业务链路无回归
+- 下一个任务：
+  - 按 v0.3.0 Docker 人工验收清单逐项验收并收口问题
+
+
+---
+
+## 2026-03-12 09:12:43 CST
+
+- 任务：v0.3.0 发布前人工验收收口
+- 时间：2026-03-12 09:12:43 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：release/v0.3.0 / 待提交
+- 本次修改：
+  - 更新 `docs/RELEASE_NOTES_v0.3.0.md`，记录 Docker 形态人工验收通过
+  - 更新 `docs/RELEASE_v0.3.0_DOCKER_ACCEPTANCE.md`，写入验收结论
+- 已完成事项：
+  - v0.3.0 Docker 最小人工验收通过
+  - 已具备正式发布条件
+- 未完成事项：
+  - 合并 `release/v0.3.0` 到 `main`
+  - 打 `v0.3.0` 标签并推送
+  - 回合并到 `develop`
+- 当前可测试内容：
+  - 查看 `docs/RELEASE_v0.3.0_DOCKER_ACCEPTANCE.md`
+  - 查看 `docs/RELEASE_NOTES_v0.3.0.md`
+- 风险说明：
+  - 当前无新增功能风险，剩余工作为 GitFlow 发布闭环
+- 下一个任务：
+  - 完成 v0.3.0 正式发布闭环

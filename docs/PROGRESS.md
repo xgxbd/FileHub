@@ -4590,3 +4590,31 @@
   - 本轮仅文档收口，不涉及功能与部署逻辑变更
 - 下一个任务：
   - 合并文档收口热修到 `main` 与 `develop`
+
+
+---
+
+## 2026-03-12 09:28:18 CST
+
+- 任务：清理历史分支并收口仓库分支结构
+- 时间：2026-03-12 09:28:18 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：develop / 待提交
+- 本次修改：
+  - 删除本地除 `main`、`develop` 外的全部历史 `feature/*`、`release/*`、`hotfix/*` 分支
+  - 删除大部分远端历史分支
+  - 将本地 `origin/HEAD` 指针切回 `origin/main`
+- 已完成事项：
+  - 本地分支已只保留 `main`、`develop`
+  - 远端已只保留 `main`、`develop` 与 `feature/p0-p1-foundation`
+  - 本地远端默认分支指针已对齐到 `main`
+- 未完成事项：
+  - GitHub 仓库默认分支仍指向 `feature/p0-p1-foundation`，需在 GitHub 页面改为 `main` 后才能删除该远端分支
+- 当前可测试内容：
+  - 执行 `git branch -a`
+  - 确认本地仅有 `main`、`develop`
+  - 确认远端当前仅剩 `origin/main`、`origin/develop`、`origin/feature/p0-p1-foundation`
+- 风险说明：
+  - 当前剩余的远端 `feature/p0-p1-foundation` 不是功能分支残留问题，而是 GitHub 默认分支设置导致的保护性阻止删除
+- 下一个任务：
+  - 在 GitHub 仓库设置中把默认分支改为 `main`，再删除 `feature/p0-p1-foundation`

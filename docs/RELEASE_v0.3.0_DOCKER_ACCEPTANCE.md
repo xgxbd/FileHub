@@ -94,3 +94,8 @@ docker compose up -d --build
 cd /Users/xloser/Owner/Code/VibeCoding/FileHub/infra
 docker compose down
 ```
+
+## 验收结论
+
+- 结果：通过
+- 说明：本轮 Docker 交付形态下的最小人工验收已完成，可进入正式发布。

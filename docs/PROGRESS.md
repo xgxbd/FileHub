@@ -4536,3 +4536,30 @@
   - 当前仍需做最后一轮人工验收，确认 Docker 交付形态下业务链路无回归
 - 下一个任务：
   - 按 v0.3.0 Docker 人工验收清单逐项验收并收口问题
+
+
+---
+
+## 2026-03-12 09:12:43 CST
+
+- 任务：v0.3.0 发布前人工验收收口
+- 时间：2026-03-12 09:12:43 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：release/v0.3.0 / 待提交
+- 本次修改：
+  - 更新 `docs/RELEASE_NOTES_v0.3.0.md`，记录 Docker 形态人工验收通过
+  - 更新 `docs/RELEASE_v0.3.0_DOCKER_ACCEPTANCE.md`，写入验收结论
+- 已完成事项：
+  - v0.3.0 Docker 最小人工验收通过
+  - 已具备正式发布条件
+- 未完成事项：
+  - 合并 `release/v0.3.0` 到 `main`
+  - 打 `v0.3.0` 标签并推送
+  - 回合并到 `develop`
+- 当前可测试内容：
+  - 查看 `docs/RELEASE_v0.3.0_DOCKER_ACCEPTANCE.md`
+  - 查看 `docs/RELEASE_NOTES_v0.3.0.md`
+- 风险说明：
+  - 当前无新增功能风险，剩余工作为 GitFlow 发布闭环
+- 下一个任务：
+  - 完成 v0.3.0 正式发布闭环

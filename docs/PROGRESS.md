@@ -4590,3 +4590,81 @@
   - 本轮仅文档收口，不涉及功能与部署逻辑变更
 - 下一个任务：
   - 合并文档收口热修到 `main` 与 `develop`
+
+
+---
+
+## 2026-03-12 09:28:18 CST
+
+- 任务：清理历史分支并收口仓库分支结构
+- 时间：2026-03-12 09:28:18 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：develop / 待提交
+- 本次修改：
+  - 删除本地除 `main`、`develop` 外的全部历史 `feature/*`、`release/*`、`hotfix/*` 分支
+  - 删除大部分远端历史分支
+  - 将本地 `origin/HEAD` 指针切回 `origin/main`
+- 已完成事项：
+  - 本地分支已只保留 `main`、`develop`
+  - 远端已只保留 `main`、`develop` 与 `feature/p0-p1-foundation`
+  - 本地远端默认分支指针已对齐到 `main`
+- 未完成事项：
+  - GitHub 仓库默认分支仍指向 `feature/p0-p1-foundation`，需在 GitHub 页面改为 `main` 后才能删除该远端分支
+- 当前可测试内容：
+  - 执行 `git branch -a`
+  - 确认本地仅有 `main`、`develop`
+  - 确认远端当前仅剩 `origin/main`、`origin/develop`、`origin/feature/p0-p1-foundation`
+- 风险说明：
+  - 当前剩余的远端 `feature/p0-p1-foundation` 不是功能分支残留问题，而是 GitHub 默认分支设置导致的保护性阻止删除
+- 下一个任务：
+  - 在 GitHub 仓库设置中把默认分支改为 `main`，再删除 `feature/p0-p1-foundation`
+
+
+---
+
+## 2026-03-12 09:36:32 CST
+
+- 任务：完成远端历史分支最终清理
+- 时间：2026-03-12 09:36:32 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：develop / 待提交
+- 本次修改：
+  - 删除远端最后剩余的历史分支 `feature/p0-p1-foundation`
+  - 刷新远端分支缓存并确认远端仅保留 `main`、`develop`
+- 已完成事项：
+  - 本地分支仅保留 `main`、`develop`
+  - 远端分支仅保留 `main`、`develop`
+  - `origin/HEAD` 已对齐到 `origin/main`
+- 未完成事项：
+  - 无
+- 当前可测试内容：
+  - 执行 `git branch -a`
+  - 确认仅存在 `main`、`develop`、`remotes/origin/main`、`remotes/origin/develop`
+- 风险说明：
+  - 本轮仅执行仓库分支治理，不影响任何发布版本与标签
+- 下一个任务：
+  - 无，分支治理已完成
+
+
+---
+
+## 2026-03-13 13:17:18 CST
+
+- 任务：补充 MIT 开源授权协议文件
+- 时间：2026-03-13 13:17:18 CST
+- git 版本：git version 2.50.1 (Apple Git-155)
+- git 分支及 Commit ID：feature/round40-add-mit-license / 待提交
+- 本次修改：
+  - 新增根目录 `LICENSE` 文件
+  - 声明当前项目采用 MIT 授权协议
+- 已完成事项：
+  - 项目已具备明确的开源授权协议文本
+- 未完成事项：
+  - 提交并推送本次改动到 GitHub
+- 当前可测试内容：
+  - 查看根目录 `LICENSE` 文件内容
+- 风险说明：
+  - 本轮仅补充授权协议文件，不涉及功能与运行逻辑变更
+- 下一个任务：
+  - 提交并推送 MIT 授权协议变更
+
